@@ -1,4 +1,4 @@
-import { PaginatedDataTable } from '@page-objects/common/paginated-data-table';
+import { PaginatedDataTable } from '@page-objects/common';
 import { Locator, Page, expect } from '@playwright/test';
 
 import { ExpectRowOptions, FindServiceRowOptions, RouteReadyOptions } from '@utils/interfaces';

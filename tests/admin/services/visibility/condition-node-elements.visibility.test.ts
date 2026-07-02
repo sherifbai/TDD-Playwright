@@ -1,4 +1,4 @@
-import { ServicePage } from '@page-objects/services/newservice/service-page';
+import { ServicePage } from '@page-objects/services';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';

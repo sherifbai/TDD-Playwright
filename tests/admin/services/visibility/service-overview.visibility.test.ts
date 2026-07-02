@@ -1,4 +1,4 @@
-import { ServicesOverviewPage } from '@page-objects/services/overview/services-overview-page';
+import { ServicesOverviewPage } from '@page-objects/services';
 
 import { test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';

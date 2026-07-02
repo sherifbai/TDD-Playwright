@@ -1,5 +1,5 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-import { WidgetPage } from '@page-objects/widget/widget-page';
+import { WidgetPage } from '@page-objects/widget';
 import { test, expect } from '@playwright/test';
 
 import { URLS } from '@utils/env/urls';
