@@ -1,4 +1,4 @@
-import { ServicePage } from '@page-objects/services';
+import { NewServicePage } from '@page-objects/services';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -7,7 +7,7 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
   page,
 }) => {
   await page.goto(URLS.admin + 'services/newService');
-  const nsp = new ServicePage(page);
+  const nsp = new NewServicePage(page);
 
   await test.step('Add "Dünaamilised valikud" node via picker (returns to canvas)', async () => {
     // new logic: choose a deterministic "+" button

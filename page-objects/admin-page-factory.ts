@@ -1,6 +1,6 @@
 import { UnansweredChatsPage } from '@page-objects/chats';
 import { PageHeader, SideMenuPage } from '@page-objects/menu';
-import { ServicePage, ServicesOverviewPage } from '@page-objects/services';
+import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
 import { Page } from '@playwright/test';
 
 export class AdminPageFactory {
@@ -26,7 +26,7 @@ export class AdminPageFactory {
     return new ServicesOverviewPage(this.page);
   }
 
-  getNewServicePage(): ServicePage {
-    return new ServicePage(this.page);
+  getNewServicePage(): NewServicePage {
+    return new NewServicePage(this.page);
   }
 }

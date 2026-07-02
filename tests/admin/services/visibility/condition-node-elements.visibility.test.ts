@@ -1,4 +1,4 @@
-import { ServicePage } from '@page-objects/services';
+import { NewServicePage } from '@page-objects/services';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -7,7 +7,7 @@ test('[services] [visibility] Condition node visibility', async ({ page }) => {
   await page.goto(URLS.admin + 'services/newService');
   await page.waitForLoadState('domcontentloaded');
 
-  const nsp = new ServicePage(page);
+  const nsp = new NewServicePage(page);
   const nodeTitle = 'Tingimus - 1';
 
   await test.step('Add "Tingimus" node via picker (picker closes, canvas visible)', async () => {
