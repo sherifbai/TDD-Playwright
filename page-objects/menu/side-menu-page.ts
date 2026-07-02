@@ -3,40 +3,40 @@ import { Locator, Page, expect } from '@playwright/test';
 export class SideMenuPage {
   private readonly page: Page;
 
-  private readonly buttonVestlused: Locator;
-  private readonly buttonAnalyytika: Locator;
-  private readonly buttonTeenused: Locator;
-  private readonly buttonHaldus: Locator;
+  private readonly buttonConversations: Locator;
+  private readonly buttonAnalytics: Locator;
+  private readonly buttonServices: Locator;
+  private readonly buttonAdministration: Locator;
   private readonly buttonCollapseAll: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.buttonVestlused = this.page.getByRole('button', { name: 'Vestlused' });
-    this.buttonAnalyytika = this.page.getByRole('button', { name: 'Analüütika' });
-    this.buttonTeenused = this.page.getByRole('button', { name: 'Teenused' });
-    this.buttonHaldus = this.page.getByRole('button', { name: 'Haldus' });
+    this.buttonConversations = this.page.getByRole('button', { name: 'Vestlused' });
+    this.buttonAnalytics = this.page.getByRole('button', { name: 'Analüütika' });
+    this.buttonServices = this.page.getByRole('button', { name: 'Teenused' });
+    this.buttonAdministration = this.page.getByRole('button', { name: 'Haldus' });
     this.buttonCollapseAll = this.page.getByRole('button', { name: 'Kitsenda menüü' });
   }
 
   async isChatMenuVisible(): Promise<void> {
-    await expect(this.buttonVestlused).toBeVisible();
+    await expect(this.buttonConversations).toBeVisible();
   }
 
   async assertVestlusedButtonVisible(): Promise<void> {
-    await expect(this.buttonVestlused).toBeVisible();
+    await expect(this.buttonConversations).toBeVisible();
   }
 
   async assertAnalyytikaButtonVisible(): Promise<void> {
-    await expect(this.buttonAnalyytika).toBeVisible();
+    await expect(this.buttonAnalytics).toBeVisible();
   }
 
   async assertTeenusedButtonVisible(): Promise<void> {
-    await expect(this.buttonTeenused).toBeVisible();
+    await expect(this.buttonServices).toBeVisible();
   }
 
   async assertHaldusButtonVisible(): Promise<void> {
-    await expect(this.buttonHaldus).toBeVisible();
+    await expect(this.buttonAdministration).toBeVisible();
   }
 
   async assertCollapseButtonVisible(): Promise<void> {

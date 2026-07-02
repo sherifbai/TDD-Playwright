@@ -1,4 +1,4 @@
-import { NewServicePage } from '@page-objects/services/newservice/new-service-page';
+import { ServicePage } from '@page-objects/services/newservice/service-page';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -7,7 +7,7 @@ test('[services] [visibility] Multichoice node elements visibility', async ({ pa
   await page.goto(URLS.admin + 'services/newService');
   await page.waitForLoadState('domcontentloaded');
 
-  const nsp = new NewServicePage(page);
+  const nsp = new ServicePage(page);
   const nodeTitle = 'Mitmevalikuline küsimus - 1';
 
   await test.step('Add multichoice node from picker (picker closes, canvas visible)', async () => {

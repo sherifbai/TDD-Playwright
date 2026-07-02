@@ -30,8 +30,7 @@ export const test = base.extend<{ page: ApiPageInterface }>({
 
       if (url.includes('ruuter') && apiCalls.has(url)) {
         const call = apiCalls.get(url)!;
-        call.status = response.status();
-        apiCalls.set(url, call);
+        apiCalls.set(url, { ...call, status: response.status() });
       }
     });
 

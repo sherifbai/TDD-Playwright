@@ -8,24 +8,24 @@ export class UnansweredChatsPage {
 
   private readonly list: Locator;
   private readonly tabs: Locator;
-  private readonly buttonAccept: Locator;
+  private readonly buttonTakeOver: Locator;
   private readonly buttonEndChat: Locator;
-  private readonly buttonForward: Locator;
   private readonly buttonAskAuth: Locator;
   private readonly buttonAskContact: Locator;
-  private readonly buttonAskApproval: Locator;
+  private readonly buttonAskPermission: Locator;
+  private readonly buttonForward: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
     this.list = this.page.getByRole('tablist');
     this.tabs = this.page.getByRole('tab');
-    this.buttonAccept = this.page.locator('button', { hasText: 'Võta üle' });
+    this.buttonTakeOver = this.page.locator('button', { hasText: 'Võta üle' });
     this.buttonEndChat = this.page.locator('button', { hasText: 'Lõpeta vestlus' });
-    this.buttonForward = this.page.locator('button', { hasText: 'Suuna kolleegile' });
     this.buttonAskAuth = this.page.locator('button', { hasText: 'Küsi autentimist' });
     this.buttonAskContact = this.page.locator('button', { hasText: 'Küsi kontaktandmeid' });
-    this.buttonAskApproval = this.page.locator('button', { hasText: 'Küsi nõusolekut' });
+    this.buttonAskPermission = this.page.locator('button', { hasText: 'Küsi nõusolekut' });
+    this.buttonForward = this.page.locator('button', { hasText: 'Suuna kolleegile' });
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -39,6 +39,6 @@ export class UnansweredChatsPage {
   async acceptChat(): Promise<void> {
     await this.waitForReady();
     await this.getLastListItem().click();
-    await this.buttonAccept.click();
+    await this.buttonTakeOver.click();
   }
 }

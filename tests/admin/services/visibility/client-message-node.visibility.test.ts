@@ -1,4 +1,4 @@
-import { NewServicePage } from '@page-objects/services/newservice/new-service-page';
+import { ServicePage } from '@page-objects/services/newservice/service-page';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -7,7 +7,7 @@ test('[services] [visibility] Client message node visibility (refactored: picker
   page,
 }) => {
   await page.goto(URLS.admin + 'services/newService');
-  const nsp = new NewServicePage(page);
+  const nsp = new ServicePage(page);
 
   await test.step('Add "Sõnum kliendile" node via picker (returns to canvas)', async () => {
     // new logic: there can be many "+" buttons; choose a deterministic one

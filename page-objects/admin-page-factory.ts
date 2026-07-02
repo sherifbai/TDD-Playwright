@@ -1,7 +1,7 @@
 import { UnansweredChatsPage } from '@page-objects/chats/chats-page';
 import { PageHeader } from '@page-objects/menu/page-header';
 import { SideMenuPage } from '@page-objects/menu/side-menu-page';
-import { NewServicePage } from '@page-objects/services/newservice/new-service-page';
+import { ServicePage } from '@page-objects/services/newservice/service-page';
 import { ServicesOverviewPage } from '@page-objects/services/overview/services-overview-page';
 import { Page } from '@playwright/test';
 
@@ -28,7 +28,7 @@ export class AdminPageFactory {
     return new ServicesOverviewPage(this.page);
   }
 
-  getNewServicePage(): NewServicePage {
-    return new NewServicePage(this.page);
+  getNewServicePage(): ServicePage {
+    return new ServicePage(this.page);
   }
 }

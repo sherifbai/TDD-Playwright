@@ -1,4 +1,4 @@
-import { NewServicePage } from '@page-objects/services/newservice/new-service-page';
+import { ServicePage } from '@page-objects/services/newservice/service-page';
 
 import { test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -7,7 +7,7 @@ test('[services] [visibility] Service canvas base elements visibility', async ({
   await page.goto(URLS.admin + 'services/newService');
   await page.waitForLoadState('domcontentloaded');
 
-  const nsp = new NewServicePage(page);
+  const nsp = new ServicePage(page);
 
   await test.step('Header elements are visible', async () => {
     await nsp.assertHeaderElementVisible();

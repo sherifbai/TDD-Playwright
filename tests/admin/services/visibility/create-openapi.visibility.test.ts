@@ -1,4 +1,4 @@
-import { NewServicePage } from '@page-objects/services/newservice/new-service-page';
+import { ServicePage } from '@page-objects/services/newservice/service-page';
 
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
@@ -17,7 +17,7 @@ test.describe('[services] [visibility] Create new OpenAPI endpoint (visibility)'
     test.setTimeout(600000);
     serviceName = createServiceName('openapi-service');
 
-    const nsp = new NewServicePage(page);
+    const nsp = new ServicePage(page);
 
     await page.goto(URLS.admin + 'services/newService');
     await nsp.waitForReady();
