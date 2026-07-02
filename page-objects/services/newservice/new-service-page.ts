@@ -6,7 +6,7 @@ import { waitForNewServiceReady } from '@utils/waits/admin-page-ready';
 
 type ServiceInput = string | Partial<ServiceData>;
 
-export class ServicePage {
+export class NewServicePage {
   private readonly page: Page;
 
   readonly header: Locator;
