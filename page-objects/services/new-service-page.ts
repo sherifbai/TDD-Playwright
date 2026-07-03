@@ -1,7 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { RouteReadyOptions, SaveServiceOptions, ServiceData } from '@utils/interfaces';
-import { normalizeServiceTitle } from '@utils/test-data/service-data';
+import { normalizeServiceTitle } from '@test-data/service-data';
 import { waitForNewServiceReady } from '@utils/waits/admin-page-ready';
 
 type ServiceInput = string | Partial<ServiceData>;

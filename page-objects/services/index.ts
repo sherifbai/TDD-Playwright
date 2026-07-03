@@ -1,2 +1,2 @@
-export * from './newservice';
-export * from './overview';
+export * from './new-service-page';
+export * from './services-overview-page';
