@@ -27,7 +27,7 @@ export class WidgetPage {
     this.page = page;
 
     this.widget = this.page.getByTitle('Ava vestlus');
-    this.bykTitle = this.page.getByText('Bürokratt');
+    this.bykTitle = this.page.getByRole('heading', { name: 'Bürokratt' });
     this.inputField = this.page.getByPlaceholder('Kirjutage oma sõnum...');
     this.sendButton = this.page.getByTitle('Saada');
     this.buttonHamburger = this.page.getByTitle('Detailid');
@@ -48,7 +48,12 @@ export class WidgetPage {
   }
 
   async openChat(): Promise<void> {
-    await this.widget.click();
+    const visibleWidget = await this.widget.isVisible().catch(() => false);
+
+    if (visibleWidget) {
+      await this.widget.click();
+    }
+
     await this.bykTitle.waitFor({ state: 'visible' });
   }
 

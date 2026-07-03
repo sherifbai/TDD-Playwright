@@ -1,2 +1,2 @@
-export * from './page-header';
-export * from './side-menu-page';
+export * from './header';
+export * from './side-menu';

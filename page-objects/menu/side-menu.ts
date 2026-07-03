@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-export class SideMenuPage {
+export class SideMenu {
   private readonly page: Page;
 
   private readonly buttonConversations: Locator;

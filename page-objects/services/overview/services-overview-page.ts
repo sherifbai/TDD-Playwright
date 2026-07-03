@@ -194,7 +194,7 @@ export class ServicesOverviewPage {
 
   async hasServiceRow(
     serviceTitle: string,
-    { pageSize = this.servicesTable.defaultPageSize }: { pageSize?: string } = {},
+    { pageSize }: { pageSize?: string } = {},
   ): Promise<boolean> {
     const row = await this.findServiceRow(serviceTitle, { pageSize }).catch(() => null);
     return row ? (await row.count().catch(() => 0)) > 0 : false;

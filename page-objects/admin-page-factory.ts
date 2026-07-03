@@ -1,5 +1,5 @@
 import { UnansweredChatsPage } from '@page-objects/chats';
-import { PageHeader, SideMenuPage } from '@page-objects/menu';
+import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
 import { Page } from '@playwright/test';
 
@@ -10,12 +10,12 @@ export class AdminPageFactory {
     this.page = page;
   }
 
-  getPageHeader(): PageHeader {
-    return new PageHeader(this.page);
+  getPageHeader(): Header {
+    return new Header(this.page);
   }
 
-  getSideMenu(): SideMenuPage {
-    return new SideMenuPage(this.page);
+  getSideMenu(): SideMenu {
+    return new SideMenu(this.page);
   }
 
   getChats(): UnansweredChatsPage {

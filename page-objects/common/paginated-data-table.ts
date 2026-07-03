@@ -9,19 +9,16 @@ function escapeRegex(value: string): string {
 export class PaginatedDataTable {
   private readonly page: Page;
   private readonly table: Locator;
-  private readonly pageSizeSelect?: Locator;
   private readonly rowLabelSelector: string;
-  readonly defaultPageSize: string;
+  private readonly defaultPageSize: string;
+  private readonly pageSizeSelect?: Locator;
 
-  constructor(
-    page: Page,
-    { table, pageSizeSelect, rowLabelSelector = 'td >> label', defaultPageSize = '50' }: PaginatedDataTableOptions,
-  ) {
+  constructor(page: Page, options: PaginatedDataTableOptions) {
     this.page = page;
-    this.table = table;
-    this.pageSizeSelect = pageSizeSelect;
-    this.rowLabelSelector = rowLabelSelector;
-    this.defaultPageSize = defaultPageSize;
+    this.table = options.table;
+    this.rowLabelSelector = options.rowLabelSelector ?? 'td >> label';
+    this.defaultPageSize = options.defaultPageSize ?? '50';
+    this.pageSizeSelect = options.pageSizeSelect;
   }
 
   async waitUntilReady({ timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
