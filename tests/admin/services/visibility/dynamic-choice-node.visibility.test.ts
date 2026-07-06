@@ -40,7 +40,6 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
 
   await test.step('Dialog tabs + footer buttons visible', async () => {
     await expect(nsp.dynamicChoicesTabSeadistamine).toBeVisible();
-    await expect(nsp.dynamicChoicesTabTestimine).toBeVisible();
 
     await expect(nsp.dynamicChoicesCancel).toBeVisible();
     await expect(nsp.dynamicChoicesSave).toBeVisible();

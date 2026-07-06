@@ -261,7 +261,7 @@ export class ServicesOverviewPage {
   async assertDeleteButtonExists(): Promise<void> {
     await this.waitForReady();
     await expect(
-      this.getRowColumns(this.getFirstTableRow()).nth(5).getByRole('button', { name: 'Kustuta' }),
+      this.getRowColumns(this.getFirstTableRow()).nth(4).getByRole('button', { name: 'Kustuta' }),
     ).toBeVisible();
   }
 

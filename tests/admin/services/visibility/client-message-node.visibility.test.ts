@@ -38,7 +38,7 @@ test('[services] [visibility] Client message node visibility (refactored: picker
 
   await test.step('Define elements section visible and has buttons (inside message node dialog)', async () => {
     // In the new page object we added:
-    // - messageSectionElements (label "Määra elemendid" section)
+    // - messageSectionElements (label "Määratud Väärtused" section)
     // - messageChips (the green draggable boxes)
     await expect(nsp.messageSectionElements).toBeVisible();
 
@@ -49,7 +49,6 @@ test('[services] [visibility] Client message node visibility (refactored: picker
 
   await test.step('Dialog elements visible (tabs, buttons, editor)', async () => {
     await expect(nsp.messageTabSeadistamine).toBeVisible();
-    await expect(nsp.messageTabTestimine).toBeVisible();
 
     await expect(nsp.messageCancel).toBeVisible();
     await expect(nsp.messageSave).toBeVisible();

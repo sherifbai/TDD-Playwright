@@ -8,7 +8,7 @@ test('[smoke] Services overview page', async ({ page }) => {
 
 test('[smoke] New service page', async ({ page }) => {
   await page.goto(URLS.admin + 'services/newService');
-  await expect(page.getByText('Teenuse seaded')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Seaded', exact: true }).first()).toBeVisible();
   await expect(page.getByText('...')).toBeVisible();
 });
 

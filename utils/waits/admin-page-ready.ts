@@ -43,7 +43,7 @@ export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: Ro
     page.locator('.react-flow, .react-flow__renderer, .react-flow__viewport').first(),
     page.locator('button.edge-button').first(),
     page.locator('.react-flow__node-start, .start-node').first(),
-    page.getByRole('button', { name: /Teenuse seaded/i }).first(),
+    page.getByRole('button', { name: /Seaded/i }).first(),
   ];
 
   await expect(header).toBeVisible({ timeout });

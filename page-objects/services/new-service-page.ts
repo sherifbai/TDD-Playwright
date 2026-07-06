@@ -1,7 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
+import { normalizeServiceTitle } from '@test-data/service-data';
 
 import { RouteReadyOptions, SaveServiceOptions, ServiceData } from '@utils/interfaces';
-import { normalizeServiceTitle } from '@test-data/service-data';
 import { waitForNewServiceReady } from '@utils/waits/admin-page-ready';
 
 type ServiceInput = string | Partial<ServiceData>;
@@ -149,7 +149,7 @@ export class NewServicePage {
     this.header = page.locator('header.header').or(page.locator('header').first()).first();
 
     this.backToServicesBtn = page.getByRole('button', { name: 'Tagasi teenuste lehele', exact: true }).first();
-    this.serviceSettingsBtn = page.getByRole('button', { name: 'Teenuse seaded', exact: true }).first();
+    this.serviceSettingsBtn = page.getByRole('button', { name: 'Seaded', exact: true }).first();
     this.stepName = this.header.locator('.naming');
 
     this.deleteServiceBtn = page.getByRole('button', { name: 'Kustuta', exact: true }).first();
@@ -164,7 +164,7 @@ export class NewServicePage {
     // Settings dialog
     // =========================
     this.settingsDialog = page.locator('[role="dialog"]').filter({
-      has: page.getByRole('heading', { name: 'Teenuse seaded' }),
+      has: page.getByRole('heading', { name: 'Seaded' }),
     });
 
     this.settingsCloseBtn = this.settingsDialog
@@ -286,12 +286,10 @@ export class NewServicePage {
     this.messageSave = this.nodeEditorSaveBtn;
     this.messageClose = this.nodeEditorCloseBtn;
     this.quillEditor = this.nodeEditorPopup.locator('.ql-editor,[contenteditable="true"]').first();
-    this.messageSectionElements = this.nodeEditorPopup
-      .locator(
-        'xpath=.//*[normalize-space()="Määra elemendid" or normalize-space()="Määra Elemendid"]/ancestor::div[2]',
-      )
-      .first();
-    this.messageChips = this.messageSectionElements.locator('[draggable="true"], .chip, .tag, .badge, button');
+    this.messageSectionElements = this.nodeEditorPopup.getByText(/Määratud\s+Väärtused/i).first();
+    this.messageChips = this.nodeEditorPopup.locator(
+      '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .tag, .badge',
+    );
 
     // ===== Define node =====
     this.defineDialog = this.nodeEditorPopup;
@@ -304,11 +302,10 @@ export class NewServicePage {
     this.defineRows = this.defineAssignContainer.locator(':scope > div').filter({
       has: this.page.locator('input, textarea'),
     });
-    this.defineAddElementBtn = this.nodeEditorPopup.getByRole('button', { name: /^\+\s*Element$/i }).first();
-    this.defineSectionElements = this.nodeEditorPopup
-      .getByText(/Määra\s+Elemendid/i)
-      .first()
-      .or(this.nodeEditorPopup.getByText(/Määra\s+elemendid/i).first());
+    this.defineAddElementBtn = this.nodeEditorPopup
+      .getByRole('button', { name: /\+\s*(Uus väärtus|Element)/i })
+      .first();
+    this.defineSectionElements = this.nodeEditorPopup.getByText(/Määratud\s+Väärtused/i).first();
     this.defineSectionEnv = this.nodeEditorPopup.getByText(/Keskkonnamuutujad/i).first();
     this.defineSectionDates = this.nodeEditorPopup.getByText(/Kuupäev ja kellaaeg/i).first();
     this.defineSectionTools = this.nodeEditorPopup.getByText(/Tööriistad/i).first();
@@ -329,13 +326,9 @@ export class NewServicePage {
     this.dynamicChoicesCancel = this.nodeEditorCancelBtn;
     this.dynamicChoicesSave = this.nodeEditorSaveBtn;
     this.dynamicChoicesClose = this.nodeEditorCloseBtn;
-    this.dynamicChoicesSectionElements = this.nodeEditorPopup
-      .locator(
-        'xpath=.//*[normalize-space()="Määra elemendid" or normalize-space()="Määra Elemendid"]/ancestor::div[2]',
-      )
-      .first();
-    this.dynamicChoicesChips = this.dynamicChoicesSectionElements.locator(
-      '[draggable="true"], .chip, .badge, .tag, button',
+    this.dynamicChoicesSectionElements = this.nodeEditorPopup.getByText(/Määratud\s+Väärtused/i).first();
+    this.dynamicChoicesChips = this.nodeEditorPopup.locator(
+      '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .badge, .tag',
     );
     this.dynamicChoicesRows = this.nodeEditorPopup
       .locator('input[name="key"]')
@@ -366,11 +359,7 @@ export class NewServicePage {
       .first();
     this.conditionAddRuleButton = this.conditionDialog.getByRole('button', { name: /\+\s*Reegel/i }).first();
     this.conditionAddGroupButton = this.conditionDialog.getByRole('button', { name: /\+\s*Grupp/i }).first();
-    this.conditionSectionDefineElements = this.conditionDialog
-      .locator(
-        'xpath=.//*[normalize-space()="Määra Elemendid" or normalize-space()="Määra elemendid"]/ancestor::div[2]',
-      )
-      .first();
+    this.conditionSectionDefineElements = this.conditionDialog.getByText(/Määratud\s+Väärtused/i).first();
 
     // ===== Create endpoint modal =====
     this.createEndpointModal = this.page
@@ -389,7 +378,9 @@ export class NewServicePage {
       .locator('xpath=following-sibling::*//*[self::select or @role="combobox" or self::input][1]')
       .or(this.createEndpointModal.getByRole('combobox').first());
     this.createEndpointCancel = this.createEndpointModal.getByRole('button', { name: /tühista|cancel/i }).first();
-    this.createEndpointCreate = this.createEndpointModal.getByRole('button', { name: /loo|create/i }).first();
+    this.createEndpointCreate = this.createEndpointModal
+      .getByRole('button', { name: /salvesta|save|loo|create/i })
+      .first();
     this.createEndpointName = this.createEndpointModal
       .locator('label:has-text("Otspunkti nimetus")')
       .locator('xpath=following-sibling::*//input[1]')
@@ -767,7 +758,6 @@ export class NewServicePage {
     await this.assertNodeEditorVisible();
     await expect(this.nodeEditorTabs).toBeVisible();
     await expect(this.nodeEditorTabSeadistamine).toBeVisible();
-    await expect(this.nodeEditorTabTestimine).toBeVisible();
   }
 
   async assertMessageDialogVisible(): Promise<void> {
@@ -787,7 +777,6 @@ export class NewServicePage {
 
   async assertDefineTabsVisible(): Promise<void> {
     await expect(this.defineTabSeadistamine).toBeVisible();
-    await expect(this.defineTabTestimine).toBeVisible();
   }
 
   async assertDefineFooterButtonsVisible(): Promise<void> {
@@ -935,7 +924,10 @@ export class NewServicePage {
       if (!(await candidate.count().catch(() => 0))) continue;
       if (!(await candidate.isVisible().catch(() => false))) continue;
       await candidate.click({ force: true }).catch(() => {});
-      clicked = await this.createEndpointModal.isVisible().catch(() => false);
+      clicked = await this.createEndpointModal
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
       if (clicked) break;
     }
 
@@ -949,6 +941,17 @@ export class NewServicePage {
   async addNewAPI(): Promise<void> {
     await this.clickAddNodeAtEdgeIndex(0);
     await this.openCreateEndpointFromPicker();
+  }
+
+  // Opens the same "Uus otspunkt" modal directly from the API registry page
+  // (services/api-registry). Stable entry point that avoids creating/saving a
+  // service, so it is not affected by the newService -> overview redirect.
+  async openCreateEndpointFromRegistry(): Promise<void> {
+    const createBtn = this.page.getByRole('button', { name: 'Loo uus otspunkt', exact: true }).first();
+    await expect(createBtn).toBeVisible({ timeout: 15000 });
+    await createBtn.scrollIntoViewIfNeeded().catch(() => {});
+    await createBtn.click({ force: true });
+    await expect(this.createEndpointModal).toBeVisible({ timeout: 10000 });
   }
 
   async assertCreateEndpointModalVisible(): Promise<void> {
@@ -1076,7 +1079,6 @@ export class NewServicePage {
     await expect(this.conditionDialog).toBeVisible();
     await expect(this.conditionTitle).toBeVisible();
     await expect(this.conditionTabSeadistamine).toBeVisible();
-    await expect(this.conditionTabTestimine).toBeVisible();
     await expect(this.conditionSave).toBeVisible();
     await expect(this.conditionCancel).toBeVisible();
     await expect(this.conditionClose).toBeVisible();

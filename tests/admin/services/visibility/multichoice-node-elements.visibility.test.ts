@@ -38,7 +38,8 @@ test('[services] [visibility] Multichoice node elements visibility', async ({ pa
     // multichoice-specific UI (scoped to the opened popup)
     const popup = nsp.nodeEditorPopup;
 
-    await expect(popup.locator('textarea[placeholder="Sisesta küsimus"]')).toBeVisible();
+    // Question is entered via the rich-text (Sõnum) editor now, not a plain textarea
+    await expect(nsp.quillEditor).toBeVisible();
 
     // default options
     await expect(popup.getByRole('button', { name: 'Jah', exact: true })).toBeVisible();

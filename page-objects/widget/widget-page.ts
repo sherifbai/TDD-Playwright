@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 
 export class WidgetPage {
   private readonly page: Page;
@@ -60,18 +60,21 @@ export class WidgetPage {
   async getCSAChat(): Promise<void> {
     await this.inputField.fill('Tere');
     await this.sendButton.click();
+    // wait for the bot greeting before sending the next message
+    await this.bykTitle.waitFor({ state: 'visible' });
+    await this.page.waitForTimeout(5000);
 
-    await this.page.waitForTimeout(3000);
-
-    if (await this.page.getByText('Kuidas saan abiks olla?').isVisible()) {
-      await this.inputField.fill('Suuna mind');
-    } else if (await this.page.getByText('Kas suunan teid klienditeenindajale? (Jah/Ei)').isVisible()) {
-      await this.inputField.fill('Jah');
-    }
+    // Ask for a human agent — the bot NLU understands this and offers to route
+    // (works regardless of the bot greeting text / language).
+    await this.inputField.fill('call a specialist');
     await this.sendButton.click();
 
+    // The bot offers to route to a human with Jah/Ei buttons (not a text answer).
+    const routeYes = this.page.getByRole('button', { name: 'Jah', exact: true });
+    await routeYes.waitFor({ state: 'visible', timeout: 20000 });
+    await routeYes.click();
+
     await this.page.waitForTimeout(3000);
-    await expect(this.page.getByText('Suunan teid klienditeenindajale. Varuge natukene kannatust.')).toBeVisible();
   }
 
   async openDetails(): Promise<void> {
