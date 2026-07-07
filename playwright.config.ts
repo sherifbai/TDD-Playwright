@@ -8,7 +8,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.PW_WORKERS || (process.env.CI ? 4 : '50%'),
+  workers: process.env.PW_WORKERS || (process.env.CI ? 4 : 2),
   reporter: 'html',
 
   use: {
@@ -34,6 +34,7 @@ export default defineConfig({
       testMatch: '**/*.setup.ts',
       use: {
         ...devices['Desktop Chrome'],
+        channel: 'chrome',
         viewport: { width: 1720, height: 1200 },
         contextOptions: { screen: { width: 1720, height: 1200 } },
         launchOptions: {
