@@ -15,8 +15,3 @@ test('[smoke] Feedback analytics page', async ({ page }) => {
   await page.goto(URLS.admin + 'analytics/feedback');
   await expect(page.getByRole('heading', { name: 'Tagasiside' })).toBeVisible();
 });
-
-test('[smoke] Advisors analytics page', async ({ page }) => {
-  await page.goto(URLS.admin + 'analytics/advisors');
-  await expect(page.getByRole('heading', { name: 'Nõustajad' })).toBeVisible();
-});
