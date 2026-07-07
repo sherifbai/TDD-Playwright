@@ -591,6 +591,11 @@ export class NewServicePage {
   }
 
   async returnToServicesOverview(): Promise<void> {
+    if (/services\/overview/i.test(this.page.url())) {
+      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      return;
+    }
+
     await this.waitForReady();
     await expect(this.backToServicesBtn).toBeVisible();
     await this.backToServicesBtn.scrollIntoViewIfNeeded().catch(() => {});

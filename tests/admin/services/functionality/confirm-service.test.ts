@@ -13,7 +13,9 @@ test.describe('[services] [functional] Confirm service test', () => {
     const { nsp, sop } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
-    await nsp.createService(createValidServiceData({ title: serviceName }));
+    await nsp.createNewService(createValidServiceData({ title: serviceName }));
+
+    await sop.clickEdit(serviceName);
     await nsp.confirmService();
     await nsp.returnToServicesOverview();
     await sop.assertServiceRowVisible(serviceName);

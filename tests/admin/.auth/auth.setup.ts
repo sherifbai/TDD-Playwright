@@ -7,7 +7,10 @@ setup('authenticate', async ({ page }) => {
   await page.goto('/');
 
   await page.getByRole('button', { name: 'sisene TARA kaudu' }).click();
-  await page.getByRole('link', { name: 'Mobiil-ID', exact: true }).click();
+
+  const mobiilIdLink = page.getByRole('link', { name: 'Mobiil-ID', exact: true });
+  await mobiilIdLink.waitFor({ state: 'visible', timeout: 180000 });
+  await mobiilIdLink.click();
 
   await page.getByRole('textbox', { name: 'Isikukood' }).fill('60001017869');
   await page.getByRole('textbox', { name: 'Telefoninumber' }).fill('68000769');
