@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 
 import { URLS } from '@utils/env/urls';
@@ -8,7 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.PW_WORKERS || (process.env.CI ? 4 : 2),
+  workers: Number(process.env.PW_WORKERS) || (process.env.CI ? 4 : 2),
   reporter: 'html',
 
   use: {
