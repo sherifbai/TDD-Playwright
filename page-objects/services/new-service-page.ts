@@ -548,6 +548,17 @@ export class NewServicePage {
     await expect(this.saveServiceBtn).toBeVisible();
     await this.saveServiceBtn.scrollIntoViewIfNeeded().catch(() => {});
 
+    const wasUnsavedDraft = /services\/newService/i.test(this.page.url());
+
+    const savePosted = wasUnsavedDraft
+      ? this.page
+          .waitForRequest((request) => request.method() === 'POST' && /\/services\/services\/add/.test(request.url()), {
+            timeout: 2000,
+          })
+          .then(() => true)
+          .catch(() => false)
+      : false;
+
     for (let attempt = 0; attempt < 2; attempt++) {
       await this.saveServiceBtn.click({ force: true }).catch(() => {});
       const toastAppeared = await this.toastList
@@ -563,6 +574,10 @@ export class NewServicePage {
 
     if (expectedToast) {
       await expect.soft(this.toastList).toContainText(expectedToast, { timeout: 10000 });
+    }
+
+    if (await savePosted) {
+      await this.page.waitForURL(/services\/edit\//i, { timeout: 15000 });
     }
   }
 

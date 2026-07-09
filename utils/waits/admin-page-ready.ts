@@ -38,16 +38,9 @@ export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: Ro
   await waitForAppSettled(page, { timeout });
 
   const header = page.locator('header.header').first().or(page.locator('header').first());
-  const readySignals = [
-    page.getByRole('application').first(),
-    page.locator('.react-flow, .react-flow__renderer, .react-flow__viewport').first(),
-    page.locator('button.edge-button').first(),
-    page.locator('.react-flow__node-start, .start-node').first(),
-    page.getByRole('button', { name: /Seaded/i }).first(),
-  ];
 
   await expect(header).toBeVisible({ timeout });
-  await Promise.any(readySignals.map((locator) => locator.waitFor({ state: 'visible', timeout })));
+  await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout });
 }
 
 export async function waitForChatsReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {

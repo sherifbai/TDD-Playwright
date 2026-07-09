@@ -135,7 +135,7 @@ export class ServicesOverviewPage {
     const button = this.servicesTable.getActionButton(row, 'Muuda');
     await expect(button).toBeVisible();
     await button.click({ force: true });
-    await this.page.waitForURL(/services\/newService/i, { timeout: 15000 }).catch(() => {});
+    await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
   }
 
@@ -163,7 +163,7 @@ export class ServicesOverviewPage {
       const editButton = this.servicesTable.getActionButton(row, 'Muuda');
       await expect(editButton).toBeVisible();
       await editButton.first().click({ force: true });
-      await this.page.waitForURL(/services\/newService/i, { timeout: 15000 }).catch(() => {});
+      await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
 
       const headerDeleteButton = this.page.getByRole('button', { name: 'Kustuta', exact: true }).first();
@@ -192,10 +192,7 @@ export class ServicesOverviewPage {
     }
   }
 
-  async hasServiceRow(
-    serviceTitle: string,
-    { pageSize }: { pageSize?: string } = {},
-  ): Promise<boolean> {
+  async hasServiceRow(serviceTitle: string, { pageSize }: { pageSize?: string } = {}): Promise<boolean> {
     const row = await this.findServiceRow(serviceTitle, { pageSize }).catch(() => null);
     return row ? (await row.count().catch(() => 0)) > 0 : false;
   }
@@ -241,7 +238,22 @@ export class ServicesOverviewPage {
 
   async assertStatusReady(rowOrTitle: Locator | string | number): Promise<void> {
     await this.waitForReady();
-    await expect(this.getRowColumns(rowOrTitle).nth(2)).toContainText('Valmis');
+
+    const statusCell = () => this.getRowColumns(rowOrTitle).nth(2);
+
+    await expect(async () => {
+      if (
+        !(
+          await statusCell()
+            .innerText()
+            .catch(() => '')
+        ).includes('Valmis')
+      ) {
+        await this.page.reload({ waitUntil: 'domcontentloaded' });
+        await this.waitForReady();
+      }
+      await expect(statusCell()).toContainText('Valmis', { timeout: 2000 });
+    }).toPass({ intervals: [500, 1000, 2000], timeout: 30000 });
   }
 
   async assertEditButtonExists(): Promise<void> {
