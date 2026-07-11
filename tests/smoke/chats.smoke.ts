@@ -3,7 +3,7 @@ import { URLS } from '@utils/env/urls';
 
 test('[smoke] Landing Page', async ({ page }) => {
   await page.goto(URLS.admin + 'chat/landing');
-  await expect(page.getByText('Tere tulemast Bürokratti')).toBeVisible();
+  await expect(page.getByText('Welcome to Bürokratt')).toBeVisible();
 });
 
 test('[smoke] Unanswered chats', async ({ page }) => {
@@ -23,5 +23,5 @@ test('[smoke] Pending chats', async ({ page }) => {
 
 test('[smoke] Chat history', async ({ page }) => {
   await page.goto(URLS.admin + 'chat/history');
-  await expect(page.getByText('Kuvan korraga', { exact: true })).toBeVisible();
+  await expect(page.getByText('Result count', { exact: true })).toBeVisible();
 });

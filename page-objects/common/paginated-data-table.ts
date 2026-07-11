@@ -61,7 +61,7 @@ export class PaginatedDataTable {
 
       const nextPageButton = this.table
         .locator('button, a')
-        .filter({ hasText: /^(->|→|›|next|järgmine)$/i })
+        .filter({ hasText: /^(->|→|›|next)$/i })
         .last();
 
       const canAdvance =

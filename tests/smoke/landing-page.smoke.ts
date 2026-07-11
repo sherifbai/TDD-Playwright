@@ -10,7 +10,7 @@ test('[smoke] Test: has landing page loaded with menu', async ({ page }) => {
   const topMenu = apf.getPageHeader();
   const sideMenu = apf.getSideMenu();
 
-  await page.getByRole('heading', { name: 'Tere tulemast Bürokratti' }).waitFor({ state: 'visible' });
+  await page.getByRole('heading', { name: 'Welcome to Bürokratt' }).waitFor({ state: 'visible' });
 
   // top menu elements
   await topMenu.assertLogoVisible();
@@ -20,18 +20,18 @@ test('[smoke] Test: has landing page loaded with menu', async ({ page }) => {
 
   // side menu elements - when logged in as admin role
   await test.step('Assert chats module visible in menu', async () => {
-    await sideMenu.assertVestlusedButtonVisible();
+    await sideMenu.assertChatsButtonVisible();
   });
 
   await test.step('Assert analytics module visible in menu', async () => {
-    await sideMenu.assertAnalyytikaButtonVisible();
+    await sideMenu.assertAnalyticsButtonVisible();
   });
 
   await test.step('Assert services module visible in menu', async () => {
-    await sideMenu.assertTeenusedButtonVisible();
+    await sideMenu.assertServicesButtonVisible();
   });
 
   await test.step('Assert management module visible in menu', async () => {
-    await sideMenu.assertHaldusButtonVisible();
+    await sideMenu.assertAdministrationButtonVisible();
   });
 });

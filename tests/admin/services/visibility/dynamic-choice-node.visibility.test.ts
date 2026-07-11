@@ -9,7 +9,7 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
   await page.goto(URLS.admin + 'services/newService');
   const nsp = new NewServicePage(page);
 
-  await test.step('Add "Dünaamilised valikud" node via picker (returns to canvas)', async () => {
+  await test.step('Add "Dynamic Choices" node via picker (returns to canvas)', async () => {
     // new logic: choose a deterministic "+" button
     if (typeof nsp.clickAddNodeAtEdgeIndex === 'function') {
       await nsp.clickAddNodeAtEdgeIndex(0);
@@ -24,12 +24,12 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDynamicChoice);
 
     // Assert node appears on canvas
-    const node = nsp.getFlowNodeByTitle('Dünaamilised valikud - 1');
+    const node = nsp.getFlowNodeByTitle('Dynamic Choices - 1');
     await expect(node).toBeVisible();
   });
 
-  await test.step('Open "Dünaamilised valikud" node dialog via node edit button', async () => {
-    await nsp.openNodeDialogByTitle('Dünaamilised valikud - 1');
+  await test.step('Open "Dynamic Choices" node dialog via node edit button', async () => {
+    await nsp.openNodeDialogByTitle('Dynamic Choices - 1');
     await nsp.assertDynamicChoicesDialogVisible();
   });
 
@@ -39,7 +39,7 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
   });
 
   await test.step('Dialog tabs + footer buttons visible', async () => {
-    await expect(nsp.dynamicChoicesTabSeadistamine).toBeVisible();
+    await expect(nsp.dynamicChoicesTabSetup).toBeVisible();
 
     await expect(nsp.dynamicChoicesCancel).toBeVisible();
     await expect(nsp.dynamicChoicesSave).toBeVisible();
@@ -55,9 +55,9 @@ test('[services] [visibility] Dynamic choice node visibility (refactored: picker
     await expect(nsp.dynamicChoicesValueInputs.first()).toBeVisible();
 
     // Optional: assert specific keys exist (based on your DOM)
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Nimekiri"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Teenuse nimi"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Võti"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Andmete võtmed"]')).toBeVisible();
+    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="List"]')).toBeVisible();
+    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Service Name"]')).toBeVisible();
+    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Key"]')).toBeVisible();
+    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Payload Keys"]')).toBeVisible();
   });
 });

@@ -8,7 +8,7 @@ test('[services] [visibility] Service canvas define node visibility', async ({ p
   await page.waitForLoadState('domcontentloaded');
 
   const nsp = new NewServicePage(page);
-  const nodeTitle = 'Määra - 1';
+  const nodeTitle = 'Assign - 1';
 
   await test.step('Add define node from picker (picker closes, node appears on canvas)', async () => {
     // open picker from first edge +

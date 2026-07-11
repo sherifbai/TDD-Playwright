@@ -9,7 +9,7 @@ test('[services] [visibility] Client message node visibility (refactored: picker
   await page.goto(URLS.admin + 'services/newService');
   const nsp = new NewServicePage(page);
 
-  await test.step('Add "Sõnum kliendile" node via picker (returns to canvas)', async () => {
+  await test.step('Add "Send message to client" node via picker (returns to canvas)', async () => {
     // new logic: there can be many "+" buttons; choose a deterministic one
     // if you added clickAddNodeAtEdgeIndex in the page object, use it.
     if (typeof nsp.clickAddNodeAtEdgeIndex === 'function') {
@@ -25,12 +25,12 @@ test('[services] [visibility] Client message node visibility (refactored: picker
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
 
     // Assert node appears on canvas (by title)
-    const node = nsp.getFlowNodeByTitle('Sõnum kliendile - 1');
+    const node = nsp.getFlowNodeByTitle('Send message to client - 1');
     await expect(node).toBeVisible();
   });
 
   await test.step('Open client message node dialog via node edit button', async () => {
-    await nsp.openNodeDialogByTitle('Sõnum kliendile - 1');
+    await nsp.openNodeDialogByTitle('Send message to client - 1');
 
     // New node-specific dialog assertion
     await nsp.assertMessageDialogVisible();
@@ -38,7 +38,7 @@ test('[services] [visibility] Client message node visibility (refactored: picker
 
   await test.step('Define elements section visible and has buttons (inside message node dialog)', async () => {
     // In the new page object we added:
-    // - messageSectionElements (label "Määratud Väärtused" section)
+    // - messageSectionElements (label "Assigned Variables" section)
     // - messageChips (the green draggable boxes)
     await expect(nsp.messageSectionElements).toBeVisible();
 
@@ -48,7 +48,7 @@ test('[services] [visibility] Client message node visibility (refactored: picker
   });
 
   await test.step('Dialog elements visible (tabs, buttons, editor)', async () => {
-    await expect(nsp.messageTabSeadistamine).toBeVisible();
+    await expect(nsp.messageTabSetup).toBeVisible();
 
     await expect(nsp.messageCancel).toBeVisible();
     await expect(nsp.messageSave).toBeVisible();

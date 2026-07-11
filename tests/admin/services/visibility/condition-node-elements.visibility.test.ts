@@ -8,9 +8,9 @@ test('[services] [visibility] Condition node visibility', async ({ page }) => {
   await page.waitForLoadState('domcontentloaded');
 
   const nsp = new NewServicePage(page);
-  const nodeTitle = 'Tingimus - 1';
+  const nodeTitle = 'Condition - 1';
 
-  await test.step('Add "Tingimus" node via picker (picker closes, canvas visible)', async () => {
+  await test.step('Add "Condition" node via picker (picker closes, canvas visible)', async () => {
     await nsp.clickAddNodeAtEdgeIndex(0);
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonCondition);
 

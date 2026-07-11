@@ -4,9 +4,14 @@ import { test as setup } from '@setup/test-setup';
 setup('authenticate', async ({ page }) => {
   await ensureAuthDirectory(AUTH_FILE);
 
+  // The admin defaults to Estonian. All of its micro-frontends (login shell, chat,
+  // services) detect the locale from this key, and storageState carries it over to
+  // every other project, so seeding it here renders the whole admin in English.
+  await page.addInitScript(() => window.localStorage.setItem('i18nextLng', 'en'));
+
   await page.goto('/');
 
-  await page.getByRole('button', { name: 'sisene TARA kaudu' }).click();
+  await page.getByRole('button', { name: 'enter via TARA' }).click();
 
   const mobiilIdLink = page.getByRole('link', { name: 'Mobiil-ID', exact: true });
   await mobiilIdLink.waitFor({ state: 'visible', timeout: 180000 });

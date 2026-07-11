@@ -22,10 +22,10 @@ test.describe('[services] [functional] New service test (TEST widget variable re
     await nsp.clickAddNodeAtEdgeIndex(0);
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDefine);
 
-    const assignNodeTitle = 'Määra - 1';
+    const assignNodeTitle = 'Assign - 1';
     await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
     await nsp.openNodeDialogByTitle(assignNodeTitle);
-    await nsp.assignSetVariableAndSave('greeting', 'Tere');
+    await nsp.assignSetVariableAndSave('greeting', 'Hello');
 
     if (typeof nsp.clickAddNodeOnLastEdge === 'function') {
       await nsp.clickAddNodeOnLastEdge();
@@ -35,10 +35,10 @@ test.describe('[services] [functional] New service test (TEST widget variable re
 
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
 
-    const msgNodeTitle = 'Sõnum kliendile - 1';
+    const msgNodeTitle = 'Send message to client - 1';
     await expect(nsp.getFlowNodeByTitle(msgNodeTitle)).toBeVisible();
     await nsp.openNodeDialogByTitle(msgNodeTitle);
-    await nsp.messageSetTextAndSave('{greeting}, maailm!');
+    await nsp.messageSetTextAndSave('{greeting}, world!');
 
     await nsp.saveService();
     await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
@@ -49,6 +49,6 @@ test.describe('[services] [functional] New service test (TEST widget variable re
 
     await nsp.widgetSendText('test');
     await expect(nsp.widgetDialog.getByText('test', { exact: true })).toBeVisible();
-    await nsp.expectWidgetToContainText('{greeting}, maailm!');
+    await nsp.expectWidgetToContainText('{greeting}, world!');
   });
 });

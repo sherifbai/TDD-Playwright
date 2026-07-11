@@ -14,9 +14,9 @@ test.describe('[services] [functional] Confirm service disabled test', () => {
 
     await page.goto(URLS.admin + 'services/newService');
     await expect(nsp.buttonConfirm).toBeDisabled();
-    await nsp.saveService({ expectedToast: 'Pealkiri on kohustuslik' });
+    await nsp.saveService({ expectedToast: 'Title is mandatory' });
 
-    await expect(page.locator('.toast__content')).toHaveText('Pealkiri on kohustuslik');
+    await expect(page.locator('.toast__content')).toHaveText('Title is mandatory');
 
     await nsp.createNewService(serviceName);
     await sop.assertServiceRowVisible(serviceName);

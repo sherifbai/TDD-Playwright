@@ -16,8 +16,8 @@ test.describe('[services] [functional] Service negative path test', () => {
     await nsp.waitForReady();
 
     await test.step('Saving without required title shows validation error', async () => {
-      await nsp.saveService({ expectedToast: 'Pealkiri on kohustuslik' });
-      await expect(page.locator('.toast__content')).toHaveText('Pealkiri on kohustuslik');
+      await nsp.saveService({ expectedToast: 'Title is mandatory' });
+      await expect(page.locator('.toast__content')).toHaveText('Title is mandatory');
       await expect(nsp.confirmServiceBtn).toBeDisabled();
     });
 

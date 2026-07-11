@@ -3,7 +3,7 @@ import { NewServicePage } from '@page-objects/services';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
 
-// Visibility of the "Uus otspunkt" (create endpoint) modal.
+// Visibility of the "Create endpoint" modal.
 // Opened from the API registry page (services/api-registry) instead of the
 // service flow canvas: this is a stable entry point to the same modal that does
 // not require creating/saving a service, so it is unaffected by the known
@@ -22,7 +22,7 @@ test('[services] [visibility] Create new OpenAPI endpoint (visibility)', async (
 
   await test.step('Assert modal base UI visible', async () => {
     await expect(nsp.createEndpointTitle).toBeVisible();
-    await expect(nsp.createEndpointTabOtspunkt).toBeVisible();
+    await expect(nsp.createEndpointTabEndpoint).toBeVisible();
 
     await expect(nsp.createEndpointServiceTypeCombo).toBeVisible();
     await expect(nsp.createEndpointCancel).toBeVisible();

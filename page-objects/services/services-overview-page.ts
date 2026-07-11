@@ -32,17 +32,17 @@ export class ServicesOverviewPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.headingServices = this.page.getByRole('heading', { name: 'Teenused', exact: true });
-    this.headingGeneralServices = this.page.getByRole('heading', { name: 'Üldteenused', exact: true });
+    this.headingServices = this.page.getByRole('heading', { name: 'Services', exact: true });
+    this.headingGeneralServices = this.page.getByRole('heading', { name: 'Common Services', exact: true });
 
-    this.buttonImportMany = this.page.getByRole('button', { name: 'Impordi mitu', exact: true });
-    this.buttonExportMany = this.page.getByRole('button', { name: 'Ekspordi mitu', exact: true });
-    this.buttonCreateNewService = this.page.getByRole('button', { name: 'Loo uus teenus', exact: true });
+    this.buttonImportMany = this.page.getByRole('button', { name: 'Import', exact: true });
+    this.buttonExportMany = this.page.getByRole('button', { name: 'Export', exact: true });
+    this.buttonCreateNewService = this.page.getByRole('button', { name: 'Create new service', exact: true });
 
-    this.buttonConfirmDelete = this.page.getByRole('dialog').getByRole('button', { name: 'Kustuta' }).last();
+    this.buttonConfirmDelete = this.page.getByRole('dialog').getByRole('button', { name: 'Delete' }).last();
     this.buttonCancelDelete = this.page
       .getByRole('dialog')
-      .getByRole('button', { name: /tühista|cancel/i })
+      .getByRole('button', { name: /cancel/i })
       .first();
 
     this.tableServices = this.page
@@ -56,18 +56,18 @@ export class ServicesOverviewPage {
       .or(this.page.locator('table').nth(1))
       .first();
 
-    this.thName = this.page.getByRole('columnheader', { name: 'Nimetus' });
-    this.thDescription = this.page.getByRole('columnheader', { name: 'Kirjeldus' });
-    this.thStatus = this.page.getByRole('columnheader', { name: 'Olek' });
+    this.thName = this.page.getByRole('columnheader', { name: 'Name' });
+    this.thDescription = this.page.getByRole('columnheader', { name: 'Description' });
+    this.thStatus = this.page.getByRole('columnheader', { name: 'State' });
 
     this.selectPageSizeServices = this.page
       .getByTestId('services-page-size')
-      .or(this.page.getByRole('combobox', { name: /Kuvan korraga/i }).nth(0))
+      .or(this.page.getByRole('combobox', { name: /Results per page/i }).nth(0))
       .or(this.page.locator('select').nth(0))
       .first();
     this.selectPageSizeGeneralServices = this.page
       .getByTestId('general-services-page-size')
-      .or(this.page.getByRole('combobox', { name: /Kuvan korraga/i }).nth(1))
+      .or(this.page.getByRole('combobox', { name: /Results per page/i }).nth(1))
       .or(this.page.locator('select').nth(1))
       .first();
 
@@ -132,7 +132,7 @@ export class ServicesOverviewPage {
 
   async clickEdit(serviceTitle: string): Promise<void> {
     const row = await this.findServiceRow(serviceTitle);
-    const button = this.servicesTable.getActionButton(row, 'Muuda');
+    const button = this.servicesTable.getActionButton(row, 'Edit');
     await expect(button).toBeVisible();
     await button.click({ force: true });
     await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
@@ -141,7 +141,7 @@ export class ServicesOverviewPage {
 
   async clickExport(serviceTitle: string): Promise<void> {
     const row = await this.findServiceRow(serviceTitle);
-    const button = this.servicesTable.getActionButton(row, 'Ekspordi');
+    const button = this.servicesTable.getActionButton(row, 'Export');
     await expect(button).toBeVisible();
     await button.click();
   }
@@ -151,7 +151,7 @@ export class ServicesOverviewPage {
     await expect(row.first()).toBeVisible({ timeout: 10000 });
 
     const targetRow = row.first();
-    const overviewDeleteButton = this.servicesTable.getActionButton(targetRow, 'Kustuta').first();
+    const overviewDeleteButton = this.servicesTable.getActionButton(targetRow, 'Delete').first();
     const canDeleteFromOverview =
       (await overviewDeleteButton.isVisible().catch(() => false)) &&
       (await overviewDeleteButton.isEnabled().catch(() => false));
@@ -160,13 +160,13 @@ export class ServicesOverviewPage {
       await overviewDeleteButton.scrollIntoViewIfNeeded().catch(() => {});
       await overviewDeleteButton.click({ force: true }).catch(() => {});
     } else {
-      const editButton = this.servicesTable.getActionButton(row, 'Muuda');
+      const editButton = this.servicesTable.getActionButton(row, 'Edit');
       await expect(editButton).toBeVisible();
       await editButton.first().click({ force: true });
       await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
 
-      const headerDeleteButton = this.page.getByRole('button', { name: 'Kustuta', exact: true }).first();
+      const headerDeleteButton = this.page.getByRole('button', { name: 'Delete', exact: true }).first();
       await expect(headerDeleteButton).toBeVisible({ timeout: 10000 });
       await headerDeleteButton.scrollIntoViewIfNeeded().catch(() => {});
       await headerDeleteButton.click({ force: true }).catch(() => {});
@@ -232,7 +232,7 @@ export class ServicesOverviewPage {
 
   async assertStatusExists(): Promise<void> {
     await this.waitForReady();
-    const statuses = ['Mustand', 'Valmis', 'Aktiivne'];
+    const statuses = ['Draft', 'Ready', 'Active'];
     await expect(this.getRowColumns(this.getFirstTableRow()).nth(2)).toContainText(new RegExp(statuses.join('|')));
   }
 
@@ -247,33 +247,33 @@ export class ServicesOverviewPage {
           await statusCell()
             .innerText()
             .catch(() => '')
-        ).includes('Valmis')
+        ).includes('Ready')
       ) {
         await this.page.reload({ waitUntil: 'domcontentloaded' });
         await this.waitForReady();
       }
-      await expect(statusCell()).toContainText('Valmis', { timeout: 2000 });
+      await expect(statusCell()).toContainText('Ready', { timeout: 2000 });
     }).toPass({ intervals: [500, 1000, 2000], timeout: 30000 });
   }
 
   async assertEditButtonExists(): Promise<void> {
     await this.waitForReady();
     await expect(
-      this.getRowColumns(this.getFirstTableRow()).nth(3).getByRole('button', { name: 'Muuda' }),
+      this.getRowColumns(this.getFirstTableRow()).nth(3).getByRole('button', { name: 'Edit' }),
     ).toBeVisible();
   }
 
   async assertExportButtonExists(): Promise<void> {
     await this.waitForReady();
     await expect(
-      this.getRowColumns(this.getFirstTableRow()).nth(4).getByRole('button', { name: 'Ekspordi' }),
+      this.getRowColumns(this.getFirstTableRow()).nth(4).getByRole('button', { name: 'Export' }),
     ).toBeVisible();
   }
 
   async assertDeleteButtonExists(): Promise<void> {
     await this.waitForReady();
     await expect(
-      this.getRowColumns(this.getFirstTableRow()).nth(4).getByRole('button', { name: 'Kustuta' }),
+      this.getRowColumns(this.getFirstTableRow()).nth(4).getByRole('button', { name: 'Delete' }),
     ).toBeVisible();
   }
 

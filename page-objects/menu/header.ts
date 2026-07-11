@@ -15,10 +15,10 @@ export class Header {
 
     this.logo = this.page.locator('svg').locator('g').first();
     this.toggleSwitchStatus = this.page.getByRole('switch');
-    this.inputStatusClarification = this.page.getByLabel('Staatuse täpsustus');
-    this.buttonStatusClarificationSave = this.page.locator('button').getByText('Salvesta');
-    this.buttonStatusClarificationCancel = this.page.locator('button').getByText('Tühista');
-    this.buttonLogOut = this.page.getByRole('button', { name: 'Logi välja', exact: true });
+    this.inputStatusClarification = this.page.getByLabel('Status clarification');
+    this.buttonStatusClarificationSave = this.page.locator('button').getByText('Save');
+    this.buttonStatusClarificationCancel = this.page.locator('button').getByText('Cancel');
+    this.buttonLogOut = this.page.getByRole('button', { name: 'Logout', exact: true });
 
     // TODO: CSA menu mapping
   }

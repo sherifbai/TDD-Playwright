@@ -35,8 +35,8 @@ test('[e2e] [chats] Chat flow test', async ({ browser }) => {
   await page.bringToFront();
   await csaPage.getChats().acceptChat();
 
-  await expect(page.getByRole('tablist', { name: 'Aktiivsed vestlused' })).toBeVisible();
-  await expect(page.getByText('Lõpeta vestlus')).toBeVisible();
+  await expect(page.getByRole('tablist', { name: 'Active chat list' })).toBeVisible();
+  await expect(page.getByText('End chat')).toBeVisible();
 
   await customerContext.close();
   await csaContext.close();

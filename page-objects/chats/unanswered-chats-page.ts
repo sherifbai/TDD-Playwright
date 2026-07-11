@@ -20,12 +20,12 @@ export class UnansweredChatsPage {
 
     this.list = this.page.getByRole('tablist');
     this.tabs = this.page.getByRole('tab');
-    this.buttonTakeOver = this.page.locator('button', { hasText: 'Võta üle' });
-    this.buttonEndChat = this.page.locator('button', { hasText: 'Lõpeta vestlus' });
-    this.buttonAskAuth = this.page.locator('button', { hasText: 'Küsi autentimist' });
-    this.buttonAskContact = this.page.locator('button', { hasText: 'Küsi kontaktandmeid' });
-    this.buttonAskPermission = this.page.locator('button', { hasText: 'Küsi nõusolekut' });
-    this.buttonForward = this.page.locator('button', { hasText: 'Suuna kolleegile' });
+    this.buttonTakeOver = this.page.locator('button', { hasText: 'Take Over' });
+    this.buttonEndChat = this.page.locator('button', { hasText: 'End chat' });
+    this.buttonAskAuth = this.page.locator('button', { hasText: 'Ask for authentication' });
+    this.buttonAskContact = this.page.locator('button', { hasText: 'Ask for contact' });
+    this.buttonAskPermission = this.page.locator('button', { hasText: 'Ask permission' });
+    this.buttonForward = this.page.locator('button', { hasText: 'Forward to colleague' });
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {

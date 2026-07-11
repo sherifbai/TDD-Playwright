@@ -10,7 +10,7 @@ test.describe('[services] [functional] Service title validation', () => {
     await page.goto(URLS.admin + 'services/newService');
     await nsp.waitForReady();
 
-    await nsp.saveService({ expectedToast: 'Pealkiri on kohustuslik' });
-    await expect(page.locator('.toast__content')).toHaveText('Pealkiri on kohustuslik');
+    await nsp.saveService({ expectedToast: 'Title is mandatory' });
+    await expect(page.locator('.toast__content')).toHaveText('Title is mandatory');
   });
 });
