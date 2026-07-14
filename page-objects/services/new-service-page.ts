@@ -1053,6 +1053,10 @@ export class NewServicePage {
     await expect(this.widgetMessages).toContainText(text);
   }
 
+  async expectWidgetNotToContainText(text: string | RegExp): Promise<void> {
+    await expect(this.widgetMessages).not.toContainText(text);
+  }
+
   async assertHeaderElementVisible(): Promise<void> {
     await expect(this.backToServicesBtn).toBeVisible();
     await expect(this.stepName).toBeVisible();
