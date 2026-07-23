@@ -887,21 +887,9 @@ export class NewServicePage {
   async messageSetTextAndSave(text: string): Promise<void> {
     await this.assertMessageDialogVisible();
     await expect(this.quillEditor).toBeVisible();
-    const normalizedText = String(text);
     await this.quillEditor.click();
-    await this.quillEditor.fill('').catch(() => {});
-    await this.quillEditor.type(normalizedText).catch(() => {});
-    const currentText = await this.quillEditor.textContent().catch(() => '');
-    if (!String(currentText || '').includes(normalizedText)) {
-      await this.quillEditor.evaluate((node: HTMLElement, value: string) => {
-        node.innerHTML = '';
-        node.textContent = value;
-        node.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }));
-        node.dispatchEvent(new Event('change', { bubbles: true }));
-        node.dispatchEvent(new Event('blur', { bubbles: true }));
-      }, normalizedText);
-    }
-    await expect(this.quillEditor).toContainText(normalizedText, { timeout: 10000 });
+    await this.quillEditor.fill(String(text));
+    await expect(this.quillEditor).toContainText(String(text), { timeout: 10000 });
     await this.messageSave.click();
     await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
     await expect(this.canvas).toBeVisible();

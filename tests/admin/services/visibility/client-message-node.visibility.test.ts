@@ -1,60 +1,72 @@
-import { NewServicePage } from '@page-objects/services';
-
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
+import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
 
-test('[services] [visibility] Client message node visibility (refactored: picker closes, edit opens dialog)', async ({
-  page,
-}) => {
-  await page.goto(URLS.admin + 'services/newService');
-  const nsp = new NewServicePage(page);
+import { getServicePages, registerServiceCleanup } from '../service-test-helpers';
 
-  await test.step('Add "Send message to client" node via picker (returns to canvas)', async () => {
-    // new logic: there can be many "+" buttons; choose a deterministic one
-    // if you added clickAddNodeAtEdgeIndex in the page object, use it.
-    if (typeof nsp.clickAddNodeAtEdgeIndex === 'function') {
+const serviceName = createServiceName('clientmsgedit');
+
+const firstMessage = `First marker ${serviceName}`;
+const editedMessage = `Edited marker ${serviceName}`;
+
+const messageNodeTitle = 'Send message to client - 1';
+
+test.describe('[services] [functional] Editing a client message node changes what the customer receives', () => {
+  registerServiceCleanup(test, serviceName);
+
+  test('[services] [functional] Re-authored message node text is delivered and the original is gone', async ({
+    page,
+  }) => {
+    const { nsp } = getServicePages(page);
+
+    await page.goto(URLS.admin + 'services/newService');
+    await nsp.waitForReady();
+
+    await test.step('Create a service with a title', async () => {
+      await nsp.setTitle(createValidServiceData({ title: serviceName }).title);
+    });
+
+    await test.step('Add a "Send message to client" node and author the first text', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-    } else if (typeof nsp.clickAddNodeOnLastEdge === 'function') {
-      await nsp.clickAddNodeOnLastEdge();
-    } else {
-      // fallback to old behavior if not yet present
-      await nsp.clickAddNode();
-    }
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
 
-    // new logic: selecting a node closes the picker and returns to canvas
-    await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
+      await nsp.openNodeDialogByTitle(messageNodeTitle);
+      await nsp.messageSetTextAndSave(firstMessage);
+      await nsp.saveService();
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
+    });
 
-    // Assert node appears on canvas (by title)
-    const node = nsp.getFlowNodeByTitle('Send message to client - 1');
-    await expect(node).toBeVisible();
-  });
+    await test.step('Baseline: the first text is delivered to the customer', async () => {
+      await expect(nsp.widget).toBeVisible();
+      await nsp.openWidget();
+      await nsp.widgetSendText('test');
+      await expect(nsp.widgetDialog.getByText('test', { exact: true })).toBeVisible();
+      await nsp.expectWidgetToContainText(firstMessage);
+    });
 
-  await test.step('Open client message node dialog via node edit button', async () => {
-    await nsp.openNodeDialogByTitle('Send message to client - 1');
+    await test.step('Re-author the node with new text and save', async () => {
+      // Reload to drop the open widget overlay and reset the conversation.
+      await page.reload();
+      await nsp.waitForReady();
 
-    // New node-specific dialog assertion
-    await nsp.assertMessageDialogVisible();
-  });
+      await nsp.openNodeDialogByTitle(messageNodeTitle);
+      await nsp.messageSetTextAndSave(editedMessage);
+      await nsp.saveService();
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
+    });
 
-  await test.step('Define elements section visible and has buttons (inside message node dialog)', async () => {
-    // In the new page object we added:
-    // - messageSectionElements (label "Assigned Variables" section)
-    // - messageChips (the green draggable boxes)
-    await expect(nsp.messageSectionElements).toBeVisible();
+    await test.step('The edited text is delivered and the original no longer is', async () => {
+      await page.reload();
+      await nsp.waitForReady();
 
-    // "has buttons" in this dialog section is actually "has chips" in the provided DOM.
-    // If you truly mean buttons, adjust to your real DOM. For now we assert at least 1 chip exists.
-    await expect(nsp.messageChips.first()).toBeVisible();
-  });
+      await expect(nsp.widget).toBeVisible();
+      await nsp.openWidget();
+      await nsp.widgetSendText('test');
+      await expect(nsp.widgetDialog.getByText('test', { exact: true })).toBeVisible();
 
-  await test.step('Dialog elements visible (tabs, buttons, editor)', async () => {
-    await expect(nsp.messageTabSetup).toBeVisible();
-
-    await expect(nsp.messageCancel).toBeVisible();
-    await expect(nsp.messageSave).toBeVisible();
-    await expect(nsp.messageClose).toBeVisible();
-
-    // Quill editor is the message box now (not generic messageBox)
-    await expect(nsp.quillEditor).toBeVisible();
+      await nsp.expectWidgetToContainText(editedMessage);
+      await nsp.expectWidgetNotToContainText(firstMessage);
+    });
   });
 });
