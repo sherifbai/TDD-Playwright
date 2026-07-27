@@ -1,63 +1,61 @@
-import { NewServicePage } from '@page-objects/services';
-
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
+import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
 
-test('[services] [visibility] Dynamic choice node visibility (refactored: picker closes, edit opens dialog)', async ({
-  page,
-}) => {
-  await page.goto(URLS.admin + 'services/newService');
-  const nsp = new NewServicePage(page);
+const serviceName = createServiceName('dynchoice');
 
-  await test.step('Add "Dynamic Choices" node via picker (returns to canvas)', async () => {
-    // new logic: choose a deterministic "+" button
-    if (typeof nsp.clickAddNodeAtEdgeIndex === 'function') {
+const authoredValues: Record<string, string> = {
+  'List': `list ${serviceName}`,
+  'Service Name': `svc ${serviceName}`,
+  'Key': `key ${serviceName}`,
+  'Payload Keys': `payload ${serviceName}`,
+};
+
+const neverAuthored = `neverauthored ${serviceName}`;
+
+const dynamicChoicesNodeTitle = 'Dynamic Choices - 1';
+
+test.describe('[services] [functional] Dynamic Choices node persists the configuration it was given', () => {
+  registerServiceCleanup(test, serviceName);
+
+  test('[services] [functional] Authored key/value mappings survive save and reload', async ({ page }) => {
+    const { nsp } = getServicePages(page);
+
+    await page.goto(URLS.admin + 'services/newService');
+    await nsp.waitForReady();
+
+    await test.step('Create a service with a title', async () => {
+      await nsp.setTitle(createValidServiceData({ title: serviceName }).title);
+    });
+
+    await test.step('Add a "Dynamic Choices" node to the flow', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-    } else if (typeof nsp.clickAddNodeOnLastEdge === 'function') {
-      await nsp.clickAddNodeOnLastEdge();
-    } else {
-      // fallback if helper not yet present
-      await nsp.clickAddNode();
-    }
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDynamicChoice);
+      await expect(nsp.getFlowNodeByTitle(dynamicChoicesNodeTitle)).toBeVisible();
+    });
 
-    // selecting node type closes picker and returns to canvas
-    await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDynamicChoice);
+    await test.step('Author a value for every key and save the service', async () => {
+      await nsp.openNodeDialogByTitle(dynamicChoicesNodeTitle);
+      await nsp.dynamicChoicesSetValuesAndSave(authoredValues);
 
-    // Assert node appears on canvas
-    const node = nsp.getFlowNodeByTitle('Dynamic Choices - 1');
-    await expect(node).toBeVisible();
-  });
+      await nsp.saveService();
+      await expect(nsp.getFlowNodeByTitle(dynamicChoicesNodeTitle)).toBeVisible();
+    });
 
-  await test.step('Open "Dynamic Choices" node dialog via node edit button', async () => {
-    await nsp.openNodeDialogByTitle('Dynamic Choices - 1');
-    await nsp.assertDynamicChoicesDialogVisible();
-  });
+    await test.step('Reload the page so nothing is served from in-memory state', async () => {
+      await page.reload();
+      await nsp.waitForReady();
+      await expect(nsp.getFlowNodeByTitle(dynamicChoicesNodeTitle)).toBeVisible();
+    });
 
-  await test.step('Define elements section visible and contains chips', async () => {
-    await expect(nsp.dynamicChoicesSectionElements).toBeVisible();
-    await expect(nsp.dynamicChoicesChips.first()).toBeVisible();
-  });
+    await test.step('Every mapping comes back exactly as authored, and nothing spurious does', async () => {
+      await nsp.openNodeDialogByTitle(dynamicChoicesNodeTitle);
 
-  await test.step('Dialog tabs + footer buttons visible', async () => {
-    await expect(nsp.dynamicChoicesTabSetup).toBeVisible();
+      await nsp.assertDynamicChoicesValues(authoredValues);
+      await expect(nsp.nodeEditorPopup).not.toContainText(neverAuthored);
 
-    await expect(nsp.dynamicChoicesCancel).toBeVisible();
-    await expect(nsp.dynamicChoicesSave).toBeVisible();
-    await expect(nsp.dynamicChoicesClose).toBeVisible();
-  });
-
-  await test.step('Assert dynamic choice fields (rows + key/value inputs)', async () => {
-    // This replaces the old nsp.assertDynamicChoiceFields() with the new mapped locators
-    await expect(nsp.dynamicChoicesRows.first()).toBeVisible();
-
-    // keys should exist and be disabled, values should be editable
-    await expect(nsp.dynamicChoicesKeyInputs.first()).toBeVisible();
-    await expect(nsp.dynamicChoicesValueInputs.first()).toBeVisible();
-
-    // Optional: assert specific keys exist (based on your DOM)
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="List"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Service Name"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Key"]')).toBeVisible();
-    await expect(nsp.dynamicChoicesDialog.locator('input[name="key"][value="Payload Keys"]')).toBeVisible();
+      await nsp.closeNodeDialogWithoutSaving();
+    });
   });
 });

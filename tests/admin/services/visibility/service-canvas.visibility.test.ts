@@ -1,32 +1,60 @@
-import { NewServicePage } from '@page-objects/services';
-
-import { test } from '@setup/test-setup';
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
+import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
+import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
 
-test('[services] [visibility] Service canvas base elements visibility', async ({ page }) => {
-  await page.goto(URLS.admin + 'services/newService');
-  await page.waitForLoadState('domcontentloaded');
+const serviceName = createServiceName('canvas');
 
-  const nsp = new NewServicePage(page);
+const assignNodeTitle = 'Assign - 1';
+const messageNodeTitle = 'Send message to client - 1';
 
-  await test.step('Header elements are visible', async () => {
-    await nsp.assertHeaderElementVisible();
-  });
+const neverAddedNodeTitle = 'Condition - 1';
 
-  await test.step('Service settings dialog fields are visible', async () => {
-    // This helper already opens and closes the settings dialog safely
-    await nsp.assertServiceDetailsFieldsVisible();
-  });
+test.describe('[services] [functional] The flow canvas stores the nodes it is given and drops the ones removed', () => {
+  registerServiceCleanup(test, serviceName);
 
-  await test.step('Canvas is visible', async () => {
-    await nsp.assertCanvasVisible();
-  });
+  test('[services] [functional] Added nodes survive a reload and a deleted node stays deleted', async ({ page }) => {
+    const { nsp } = getServicePages(page);
 
-  await test.step('Canvas header/tools are visible', async () => {
-    await nsp.assertCanvasElementsVisible();
-  });
+    await test.step('Create a service and place two nodes on the canvas', async () => {
+      await page.goto(URLS.admin + 'services/newService');
+      await nsp.waitForReady();
+      await nsp.setTitle(createValidServiceData({ title: serviceName }).title);
 
-  await test.step('Zoom controls are visible', async () => {
-    await nsp.assertZoomButtonsVisible();
+      await nsp.clickAddNodeAtEdgeIndex(0);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerDefineBtn);
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+
+      await nsp.clickAddNodeAtEdgeIndex(1);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerMessageBtn);
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
+
+      await nsp.saveService();
+    });
+
+    await test.step('Both nodes come back after a full reload', async () => {
+      await page.reload();
+      await nsp.waitForReady();
+
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
+      await expect(nsp.getFlowNodeByTitle(neverAddedNodeTitle)).toHaveCount(0);
+    });
+
+    await test.step('Remove one node and save the shortened flow', async () => {
+      await nsp.deleteNodeByTitle(messageNodeTitle);
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+
+      await nsp.saveService();
+    });
+
+    await test.step('The removed node is gone after a reload and the remaining one is untouched', async () => {
+      await page.reload();
+      await nsp.waitForReady();
+
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+      await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toHaveCount(0);
+      await expect(nsp.getFlowNodeByTitle(neverAddedNodeTitle)).toHaveCount(0);
+    });
   });
 });

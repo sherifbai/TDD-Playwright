@@ -1,8 +1,7 @@
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
 import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
-
-import { getServicePages, registerServiceCleanup } from '../service-test-helpers';
 
 const serviceName = createServiceName('clientmsgedit');
 
@@ -46,7 +45,6 @@ test.describe('[services] [functional] Editing a client message node changes wha
     });
 
     await test.step('Re-author the node with new text and save', async () => {
-      // Reload to drop the open widget overlay and reset the conversation.
       await page.reload();
       await nsp.waitForReady();
 

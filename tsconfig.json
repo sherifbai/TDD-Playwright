@@ -10,6 +10,7 @@
       "@utils/*": ["utils/*"],
       "@page-objects/*": ["page-objects/*"],
       "@setup/*": ["tests/.setup/*"],
+      "@helpers/*": ["tests/.helpers/*"],
       "@auth/*": ["tests/admin/.auth/*"],
       "@test-data/*": ["utils/test-data/*"]
     },

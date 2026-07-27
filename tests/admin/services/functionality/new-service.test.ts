@@ -1,8 +1,7 @@
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
 import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
-
-import { getServicePages, registerServiceCleanup } from '../service-test-helpers';
 
 const serviceName = createServiceName('newservice');
 

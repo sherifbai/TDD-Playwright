@@ -1,8 +1,3 @@
-// SERVICE CREATION STEPS
-// 1. Create a service
-// 2. Add nodes
-// 3. Save + assert service is listed
-
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 
 import { test } from '@setup/test-setup';
@@ -30,7 +25,6 @@ test.skip('Service creation flow', async ({ page }) => {
   await nsp.addNodes();
 
   await nsp.editNode('Send message to client - 1');
-  await page.waitForTimeout(3000);
   await nsp.addMessage('test');
   await nsp.buttonSave.last().click();
 
@@ -38,6 +32,4 @@ test.skip('Service creation flow', async ({ page }) => {
 
   await nsp.returnToServicesOverview();
   await sop.assertServiceRowVisible(randomString);
-
-  // TODO: confirm service
 });

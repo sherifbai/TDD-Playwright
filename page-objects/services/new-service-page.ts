@@ -143,9 +143,6 @@ export class NewServicePage {
   constructor(page: Page) {
     this.page = page;
 
-    // =========================
-    // Header
-    // =========================
     this.header = page.locator('header.header').or(page.locator('header').first()).first();
 
     this.backToServicesBtn = page.getByRole('button', { name: 'Back to service listing', exact: true }).first();
@@ -156,13 +153,9 @@ export class NewServicePage {
     this.saveServiceBtn = page.getByRole('button', { name: 'Save', exact: true }).first();
     this.confirmServiceBtn = page.getByRole('button', { name: 'Confirm', exact: true }).first();
 
-    // backwards-compatible aliases used by older tests
     this.buttonSave = this.saveServiceBtn;
     this.buttonConfirm = this.confirmServiceBtn;
 
-    // =========================
-    // Settings dialog
-    // =========================
     this.settingsDialog = page.locator('[role="dialog"]').filter({
       has: page.getByRole('heading', { name: 'Settings' }),
     });
@@ -184,9 +177,6 @@ export class NewServicePage {
     this.serviceTitleInput = this.settingsDialog.locator('input[placeholder="Title is mandatory"]');
     this.serviceDescriptionInput = this.settingsDialog.getByLabel('Description :');
 
-    // =========================
-    // Canvas / React Flow
-    // =========================
     this.canvas = page
       .getByRole('application')
       .first()
@@ -211,14 +201,8 @@ export class NewServicePage {
     this.zoomOutBtn = page.getByTitle('Zoom Out');
     this.fitViewBtn = page.getByTitle('Fit View');
 
-    // =========================
-    // Toasts
-    // =========================
     this.toastList = page.locator('ol.toast__list');
 
-    // =========================
-    // Node Picker
-    // =========================
     this.nodePickerDialog = page
       .locator('.dropdown__content')
       .filter({
@@ -238,7 +222,6 @@ export class NewServicePage {
       })
       .first();
 
-    // backwards-compatible picker aliases
     this.buttonDefine = this.pickerDefineBtn;
     this.buttonMessageForCustomer = this.pickerMessageBtn;
     this.buttonCondition = this.pickerConditionBtn;
@@ -264,9 +247,6 @@ export class NewServicePage {
           .first(),
       );
 
-    // =========================
-    // Generic node editor popup
-    // =========================
     this.nodeEditorPopup = page.locator('[role="dialog"].popup[data-state="open"]');
     this.nodeEditorTitle = this.nodeEditorPopup.locator('h2.popup__title');
     this.nodeEditorCloseBtn = this.nodeEditorPopup.locator('button.popup__close');
@@ -276,7 +256,6 @@ export class NewServicePage {
     this.nodeEditorTabSetup = this.nodeEditorPopup.getByRole('tab', { name: 'Setup', exact: true });
     this.nodeEditorTabTest = this.nodeEditorPopup.getByRole('tab', { name: 'Test', exact: true });
 
-    // ===== Message node =====
     this.messageDialog = this.nodeEditorPopup;
     this.messageTabSetup = this.nodeEditorTabSetup;
     this.messageTabTest = this.nodeEditorTabTest;
@@ -289,7 +268,6 @@ export class NewServicePage {
       '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .tag, .badge',
     );
 
-    // ===== Define node =====
     this.defineDialog = this.nodeEditorPopup;
     this.defineTabSetup = this.nodeEditorTabSetup;
     this.defineTabTest = this.nodeEditorTabTest;
@@ -311,13 +289,8 @@ export class NewServicePage {
       '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .badge, .tag',
     );
     this.defineNameInputs = this.defineAssignContainer.locator('input[name="key"]');
-    this.defineValueInputs = this.defineAssignContainer
-      .locator(
-        'input[placeholder="Drag an element here"], input._dragInput_92s4r_58, input:not([name]):not([type]), input',
-      )
-      .filter({ hasNot: this.page.locator('[name="key"]') });
+    this.defineValueInputs = this.defineAssignContainer.locator('input[name="value"]');
 
-    // ===== Dynamic choices node =====
     this.dynamicChoicesDialog = this.nodeEditorPopup;
     this.dynamicChoicesTabSetup = this.nodeEditorTabSetup;
     this.dynamicChoicesTabTest = this.nodeEditorTabTest;
@@ -336,7 +309,6 @@ export class NewServicePage {
       'input[name="value"], textarea[name="value"], input:not([name="key"])',
     );
 
-    // ===== Condition node =====
     this.conditionDialog = this.page
       .locator('[role="dialog"].popup:visible')
       .filter({
@@ -356,7 +328,6 @@ export class NewServicePage {
     this.conditionAddGroupButton = this.conditionDialog.getByRole('button', { name: /\+\s*Group/i }).first();
     this.conditionSectionDefineElements = this.conditionDialog.getByText(/Assigned\s+Variables/i).first();
 
-    // ===== Create endpoint modal =====
     this.createEndpointModal = this.page
       .locator('[role="dialog"].modal[data-state="open"]')
       .filter({
@@ -392,9 +363,6 @@ export class NewServicePage {
     this.createEndpointPublicNo = this.createEndpointModal.getByText(/^No$/).first();
     this.apiURL = 'https://petstore3.swagger.io/api/v3/openapi.json';
 
-    // =========================
-    // Widget (Buerokratt)
-    // =========================
     this.widgetIcon = page.getByAltText('Buerokratt logo');
     this.widget = this.widgetIcon;
     this.widgetDialog = page
@@ -493,7 +461,6 @@ export class NewServicePage {
     const candidates = [
       this.settingsDialog.getByLabel('Title :').first(),
       this.settingsDialog.locator('label:has-text("Title")').locator('xpath=following::input[1]').first(),
-      // The name attribute is hardcoded in the app and stays Estonian in every locale.
       this.settingsDialog.locator('input[name="Pealkiri"]').first(),
       this.settingsDialog.locator('input[placeholder*="Title"]').first(),
       this.serviceTitleInput.first(),
@@ -752,6 +719,16 @@ export class NewServicePage {
     await this.openNodeDialogByTitle(titleText);
   }
 
+  nodeDeleteButton(titleText: string): Locator {
+    return this.getFlowNodeByTitle(titleText).locator('button').nth(1);
+  }
+
+  async deleteNodeByTitle(titleText: string): Promise<void> {
+    await expect(this.getFlowNodeByTitle(titleText)).toBeVisible();
+    await this.nodeDeleteButton(titleText).click();
+    await expect(this.getFlowNodeByTitle(titleText)).toHaveCount(0);
+  }
+
   async assertNodeEditorVisible(): Promise<void> {
     await expect(this.nodeEditorPopup).toBeVisible();
     await expect(this.nodeEditorTitle).toBeVisible();
@@ -806,61 +783,36 @@ export class NewServicePage {
     return explicitRows.nth(rowIndex);
   }
 
-  getVisibleDefineValueInput(scope: Locator = this.defineAssignContainer): Locator {
-    return scope
-      .locator('input:not([name="key"]):not([type="hidden"]), textarea:not([name="key"])')
-      .filter({ hasNot: scope.locator('[aria-hidden="true"]') })
-      .first();
+  getAssignNameInput(row: Locator): Locator {
+    return row.locator('input[name="key"]').first();
   }
 
-  async resolveDefineRowInputs(rowIndex: number): Promise<{ row: Locator; nameInput: Locator; valueInput: Locator }> {
-    let row = this.getDefineRow(rowIndex);
-    if (!(await row.count().catch(() => 0))) {
-      row = this.defineAssignContainer
-        .locator('div')
-        .filter({ has: this.page.locator('input, textarea') })
-        .nth(rowIndex);
-    }
-    await expect(row).toBeVisible();
+  getAssignValueInput(row: Locator): Locator {
+    return row.locator('input[name="value"]').first();
+  }
 
-    let nameInput = row.locator('input[name="key"]').first();
-    if (!(await nameInput.count().catch(() => 0))) {
-      nameInput = row.locator('input, textarea').first();
-    }
+  getAssignValueModeToggle(row: Locator): Locator {
+    return row.locator('.small-assign-button.assign-blue').first();
+  }
 
-    let valueInput = row.locator('input:not([name="key"]):not([type="hidden"]), textarea:not([name="key"])').last();
-    if (
-      !(await valueInput.count().catch(() => 0)) ||
-      (await valueInput.evaluate((el) => (el as unknown) === null).catch(() => false))
-    ) {
-      valueInput = row.locator('input, textarea').nth(1);
-    }
-    if (!(await valueInput.count().catch(() => 0))) {
-      valueInput = this.getVisibleDefineValueInput(row);
-    }
-
-    await expect(nameInput).toBeEditable();
-    await expect(valueInput).toBeEditable();
-    return { row, nameInput, valueInput };
+  async switchAssignRowToLiteralValue(row: Locator): Promise<void> {
+    await this.getAssignValueModeToggle(row).click();
+    await expect(this.getAssignValueInput(row)).toBeEditable();
   }
 
   async robustFillInput(input: Locator, value: string): Promise<void> {
     const normalizedValue = String(value);
-    await input.click({ force: true });
-    await input.fill('').catch(() => {});
-    await input.pressSequentially(normalizedValue, { delay: 20 }).catch(() => {});
-    const currentValue = await input.inputValue().catch(() => null);
-    if (currentValue !== normalizedValue) {
-      await input.evaluate((node: HTMLInputElement | HTMLTextAreaElement, nextValue: string) => {
-        const tag = node.tagName?.toLowerCase();
-        const prototype = tag === 'textarea' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
-        const nativeSetter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
-        nativeSetter?.call(node, nextValue);
-        node.dispatchEvent(new Event('input', { bubbles: true }));
-        node.dispatchEvent(new Event('change', { bubbles: true }));
-        node.dispatchEvent(new Event('blur', { bubbles: true }));
-      }, normalizedValue);
+    await expect(input).toBeEditable();
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await input.click();
+      await input.fill(normalizedValue);
+
+      if ((await input.inputValue()) === normalizedValue) {
+        break;
+      }
     }
+
     await expect(input).toHaveValue(normalizedValue, { timeout: 10000 });
   }
 
@@ -869,18 +821,35 @@ export class NewServicePage {
     await expect(this.defineAddElementBtn).toBeVisible();
 
     const rowsBefore = await this.defineRows.count();
-    await this.defineAddElementBtn.scrollIntoViewIfNeeded().catch(() => {});
-    await this.defineAddElementBtn.click({ force: true });
-    await this.page.waitForTimeout(500);
+    await this.defineAddElementBtn.scrollIntoViewIfNeeded();
+    await this.defineAddElementBtn.click();
+    await expect(this.defineRows).toHaveCount(rowsBefore + 1);
 
-    const rowsAfter = await this.defineRows.count().catch(() => rowsBefore);
-    const targetIndex = Math.max(rowsBefore, rowsAfter - 1, 0);
+    const row = this.getDefineRow(rowsBefore);
+    await expect(row).toBeVisible();
 
-    const { nameInput, valueInput } = await this.resolveDefineRowInputs(targetIndex);
-    await this.robustFillInput(nameInput, name);
-    await this.robustFillInput(valueInput, value);
+    await this.robustFillInput(this.getAssignNameInput(row), name);
+    await this.switchAssignRowToLiteralValue(row);
+    await this.robustFillInput(this.getAssignValueInput(row), value);
 
-    await this.defineSave.click({ force: true }).catch(() => {});
+    await this.defineSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+  }
+
+  persistedAssignValue(value: string): string {
+    return `\${"${value}"}`;
+  }
+
+  async assertAssignVariableRow(rowIndex: number, name: string, value: string): Promise<void> {
+    const row = this.getDefineRow(rowIndex);
+    await expect(row).toBeVisible();
+
+    await expect(this.getAssignNameInput(row)).toHaveValue(name);
+    await expect(this.getAssignValueInput(row)).toHaveValue(this.persistedAssignValue(value));
+  }
+
+  async closeNodeDialogWithoutSaving(): Promise<void> {
+    await this.defineCancel.click();
     await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
   }
 
@@ -899,9 +868,100 @@ export class NewServicePage {
     await this.messageSetTextAndSave(text);
   }
 
+  async multichoiceSetQuestionAndRenameOption(question: string, optionIndex: number, newLabel: string): Promise<void> {
+    await expect(this.nodeEditorTitle).toContainText('Multi-choice question');
+
+    await expect(this.quillEditor).toBeVisible();
+    await this.quillEditor.click();
+    await this.quillEditor.fill(String(question));
+    await expect(this.quillEditor).toContainText(String(question), { timeout: 10000 });
+
+    const previewButton = this.nodeEditorPopup.locator('.multiple-choice-question-button').nth(optionIndex);
+    const previewRow = previewButton.locator('xpath=ancestor::div[contains(@class,"track")][1]');
+    await previewRow.getByRole('button', { name: 'Edit', exact: true }).click();
+
+    const labelInput = this.nodeEditorPopup.locator(`input[name="button-title-${optionIndex}"]`);
+    await expect(labelInput).toBeEditable();
+    await labelInput.fill(newLabel);
+    await expect(labelInput).toHaveValue(newLabel);
+
+    const editRow = labelInput.locator('xpath=ancestor::div[contains(@class,"track")][1]');
+    await editRow.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(
+      this.nodeEditorPopup.locator('.multiple-choice-question-button__text', { hasText: newLabel }),
+    ).toBeVisible();
+
+    await this.nodeEditorSaveBtn.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
   async assertSectionHasButtons(sectionLocator: Locator): Promise<void> {
     const items = sectionLocator.locator('button,[draggable="true"],.chip,.badge,.tag');
     await expect(items.first()).toBeVisible();
+  }
+
+  async conditionAddLiteralRule(leftValue: string, operator: string, rightValue: string): Promise<void> {
+    await this.conditionAddRuleButton.click();
+
+    const bluePencils = this.conditionDialog.locator('.small-assign-button.assign-blue');
+    await bluePencils.first().click();
+    await bluePencils.first().click();
+
+    const leftInput = this.conditionDialog.locator('input[name="field"]');
+    const rightInput = this.conditionDialog.locator('input[name="value"]');
+
+    await leftInput.fill(leftValue);
+    await expect(leftInput).toHaveValue(leftValue);
+    await rightInput.fill(rightValue);
+    await expect(rightInput).toHaveValue(rightValue);
+
+    await this.conditionDialog.locator('[name="operator"]').click();
+    await this.conditionDialog.getByRole('option', { name: operator, exact: true }).click();
+  }
+
+  async conditionSaveNode(): Promise<void> {
+    await this.conditionSave.click();
+    await expect(this.conditionDialog).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
+  async addMessageOnConditionBranch(
+    branchLabel: 'Success' | 'Failure',
+    expectedNodeTitle: string,
+    text: string,
+  ): Promise<void> {
+    await this.canvas.getByRole('button', { name: branchLabel, exact: true }).click();
+    await this.pickNodeTypeAndReturnToCanvas(this.buttonMessageForCustomer);
+    await expect(this.getFlowNodeByTitle(expectedNodeTitle)).toBeVisible();
+
+    await this.openNodeDialogByTitle(expectedNodeTitle);
+    await this.messageSetTextAndSave(text);
+  }
+
+  getDynamicChoiceValueInputByKey(key: string): Locator {
+    return this.nodeEditorPopup
+      .locator('._assignElement_umtte_1')
+      .filter({ has: this.page.locator(`input[name="key"][value="${key}"]`) })
+      .locator('input[name="value"]');
+  }
+
+  async dynamicChoicesSetValuesAndSave(values: Record<string, string>): Promise<void> {
+    for (const [key, value] of Object.entries(values)) {
+      const input = this.getDynamicChoiceValueInputByKey(key);
+      await input.fill(value);
+      await expect(input).toHaveValue(value);
+    }
+
+    await this.dynamicChoicesSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
+  async assertDynamicChoicesValues(values: Record<string, string>): Promise<void> {
+    for (const [key, value] of Object.entries(values)) {
+      await expect(this.getDynamicChoiceValueInputByKey(key)).toHaveValue(value);
+    }
   }
 
   async openCreateEndpointFromPicker(): Promise<void> {
@@ -941,9 +1001,6 @@ export class NewServicePage {
     await this.openCreateEndpointFromPicker();
   }
 
-  // Opens the same "Create endpoint" modal directly from the API registry page
-  // (services/api-registry). Stable entry point that avoids creating/saving a
-  // service, so it is not affected by the newService -> overview redirect.
   async openCreateEndpointFromRegistry(): Promise<void> {
     const createBtn = this.page.getByRole('button', { name: 'Create endpoint', exact: true }).first();
     await expect(createBtn).toBeVisible({ timeout: 15000 });
@@ -978,6 +1035,38 @@ export class NewServicePage {
   async setEndpointUrl(value: string): Promise<void> {
     await expect(this.createEndpointUrl).toBeVisible();
     await this.robustFillInput(this.createEndpointUrl, value);
+  }
+
+  get createEndpointEndpointsCombo(): Locator {
+    return this.createEndpointModal.locator('[role="combobox"][name="select-endpoint"]');
+  }
+
+  async fetchEndpointsFromUrl(url: string): Promise<string[]> {
+    await this.robustFillInput(this.createEndpointUrl, url);
+    await this.createEndpointFetchEndpoints.click();
+
+    await expect(async () => {
+      await this.createEndpointEndpointsCombo.click({ force: true });
+      await expect(this.page.locator('li[role="option"]').first()).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 60000 });
+
+    return this.page.locator('li[role="option"]').allInnerTexts();
+  }
+
+  async selectFetchedEndpoint(label: string): Promise<void> {
+    if (
+      !(await this.page
+        .locator('li[role="option"]')
+        .first()
+        .isVisible()
+        .catch(() => false))
+    ) {
+      await this.createEndpointEndpointsCombo.click({ force: true });
+      await expect(this.page.locator('li[role="option"]').first()).toBeVisible({ timeout: 10000 });
+    }
+
+    await this.page.getByRole('option', { name: label, exact: true }).first().click();
+    await expect(this.createEndpointEndpointsCombo).toContainText(label);
   }
 
   async createEndpoint(): Promise<void> {

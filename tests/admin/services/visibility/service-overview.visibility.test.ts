@@ -1,31 +1,41 @@
-import { ServicesOverviewPage } from '@page-objects/services';
-
-import { test } from '@setup/test-setup';
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
+import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
+import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
 
-test('[services] [visibility] Service overview page elements visibility', async ({ page }) => {
-  await page.goto(URLS.admin + 'services/overview');
-  await page.waitForLoadState('domcontentloaded');
+const serviceName = createServiceName('overview');
 
-  const sop = new ServicesOverviewPage(page);
+test.describe('[services] [functional] The services overview lists a created service and drops it on delete', () => {
+  registerServiceCleanup(test, serviceName);
 
-  await test.step('Service name column/values visible', async () => {
-    await sop.assertServiceNameExists();
-  });
+  test('[services] [functional] A created service appears as its own row and is gone after delete', async ({
+    page,
+  }) => {
+    const { nsp, sop } = getServicePages(page);
 
-  await test.step('Service status column/values visible', async () => {
-    await sop.assertStatusExists();
-  });
+    await test.step('Create a uniquely-named service', async () => {
+      await page.goto(URLS.admin + 'services/newService');
+      await nsp.waitForReady();
+      await nsp.setTitle(createValidServiceData({ title: serviceName }).title);
+      await nsp.saveService();
+    });
 
-  await test.step('Edit button visible', async () => {
-    await sop.assertEditButtonExists();
-  });
+    await test.step('The service appears in the overview with a status and a delete control', async () => {
+      await page.goto(URLS.admin + 'services/overview');
+      await sop.waitForReady();
 
-  await test.step('Delete button visible', async () => {
-    await sop.assertDeleteButtonExists();
-  });
+      const row = await sop.findServiceRow(serviceName);
+      await expect(row).toBeVisible();
 
-  await test.step('Pagination / page size control visible', async () => {
-    await sop.assertPageSizeVisibleServices();
+      const columns = sop.getRowColumns(row);
+      await expect(columns.nth(0)).toContainText(serviceName);
+      await expect(columns.nth(2)).toContainText(/Draft|Ready|Active/);
+      await expect(columns.nth(4).getByRole('button', { name: 'Delete' })).toBeVisible();
+    });
+
+    await test.step('Deleting the service removes exactly that row from the overview', async () => {
+      await sop.deleteService(serviceName);
+      await sop.assertRowDeleted(serviceName);
+    });
   });
 });

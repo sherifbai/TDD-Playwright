@@ -99,12 +99,11 @@ export class ServicesOverviewPage {
   }
 
   getRowColumns(rowOrTitle: Locator | string | number): Locator {
-    const isLocator = typeof rowOrTitle === 'object' && typeof rowOrTitle.locator === 'function';
-    const isTextLike = typeof rowOrTitle === 'string' || typeof rowOrTitle === 'number';
-    const row = isLocator ? rowOrTitle : isTextLike ? this.getServiceRow(String(rowOrTitle)) : null;
-    if (!row || typeof row.locator !== 'function') {
-      throw new Error(`Expected a row locator or service title, received: ${typeof rowOrTitle}`);
-    }
+    const row =
+      typeof rowOrTitle === 'string' || typeof rowOrTitle === 'number'
+        ? this.getServiceRow(String(rowOrTitle))
+        : rowOrTitle;
+
     return row.locator('td');
   }
 
@@ -206,7 +205,6 @@ export class ServicesOverviewPage {
       await this.deleteService(serviceTitle);
       return !(await this.hasServiceRow(serviceTitle).catch(() => true));
     } catch (error) {
-      // Cleanup should be best-effort to avoid after-hook masking the real test failure.
       await this.page.goto('services/overview').catch(() => {});
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
       const stillExists = await this.hasServiceRow(serviceTitle).catch(() => false);

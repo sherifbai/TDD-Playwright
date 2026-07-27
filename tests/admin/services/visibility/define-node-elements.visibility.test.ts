@@ -1,57 +1,56 @@
-import { NewServicePage } from '@page-objects/services';
-
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
+import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
 
-test('[services] [visibility] Service canvas define node visibility', async ({ page }) => {
-  await page.goto(URLS.admin + 'services/newService');
-  await page.waitForLoadState('domcontentloaded');
+const serviceName = createServiceName('assignroundtrip');
 
-  const nsp = new NewServicePage(page);
-  const nodeTitle = 'Assign - 1';
+const variableName = `marker${serviceName}`;
+const variableValue = `value${serviceName}`;
+const neverAuthoredVariable = `neverauthored${serviceName}`;
 
-  await test.step('Add define node from picker (picker closes, node appears on canvas)', async () => {
-    // open picker from first edge +
-    await nsp.clickAddNodeAtEdgeIndex(0);
-    await nsp.assertNodePickerVisible();
+const assignNodeTitle = 'Assign - 1';
 
-    // pick node type -> picker closes -> canvas visible
-    await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerDefineBtn);
+test.describe('[services] [functional] Assign node persists the variable it was configured with', () => {
+  registerServiceCleanup(test, serviceName);
 
-    await expect(nsp.canvas).toBeVisible();
-    await expect(nsp.getFlowNodeByTitle(nodeTitle)).toBeVisible();
-  });
+  test('[services] [functional] Authored variable survives save and reload', async ({ page }) => {
+    const { nsp } = getServicePages(page);
 
-  await test.step('Open define node dialog via node edit button', async () => {
-    await nsp.openNodeDialogByTitle(nodeTitle);
+    await page.goto(URLS.admin + 'services/newService');
+    await nsp.waitForReady();
 
-    // this must be the DEFINE editor popup, not the picker dialog
-    await nsp.assertDefineDialogVisible();
-  });
+    await test.step('Create a service with a title', async () => {
+      await nsp.setTitle(createValidServiceData({ title: serviceName }).title);
+    });
 
-  await test.step('Define dialog base UI visible', async () => {
-    await nsp.assertDefineTabsVisible();
-    await nsp.assertDefineFooterButtonsVisible();
-  });
+    await test.step('Add an "Assign" node to the flow', async () => {
+      await nsp.clickAddNodeAtEdgeIndex(0);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDefine);
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+    });
 
-  await test.step('Add element row works', async () => {
-    const rowsBefore = await nsp.defineRows.count();
-    await nsp.defineAddElementBtn.click();
-    await expect(nsp.defineRows).toHaveCount(rowsBefore + 1);
+    await test.step('Author a variable in the node and save the service', async () => {
+      await nsp.openNodeDialogByTitle(assignNodeTitle);
+      await nsp.assignSetVariableAndSave(variableName, variableValue);
 
-    const { row: newRow, nameInput, valueInput } = await nsp.resolveDefineRowInputs(rowsBefore);
-    await expect(newRow).toBeVisible();
-    await expect(nameInput).toBeEditable();
-    await expect(valueInput).toBeEditable();
-  });
+      await nsp.saveService();
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+    });
 
-  await test.step('Sections visible + chips exist', async () => {
-    await expect(nsp.defineSectionElements).toBeVisible();
-    await expect(nsp.defineSectionEnv).toBeVisible();
-    await expect(nsp.defineSectionDates).toBeVisible();
-    await expect(nsp.defineSectionTools).toBeVisible();
+    await test.step('Reload the page so nothing is served from in-memory state', async () => {
+      await page.reload();
+      await nsp.waitForReady();
+      await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
+    });
 
-    // at least one chip in elements section (e.g. "input", "Empty Content Type")
-    await expect(nsp.defineChips.first()).toBeVisible();
+    await test.step('The variable comes back exactly as authored, and nothing spurious does', async () => {
+      await nsp.openNodeDialogByTitle(assignNodeTitle);
+
+      await nsp.assertAssignVariableRow(0, variableName, variableValue);
+      await expect(nsp.nodeEditorPopup).not.toContainText(neverAuthoredVariable);
+
+      await nsp.closeNodeDialogWithoutSaving();
+    });
   });
 });

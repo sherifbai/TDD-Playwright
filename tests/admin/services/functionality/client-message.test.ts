@@ -1,8 +1,7 @@
+import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
 import { createServiceName, createValidServiceData } from '@utils/test-data/service-data';
-
-import { getServicePages, registerServiceCleanup } from '../service-test-helpers';
 
 const serviceName = createServiceName('clientmessage');
 
@@ -27,11 +26,7 @@ test.describe('[services] [functional] New service test (TEST widget variable re
     await nsp.openNodeDialogByTitle(assignNodeTitle);
     await nsp.assignSetVariableAndSave('greeting', 'Hello');
 
-    if (typeof nsp.clickAddNodeOnLastEdge === 'function') {
-      await nsp.clickAddNodeOnLastEdge();
-    } else {
-      await nsp.clickAddNodeAtEdgeIndex(1);
-    }
+    await nsp.clickAddNodeOnLastEdge();
 
     await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
 
