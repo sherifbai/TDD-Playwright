@@ -1,3 +1,4 @@
+export * from './admin-page-visit.interface';
 export * from './api-call.interface';
 export * from './api-page.interface';
 export * from './env-urls.interface';
@@ -8,4 +9,5 @@ export * from './paginated-data-table-options.interface';
 export * from './ready-page.interface';
 export * from './route-ready-options.interface';
 export * from './save-service-options.interface';
+export * from './server-error.interface';
 export * from './service-data.interface';
