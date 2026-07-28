@@ -17,21 +17,14 @@ export async function waitForServicesOverviewReady(
 ): Promise<void> {
   await waitForAppSettled(page, { timeout });
 
-  const heading = page.getByRole('heading', { name: /Teenused/i }).first();
-  const createButton = page.getByRole('button', { name: /Loo uus teenus/i }).first();
-  const table = page
-    .getByTestId('services-table')
-    .first()
-    .or(page.locator('table.data-table').first())
-    .or(page.locator('table').first());
+  const heading = page.getByRole('heading', { name: 'Services', exact: true });
+  const createButton = page.getByRole('button', { name: 'Create new service', exact: true });
+  const table = page.getByTestId('services-table').or(page.locator('table.data-table')).or(page.locator('table'));
 
-  await Promise.any([
-    heading.waitFor({ state: 'visible', timeout }),
-    createButton.waitFor({ state: 'visible', timeout }),
-    table.waitFor({ state: 'visible', timeout }),
-  ]).catch(async () => {
-    await expect(page.locator('main').first()).toBeVisible({ timeout });
-  });
+  await expect(
+    heading.or(createButton).or(table).first(),
+    'Services overview rendered neither its heading, its create button nor a services table',
+  ).toBeVisible({ timeout });
 }
 
 export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {

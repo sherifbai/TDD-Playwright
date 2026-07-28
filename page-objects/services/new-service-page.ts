@@ -461,7 +461,6 @@ export class NewServicePage {
     const candidates = [
       this.settingsDialog.getByLabel('Title :').first(),
       this.settingsDialog.locator('label:has-text("Title")').locator('xpath=following::input[1]').first(),
-      this.settingsDialog.locator('input[name="Pealkiri"]').first(),
       this.settingsDialog.locator('input[placeholder*="Title"]').first(),
       this.serviceTitleInput.first(),
     ];
