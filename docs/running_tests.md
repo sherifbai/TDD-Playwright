@@ -31,7 +31,7 @@ npm run test:services:fast
 npm run test:tests:fast
 npm run test:smoke:admin
 npx playwright test tests/admin/services/visibility
-npx playwright test tests/admin/services/functionality/new-service.test.js
+npx playwright test tests/admin/services/functionality
 npx playwright test -g "Create service"
 ```
 
@@ -141,7 +141,7 @@ TEST_PATH: tests/admin/services/visibility
 ```yaml
 ## AT_TESTS
 PROJECT: tests
-TEST_FILE: tests/admin/services/functionality/new-service.test.js
+TEST_FILE: tests/admin/services/functionality/new-service.functionality.test.ts
 ```
 
 ```yaml
@@ -153,7 +153,7 @@ TEST_GREP: "Create service"
 
 ```yaml
 ## AT_TESTS
-TARGETS: path:tests/smoke@smoke;path:tests/admin/services/visibility@tests;file:tests/admin/services/functionality/new-service.test.js@tests
+TARGETS: path:tests/smoke@smoke;path:tests/admin/services/visibility@tests;file:tests/admin/services/functionality/new-service.functionality.test.ts@tests
 ```
 
 ### Label-trigger behavior
