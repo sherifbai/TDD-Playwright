@@ -1,27 +1,30 @@
-import { test, expect } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
+import { openAdminPage } from '@helpers/smoke-helpers';
+import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Landing Page', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/landing');
-  await expect(page.getByText('Welcome to Bürokratt')).toBeVisible();
-});
+test('[smoke] Unanswered chats page loads its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/unanswered');
 
-test('[smoke] Unanswered chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/unanswered');
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
 });
 
-test('[smoke] Active chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/active');
+test('[smoke] Active chats page loads its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/active');
+
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
 });
 
-test('[smoke] Pending chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/pending');
+test('[smoke] Pending chats page loads its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/pending');
+
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
 });
 
-test('[smoke] Chat history', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/history');
-  await expect(page.getByText('Result count', { exact: true })).toBeVisible();
+test('[smoke] Chat history page loads a result count from the backend', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/history');
+  await expect(page.getByText(/Result count:?\s*\d+/i)).toBeVisible();
+
+  visit.assertBackendAnswered();
 });

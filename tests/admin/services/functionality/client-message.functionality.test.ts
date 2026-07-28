@@ -8,9 +8,6 @@ const serviceName = createServiceName('clientmessage');
 const variableName = 'greeting';
 const variableValue = `Hello ${serviceName}`;
 
-// The message node is authored with a `{variable}` placeholder while an Assign node
-// upstream defines that very variable. The widget delivers the message body as typed:
-// it is not a template, so the placeholder reaches the customer unresolved.
 const authoredMessage = `{${variableName}} from ${serviceName}`;
 const interpolatedMessage = `${variableValue} from ${serviceName}`;
 const neverAuthoredMessage = `Never authored ${serviceName}`;

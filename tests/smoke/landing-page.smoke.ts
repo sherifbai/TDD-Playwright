@@ -1,37 +1,30 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 
-import { test } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
+import { openAdminPage } from '@helpers/smoke-helpers';
+import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Test: has landing page loaded with menu', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/landing');
+test('[smoke] Landing page loads with the modules an admin may open', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/landing');
 
   const apf = new AdminPageFactory(page);
   const topMenu = apf.getPageHeader();
   const sideMenu = apf.getSideMenu();
 
-  await page.getByRole('heading', { name: 'Welcome to Bürokratt' }).waitFor({ state: 'visible' });
+  await expect(page.getByRole('heading', { name: 'Welcome to Bürokratt' })).toBeVisible();
 
-  // top menu elements
-  await topMenu.assertLogoVisible();
-  await topMenu.assertToggleSwitchVisible();
-  await topMenu.assertLogoutButtonVisible();
-  await sideMenu.assertCollapseButtonVisible();
+  await test.step('The header offers the admin session controls', async () => {
+    await topMenu.assertLogoVisible();
+    await topMenu.assertToggleSwitchVisible();
+    await topMenu.assertLogoutButtonVisible();
+    await sideMenu.assertCollapseButtonVisible();
+  });
 
-  // side menu elements - when logged in as admin role
-  await test.step('Assert chats module visible in menu', async () => {
+  await test.step('The side menu offers every module an admin role has', async () => {
     await sideMenu.assertChatsButtonVisible();
-  });
-
-  await test.step('Assert analytics module visible in menu', async () => {
     await sideMenu.assertAnalyticsButtonVisible();
-  });
-
-  await test.step('Assert services module visible in menu', async () => {
     await sideMenu.assertServicesButtonVisible();
-  });
-
-  await test.step('Assert management module visible in menu', async () => {
     await sideMenu.assertAdministrationButtonVisible();
   });
+
+  visit.assertBackendAnswered();
 });

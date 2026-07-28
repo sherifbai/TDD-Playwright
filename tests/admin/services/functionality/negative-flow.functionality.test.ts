@@ -16,8 +16,6 @@ test.describe('[services] [functional] A service without a title is rejected', (
     await page.goto(URLS.admin + 'services/newService');
     await nsp.waitForReady();
 
-    // A saved service gets an id and the editor moves to /services/edit/<id>, so the
-    // url is the product's own evidence of whether a record was created.
     await test.step('Saving a titleless draft is refused and creates no service', async () => {
       await nsp.saveService({ expectedToast: 'Title is mandatory' });
 
@@ -26,8 +24,6 @@ test.describe('[services] [functional] A service without a title is rejected', (
       await expect(nsp.confirmServiceBtn).toBeDisabled();
     });
 
-    // Positive control: the same draft saves as soon as the title rule is satisfied, so
-    // the refusal above is the validation rule at work and not a broken editor.
     await test.step('Supplying a title lets the same draft save and create the service', async () => {
       await nsp.setTitle(serviceName);
       await nsp.saveService();
