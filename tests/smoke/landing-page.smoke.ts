@@ -27,4 +27,5 @@ test('[smoke] Landing page loads with the modules an admin may open', async ({ p
   });
 
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

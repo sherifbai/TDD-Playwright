@@ -6,6 +6,7 @@ test('[smoke] Analytics overview page loads its chat metrics', async ({ page }) 
 
   await expect(page.getByText('Total number of chats')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Chats analytics page loads', async ({ page }) => {
@@ -13,6 +14,7 @@ test('[smoke] Chats analytics page loads', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Chats', exact: true })).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Feedback analytics page loads', async ({ page }) => {
@@ -20,4 +22,5 @@ test('[smoke] Feedback analytics page loads', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Feedback' })).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

@@ -8,4 +8,5 @@ test('[smoke] Users page loads the user list from the backend', async ({ page })
   await expect(page.getByRole('table').first().locator('tbody tr').first()).toBeVisible();
 
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

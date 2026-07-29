@@ -6,6 +6,7 @@ test('[smoke] Chatbot settings page loads with its active toggle', async ({ page
 
   await expect(page.getByLabel('Chatbot active')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Welcome message page loads with its greeting toggle', async ({ page }) => {
@@ -13,6 +14,7 @@ test('[smoke] Welcome message page loads with its greeting toggle', async ({ pag
 
   await expect(page.getByLabel('Greeting Active')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Appearance page loads with its widget switches', async ({ page }) => {
@@ -20,6 +22,7 @@ test('[smoke] Appearance page loads with its widget switches', async ({ page }) 
 
   await expect(page.getByRole('switch', { name: 'Widget bubble message text' })).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Emergency notices page loads with its notice toggle', async ({ page }) => {
@@ -27,6 +30,7 @@ test('[smoke] Emergency notices page loads with its notice toggle', async ({ pag
 
   await expect(page.getByLabel('Notice active')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Feedback page loads with its feedback toggle', async ({ page }) => {
@@ -34,6 +38,7 @@ test('[smoke] Feedback page loads with its feedback toggle', async ({ page }) =>
 
   await expect(page.getByLabel('Feedback active')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Working time page loads with its customer service toggle', async ({ page }) => {
@@ -41,6 +46,7 @@ test('[smoke] Working time page loads with its customer service toggle', async (
 
   await expect(page.getByLabel('Use customer service')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Session length page loads with its session length field', async ({ page }) => {
@@ -48,4 +54,5 @@ test('[smoke] Session length page loads with its session length field', async ({
 
   await expect(page.getByLabel('Session length')).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

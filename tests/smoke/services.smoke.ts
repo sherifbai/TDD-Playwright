@@ -8,6 +8,7 @@ test('[smoke] Services overview page loads the services table', async ({ page })
   await expect(page.getByRole('table').first().locator('tbody tr').first()).toBeVisible();
 
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] New service page loads the flow editor', async ({ page }) => {
@@ -17,6 +18,7 @@ test('[smoke] New service page loads the flow editor', async ({ page }) => {
   await expect(page.locator('.react-flow__node').first()).toBeVisible();
 
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
 test('[smoke] Faulty services page loads', async ({ page }) => {
@@ -24,4 +26,5 @@ test('[smoke] Faulty services page loads', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Faulty Services' })).toBeVisible();
   visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
