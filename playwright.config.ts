@@ -6,6 +6,7 @@ import { URLS } from '@utils/env/urls';
 export default defineConfig({
   timeout: 120000,
   testDir: './tests',
+  globalTeardown: './tests/.setup/global-teardown.ts',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
