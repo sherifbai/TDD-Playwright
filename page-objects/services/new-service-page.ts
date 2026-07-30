@@ -506,7 +506,6 @@ export class NewServicePage {
     const { expectedToast = /saved/i } = options;
     await this.waitForReady();
     await expect(this.saveServiceBtn).toBeVisible();
-    await this.saveServiceBtn.scrollIntoViewIfNeeded().catch(() => {});
 
     const wasUnsavedDraft = /services\/newService/i.test(this.page.url());
 
@@ -520,7 +519,7 @@ export class NewServicePage {
       : false;
 
     for (let attempt = 0; attempt < 2; attempt++) {
-      await this.saveServiceBtn.click({ force: true }).catch(() => {});
+      await this.saveServiceBtn.click({ force: true });
       const toastAppeared = await this.toastList
         .locator('li')
         .first()
@@ -537,7 +536,7 @@ export class NewServicePage {
     }
 
     if (await savePosted) {
-      await this.page.waitForURL(/services\/edit\//i, { timeout: 15000 });
+      await expect(this.page).toHaveURL(/services\/edit\//i, { timeout: 15000 });
     }
   }
 
@@ -545,10 +544,9 @@ export class NewServicePage {
     const { expectedToast = /saved|confirm|ready/i } = options;
     await this.waitForReady();
     await expect(this.confirmServiceBtn).toBeVisible();
-    await this.confirmServiceBtn.scrollIntoViewIfNeeded().catch(() => {});
 
     for (let attempt = 0; attempt < 2; attempt++) {
-      await this.confirmServiceBtn.click({ force: true }).catch(() => {});
+      await this.confirmServiceBtn.click({ force: true });
       const toastAppeared = await this.toastList
         .locator('li')
         .first()
@@ -567,14 +565,13 @@ export class NewServicePage {
 
   async returnToServicesOverview(): Promise<void> {
     if (/services\/overview/i.test(this.page.url())) {
-      await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+      await this.page.waitForLoadState('domcontentloaded');
       return;
     }
 
     await this.waitForReady();
     await expect(this.backToServicesBtn).toBeVisible();
-    await this.backToServicesBtn.scrollIntoViewIfNeeded().catch(() => {});
-    await this.backToServicesBtn.click({ force: true }).catch(() => {});
+    await this.backToServicesBtn.click({ force: true });
 
     const navigated = await this.page
       .waitForURL(/services\/overview/i, { timeout: 10000 })
@@ -582,11 +579,11 @@ export class NewServicePage {
       .catch(() => false);
 
     if (!navigated) {
-      await this.page.goto('services/overview').catch(() => {});
-      await this.page.waitForURL(/services\/overview/i, { timeout: 15000 }).catch(() => {});
+      await this.page.goto('services/overview');
+      await expect(this.page).toHaveURL(/services\/overview/i, { timeout: 15000 });
     }
 
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async createService(serviceData: ServiceInput = {}): Promise<Partial<ServiceData> & { title: string }> {
@@ -865,6 +862,17 @@ export class NewServicePage {
 
   async addMessage(text: string): Promise<void> {
     await this.messageSetTextAndSave(text);
+  }
+
+  async messageClearTextAndSave(): Promise<void> {
+    await this.assertMessageDialogVisible();
+    await expect(this.quillEditor).toBeVisible();
+    await this.quillEditor.click();
+    await this.quillEditor.fill('');
+    await expect(this.quillEditor).toHaveText('', { timeout: 10000 });
+    await this.messageSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
   }
 
   async multichoiceSetQuestionAndRenameOption(question: string, optionIndex: number, newLabel: string): Promise<void> {
