@@ -13,7 +13,7 @@ const messageNodeTitle = 'Send message to client - 1';
 test.describe('[services] [functional] Editing a client message node changes what the customer receives', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Re-authored message node text is delivered and the original is gone', async ({
+  test('[services] [functional] The customer receives exactly the text the node currently holds, and nothing when it is emptied', async ({
     page,
   }) => {
     const { nsp } = getServicePages(page);
@@ -64,6 +64,26 @@ test.describe('[services] [functional] Editing a client message node changes wha
       await expect(nsp.widgetDialog.getByText('test', { exact: true })).toBeVisible();
 
       await nsp.expectWidgetToContainText(editedMessage);
+      await nsp.expectWidgetNotToContainText(firstMessage);
+    });
+
+    await test.step('Clearing the node text stops the message from being delivered at all', async () => {
+      await page.reload();
+      await nsp.waitForReady();
+
+      await nsp.openNodeDialogByTitle(messageNodeTitle);
+      await nsp.messageClearTextAndSave();
+      await nsp.saveService();
+
+      await page.reload();
+      await nsp.waitForReady();
+
+      await expect(nsp.widget).toBeVisible();
+      await nsp.openWidget();
+      await nsp.widgetSendText('test');
+      await expect(nsp.widgetDialog.getByText('test', { exact: true })).toBeVisible();
+
+      await nsp.expectWidgetNotToContainText(editedMessage);
       await nsp.expectWidgetNotToContainText(firstMessage);
     });
   });
