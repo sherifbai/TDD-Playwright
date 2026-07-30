@@ -19,7 +19,6 @@ test.describe('[services] [functional] A service without a title is rejected', (
     await test.step('Saving a titleless draft is refused and creates no service', async () => {
       await nsp.saveService({ expectedToast: 'Title is mandatory' });
 
-      await expect(page.locator('.toast__content')).toHaveText('Title is mandatory');
       await expect(page).toHaveURL(/services\/newService/i);
       await expect(nsp.confirmServiceBtn).toBeDisabled();
     });

@@ -1,15 +1,30 @@
 import { Page, expect } from '@playwright/test';
 
 import { URLS } from '@utils/env/urls';
+import { waitForServicesOverviewReady } from '@utils/waits';
 
 const GENERATED_SERVICE = /\d{14}/;
 
 export async function removeGeneratedServices(page: Page): Promise<number> {
+  const table = page.locator('table').first();
   const rows = page.locator('table tbody tr');
   const generatedRows = rows.filter({ hasText: GENERATED_SERVICE });
 
   await page.goto(URLS.admin + 'services/overview');
-  await expect(rows.first(), 'Services overview never rendered any rows').toBeVisible({ timeout: 30000 });
+
+  // Throws when the admin never rendered, which is what the caller has to hear about.
+  // An overview that rendered but holds no services is a different, unremarkable case:
+  // there is simply nothing to clean up.
+  await waitForServicesOverviewReady(page, { timeout: 30000 });
+
+  const tableRendered = await table.waitFor({ state: 'visible', timeout: 15000 }).then(
+    () => true,
+    () => false,
+  );
+
+  if (!tableRendered) {
+    return 0;
+  }
 
   await showAllRowsOnOnePage(page);
 

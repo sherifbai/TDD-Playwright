@@ -483,6 +483,7 @@ export class NewServicePage {
     await titleInput.fill('');
     await titleInput.pressSequentially(normalizedTitle, { delay: 20 });
     const currentValue = await titleInput.inputValue().catch(() => '');
+
     if (currentValue !== normalizedTitle) {
       await titleInput.evaluate((input: HTMLInputElement, value: string) => {
         const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
@@ -492,6 +493,7 @@ export class NewServicePage {
         input.dispatchEvent(new Event('blur', { bubbles: true }));
       }, normalizedTitle);
     }
+
     await expect(titleInput).toHaveValue(normalizedTitle, { timeout: 10000 });
     return normalizedTitle;
   }
@@ -509,34 +511,30 @@ export class NewServicePage {
 
     const wasUnsavedDraft = /services\/newService/i.test(this.page.url());
 
+    // Clicked once on purpose. The button posts a service, so a blind retry could
+    // create a second one whenever the first save landed but its toast was slow.
     const savePosted = wasUnsavedDraft
       ? this.page
           .waitForRequest((request) => request.method() === 'POST' && /\/services\/services\/add/.test(request.url()), {
             timeout: 2000,
           })
-          .then(() => true)
-          .catch(() => false)
-      : false;
+          .then(
+            () => true,
+            () => false,
+          )
+      : Promise.resolve(false);
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      await this.saveServiceBtn.click({ force: true });
-      const toastAppeared = await this.toastList
-        .locator('li')
-        .first()
-        .waitFor({ state: 'visible', timeout: 4000 })
-        .then(() => true)
-        .catch(() => false);
+    await this.saveServiceBtn.click({ force: true });
 
-      if (toastAppeared) break;
-      await this.page.waitForTimeout(1000);
-    }
-
-    if (expectedToast) {
-      await expect.soft(this.toastList).toContainText(expectedToast, { timeout: 10000 });
-    }
+    await expect(this.toastList, `Saving the service showed no toast matching ${expectedToast}`).toContainText(
+      expectedToast,
+      { timeout: 15000 },
+    );
 
     if (await savePosted) {
-      await expect(this.page).toHaveURL(/services\/edit\//i, { timeout: 15000 });
+      await expect(this.page, 'The saved draft never opened as an editable service').toHaveURL(/services\/edit\//i, {
+        timeout: 15000,
+      });
     }
   }
 
@@ -545,22 +543,12 @@ export class NewServicePage {
     await this.waitForReady();
     await expect(this.confirmServiceBtn).toBeVisible();
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      await this.confirmServiceBtn.click({ force: true });
-      const toastAppeared = await this.toastList
-        .locator('li')
-        .first()
-        .waitFor({ state: 'visible', timeout: 4000 })
-        .then(() => true)
-        .catch(() => false);
+    await this.confirmServiceBtn.click({ force: true });
 
-      if (toastAppeared) break;
-      await this.page.waitForTimeout(1000);
-    }
-
-    if (expectedToast) {
-      await expect.soft(this.toastList).toContainText(expectedToast, { timeout: 10000 });
-    }
+    await expect(this.toastList, `Confirming the service showed no toast matching ${expectedToast}`).toContainText(
+      expectedToast,
+      { timeout: 15000 },
+    );
   }
 
   async returnToServicesOverview(): Promise<void> {

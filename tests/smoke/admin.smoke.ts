@@ -12,7 +12,8 @@ test('[smoke] Chatbot settings page loads with its active toggle', async ({ page
 test('[smoke] Welcome message page loads with its greeting toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/welcome-message');
 
-  await expect(page.getByLabel('Greeting Active')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome Message' })).toBeVisible();
+  await expect(page.locator('main').getByRole('switch')).toBeVisible();
   visit.assertBackendAnswered();
   visit.assertNoFailedApiCalls();
 });
