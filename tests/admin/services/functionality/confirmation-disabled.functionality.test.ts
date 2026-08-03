@@ -5,30 +5,28 @@ import { createServiceName } from '@utils/test-data/service-data';
 
 const serviceName = createServiceName('confirmdisabled');
 
-test.describe('[services] [functional] Confirm is gated on the service being saved', () => {
+test.describe('[services] [functional] Confirm is gated on the service having a title', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Confirm stays disabled on an unsaved draft and becomes enabled once the service saves', async ({
-    page,
-  }) => {
+  test('Confirm stays disabled without a title and becomes enabled once one is typed', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
     await nsp.waitForReady();
 
-    await test.step('Confirm is disabled on a draft that has never been saved', async () => {
+    await test.step('Confirm is disabled on a draft that has no title', async () => {
       await expect(nsp.confirmServiceBtn).toBeDisabled();
     });
 
-    await test.step('A rejected save leaves Confirm disabled', async () => {
+    await test.step('A save rejected for the missing title leaves Confirm disabled', async () => {
       await nsp.saveService({ expectedToast: 'Title is mandatory' });
       await expect(nsp.confirmServiceBtn).toBeDisabled();
     });
 
-    await test.step('Once the title is supplied and the service saves, Confirm becomes enabled', async () => {
+    await test.step('A typed title enables Confirm while the draft is still unsaved', async () => {
       await nsp.setTitle(serviceName);
-      await nsp.saveService();
 
+      await expect(page).toHaveURL(/services\/newService/);
       await expect(nsp.confirmServiceBtn).toBeEnabled();
     });
   });
