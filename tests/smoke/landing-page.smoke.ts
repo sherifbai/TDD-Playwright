@@ -3,7 +3,7 @@ import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Landing page loads with the modules an admin may open', async ({ page }) => {
+test('[SMOKE] "Landing" page loads with the modules an admin may open', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/landing');
 
   const apf = new AdminPageFactory(page);
@@ -20,7 +20,7 @@ test('[smoke] Landing page loads with the modules an admin may open', async ({ p
   });
 
   await test.step('The side menu offers every module an admin role has', async () => {
-    await sideMenu.assertChatsButtonVisible();
+    await sideMenu.assertConversationsButtonVisible();
     await sideMenu.assertAnalyticsButtonVisible();
     await sideMenu.assertServicesButtonVisible();
     await sideMenu.assertAdministrationButtonVisible();

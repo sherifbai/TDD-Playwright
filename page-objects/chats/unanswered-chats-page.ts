@@ -40,13 +40,13 @@ export class UnansweredChatsPage {
     return this.tabs.last();
   }
 
-  async acceptChat(): Promise<void> {
+  async takeOverLastChat(): Promise<void> {
     await this.waitForReady();
     await this.getLastListItem().click();
     await this.buttonTakeOver.click();
   }
 
-  async acceptChatContaining(text: string): Promise<void> {
+  async takeOverChatContaining(text: string): Promise<void> {
     await this.waitForReady();
 
     const queuedChat = this.tabs.filter({ hasText: text });

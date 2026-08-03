@@ -38,7 +38,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
     });
 
     await test.step('The operator picks up that very chat and reads the marker', async () => {
-      await chats.acceptChatContaining(customerMarker);
+      await chats.takeOverChatContaining(customerMarker);
       await chats.expectOperatorReceived(customerMarker);
 
       await expect(page.getByRole('tablist', { name: 'Active chat list' })).toBeVisible();

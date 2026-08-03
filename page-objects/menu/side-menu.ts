@@ -19,11 +19,7 @@ export class SideMenu {
     this.buttonCollapseAll = this.page.getByRole('button', { name: 'Close menu' });
   }
 
-  async isChatMenuVisible(): Promise<void> {
-    await expect(this.buttonConversations).toBeVisible();
-  }
-
-  async assertChatsButtonVisible(): Promise<void> {
+  async assertConversationsButtonVisible(): Promise<void> {
     await expect(this.buttonConversations).toBeVisible();
   }
 

@@ -1,9 +1,5 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-// Locators here stay in Estonian on purpose. The widget lives on the customer site,
-// a different origin from the admin, and it only detects its locale from the URL path
-// — it ignores the i18nextLng key the admin auth setup seeds. The test host serves no
-// /en/ route, so the widget always renders in Estonian.
 export class WidgetPage {
   private readonly page: Page;
 

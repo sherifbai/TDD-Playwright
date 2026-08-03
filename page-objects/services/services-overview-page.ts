@@ -7,65 +7,40 @@ import { waitForServicesOverviewReady } from '@utils/waits/admin-page-ready';
 export class ServicesOverviewPage {
   private readonly page: Page;
 
-  private readonly headingServices: Locator;
-  private readonly headingGeneralServices: Locator;
-
-  private readonly buttonImportMany: Locator;
-  private readonly buttonExportMany: Locator;
   private readonly buttonCreateNewService: Locator;
-
   private readonly buttonConfirmDelete: Locator;
-  private readonly buttonCancelDelete: Locator;
 
   private readonly tableServices: Locator;
-  private readonly tableGeneralServices: Locator;
-
-  private readonly thName: Locator;
-  private readonly thDescription: Locator;
-  private readonly thStatus: Locator;
+  private readonly tableCommonServices: Locator;
 
   private readonly selectPageSizeServices: Locator;
-  private readonly selectPageSizeGeneralServices: Locator;
+  private readonly selectPageSizeCommonServices: Locator;
 
   private readonly servicesTable: PaginatedDataTable;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.headingServices = this.page.getByRole('heading', { name: 'Services', exact: true });
-    this.headingGeneralServices = this.page.getByRole('heading', { name: 'Common Services', exact: true });
-
-    this.buttonImportMany = this.page.getByRole('button', { name: 'Import', exact: true });
-    this.buttonExportMany = this.page.getByRole('button', { name: 'Export', exact: true });
     this.buttonCreateNewService = this.page.getByRole('button', { name: 'Create new service', exact: true });
-
     this.buttonConfirmDelete = this.page.getByRole('dialog').getByRole('button', { name: 'Delete' }).last();
-    this.buttonCancelDelete = this.page
-      .getByRole('dialog')
-      .getByRole('button', { name: /cancel/i })
-      .first();
 
     this.tableServices = this.page
       .getByTestId('services-table')
       .or(this.page.locator('table.data-table').nth(0))
       .or(this.page.locator('table').nth(0))
       .first();
-    this.tableGeneralServices = this.page
+    this.tableCommonServices = this.page
       .getByTestId('general-services-table')
       .or(this.page.locator('table.data-table').nth(1))
       .or(this.page.locator('table').nth(1))
       .first();
-
-    this.thName = this.page.getByRole('columnheader', { name: 'Name' });
-    this.thDescription = this.page.getByRole('columnheader', { name: 'Description' });
-    this.thStatus = this.page.getByRole('columnheader', { name: 'State' });
 
     this.selectPageSizeServices = this.page
       .getByTestId('services-page-size')
       .or(this.page.getByRole('combobox', { name: /Results per page/i }).nth(0))
       .or(this.page.locator('select').nth(0))
       .first();
-    this.selectPageSizeGeneralServices = this.page
+    this.selectPageSizeCommonServices = this.page
       .getByTestId('general-services-page-size')
       .or(this.page.getByRole('combobox', { name: /Results per page/i }).nth(1))
       .or(this.page.locator('select').nth(1))
@@ -286,10 +261,10 @@ export class ServicesOverviewPage {
 
   async assertPageSizeVisibleGeneralServices(): Promise<void> {
     await this.waitForReady();
-    if (await this.selectPageSizeGeneralServices.isVisible().catch(() => false)) {
-      await expect(this.selectPageSizeGeneralServices).toBeVisible();
+    if (await this.selectPageSizeCommonServices.isVisible().catch(() => false)) {
+      await expect(this.selectPageSizeCommonServices).toBeVisible();
       return;
     }
-    await expect(this.tableGeneralServices).toBeVisible();
+    await expect(this.tableCommonServices).toBeVisible();
   }
 }
