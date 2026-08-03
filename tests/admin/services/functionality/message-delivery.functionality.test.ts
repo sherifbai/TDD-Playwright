@@ -11,7 +11,7 @@ const neverAuthoredMessage = `Never authored ${serviceName}`;
 test.describe('[services] [functional] Message node delivers authored text to the customer widget', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Authored message node text is delivered in the TEST widget', async ({ page }) => {
+  test('Authored message node text is delivered in the TEST widget', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
@@ -25,7 +25,7 @@ test.describe('[services] [functional] Message node delivers authored text to th
 
     await test.step('Add a "Send message to client" node to the flow', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerMessageBtn);
       await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
     });
 

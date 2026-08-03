@@ -13,7 +13,7 @@ const messageNodeTitle = 'Send message to client - 1';
 test.describe('[services] [functional] Editing a client message node changes what the customer receives', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] The customer receives exactly the text the node currently holds, and nothing when it is emptied', async ({
+  test('The customer receives exactly the text the node currently holds, and nothing when it is emptied', async ({
     page,
   }) => {
     const { nsp } = getServicePages(page);
@@ -27,7 +27,7 @@ test.describe('[services] [functional] Editing a client message node changes wha
 
     await test.step('Add a "Send message to client" node and author the first text', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerMessageBtn);
       await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
 
       await nsp.openNodeDialogByTitle(messageNodeTitle);

@@ -37,9 +37,7 @@ test.describe('[services] [functional] Condition node routes the conversation do
     const deliveredMessage = takenBranch === 'Success' ? successMessage : failureMessage;
     const skippedMessage = takenBranch === 'Success' ? failureMessage : successMessage;
 
-    test(`[services] [functional] An ${rule} rule delivers the ${takenBranch} branch and no other`, async ({
-      page,
-    }) => {
+    test(`An ${rule} rule delivers the ${takenBranch} branch and no other`, async ({ page }) => {
       const { nsp } = getServicePages(page);
 
       await page.goto(URLS.admin + 'services/newService');
@@ -51,7 +49,7 @@ test.describe('[services] [functional] Condition node routes the conversation do
 
       await test.step('Add a "Condition" node to the flow', async () => {
         await nsp.clickAddNodeAtEdgeIndex(0);
-        await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonCondition);
+        await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerConditionBtn);
         await expect(nsp.getFlowNodeByTitle(conditionNodeTitle)).toBeVisible();
       });
 

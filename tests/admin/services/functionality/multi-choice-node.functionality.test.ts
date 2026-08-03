@@ -16,9 +16,7 @@ const multichoiceNodeTitle = 'Multi-choice question - 1';
 test.describe('[services] [functional] Multi-choice node presents its authored question and options to the customer', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Authored question and renamed option are delivered as widget buttons', async ({
-    page,
-  }) => {
+  test('Authored question and renamed option are delivered as widget buttons', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');

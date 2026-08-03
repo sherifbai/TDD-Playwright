@@ -13,7 +13,7 @@ const neverAddedNodeTitle = 'Condition - 1';
 test.describe('[services] [functional] The flow canvas stores the nodes it is given and drops the ones removed', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Added nodes survive a reload and a deleted node stays deleted', async ({ page }) => {
+  test('Added nodes survive a reload and a deleted node stays deleted', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await test.step('Create a service and place two nodes on the canvas', async () => {

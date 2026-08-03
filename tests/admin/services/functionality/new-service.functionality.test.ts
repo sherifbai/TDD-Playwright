@@ -10,7 +10,7 @@ const description = `Description marker ${serviceName}`;
 test.describe('[services] [functional] A created service persists the data it was authored with', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Title and description survive saving and reopening the service', async ({ page }) => {
+  test('Title and description survive saving and reopening the service', async ({ page }) => {
     const { nsp, sop } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');

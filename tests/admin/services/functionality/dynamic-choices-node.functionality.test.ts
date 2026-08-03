@@ -5,7 +5,7 @@ import { createServiceName, createValidServiceData } from '@utils/test-data/serv
 
 const serviceName = createServiceName('dynchoice');
 
-const authoredValues: Record<string, string> = {
+const authoredValues = {
   'List': `list ${serviceName}`,
   'Service Name': `svc ${serviceName}`,
   'Key': `key ${serviceName}`,
@@ -19,7 +19,7 @@ const dynamicChoicesNodeTitle = 'Dynamic Choices - 1';
 test.describe('[services] [functional] Dynamic Choices node persists the configuration it was given', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Authored key/value mappings survive save and reload', async ({ page }) => {
+  test('Authored key/value mappings survive save and reload', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
@@ -31,7 +31,7 @@ test.describe('[services] [functional] Dynamic Choices node persists the configu
 
     await test.step('Add a "Dynamic Choices" node to the flow', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDynamicChoice);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerDynamicChoiceBtn);
       await expect(nsp.getFlowNodeByTitle(dynamicChoicesNodeTitle)).toBeVisible();
     });
 

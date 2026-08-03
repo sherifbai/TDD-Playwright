@@ -9,9 +9,7 @@ const updatedName = createUpdatedServiceName(serviceName);
 test.describe('[services] [functional] Renaming a service replaces its old name everywhere', () => {
   registerServiceCleanup(test, () => [updatedName, serviceName]);
 
-  test('[services] [functional] A renamed service is listed under the new name only, and reopens with it', async ({
-    page,
-  }) => {
+  test('A renamed service is listed under the new name only, and reopens with it', async ({ page }) => {
     const { nsp, sop } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');

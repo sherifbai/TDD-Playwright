@@ -8,9 +8,7 @@ const serviceName = createServiceName('negativeservice');
 test.describe('[services] [functional] A service without a title is rejected', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] A titleless save creates no service, and the same draft saves once the title is supplied', async ({
-    page,
-  }) => {
+  test('A titleless save creates no service, and the same draft saves once the title is supplied', async ({ page }) => {
     const { nsp, sop } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');

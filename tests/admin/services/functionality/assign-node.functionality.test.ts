@@ -14,7 +14,7 @@ const assignNodeTitle = 'Assign - 1';
 test.describe('[services] [functional] Assign node persists the variable it was configured with', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] Authored variable survives save and reload', async ({ page }) => {
+  test('Authored variable survives save and reload', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
@@ -26,7 +26,7 @@ test.describe('[services] [functional] Assign node persists the variable it was 
 
     await test.step('Add an "Assign" node to the flow', async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDefine);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerDefineBtn);
       await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
     });
 

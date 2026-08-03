@@ -16,8 +16,6 @@ export class NewServicePage {
   readonly deleteServiceBtn: Locator;
   readonly saveServiceBtn: Locator;
   readonly confirmServiceBtn: Locator;
-  readonly buttonSave: Locator;
-  readonly buttonConfirm: Locator;
 
   readonly settingsDialog: Locator;
   readonly settingsCloseBtn: Locator;
@@ -48,11 +46,6 @@ export class NewServicePage {
   readonly pickerDynamicChoiceBtn: Locator;
   readonly pickerEndServiceBtn: Locator;
   private pickerAddApiBtn: Locator;
-
-  readonly buttonDefine: Locator;
-  readonly buttonMessageForCustomer: Locator;
-  readonly buttonCondition: Locator;
-  readonly buttonDynamicChoice: Locator;
 
   readonly nodeEditorPopup: Locator;
   readonly nodeEditorTitle: Locator;
@@ -153,9 +146,6 @@ export class NewServicePage {
     this.saveServiceBtn = page.getByRole('button', { name: 'Save', exact: true }).first();
     this.confirmServiceBtn = page.getByRole('button', { name: 'Confirm', exact: true }).first();
 
-    this.buttonSave = this.saveServiceBtn;
-    this.buttonConfirm = this.confirmServiceBtn;
-
     this.settingsDialog = page.locator('[role="dialog"]').filter({
       has: page.getByRole('heading', { name: 'Settings' }),
     });
@@ -221,11 +211,6 @@ export class NewServicePage {
         has: page.locator('svg path[d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"]'),
       })
       .first();
-
-    this.buttonDefine = this.pickerDefineBtn;
-    this.buttonMessageForCustomer = this.pickerMessageBtn;
-    this.buttonCondition = this.pickerConditionBtn;
-    this.buttonDynamicChoice = this.pickerDynamicChoiceBtn;
 
     this.nodePickerDialog = page
       .locator('.dropdown__content, [role="dialog"], .modal, .popup')
@@ -927,7 +912,7 @@ export class NewServicePage {
     text: string,
   ): Promise<void> {
     await this.canvas.getByRole('button', { name: branchLabel, exact: true }).click();
-    await this.pickNodeTypeAndReturnToCanvas(this.buttonMessageForCustomer);
+    await this.pickNodeTypeAndReturnToCanvas(this.pickerMessageBtn);
     await expect(this.getFlowNodeByTitle(expectedNodeTitle)).toBeVisible();
 
     await this.openNodeDialogByTitle(expectedNodeTitle);
@@ -1180,6 +1165,6 @@ export class NewServicePage {
 
   async addNodes(): Promise<void> {
     await this.clickAddNodeAtEdgeIndex(0);
-    await this.pickNodeTypeAndReturnToCanvas(this.buttonMessageForCustomer);
+    await this.pickNodeTypeAndReturnToCanvas(this.pickerMessageBtn);
   }
 }

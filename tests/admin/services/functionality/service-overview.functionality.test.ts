@@ -8,9 +8,7 @@ const serviceName = createServiceName('overview');
 test.describe('[services] [functional] The services overview lists a created service and drops it on delete', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] A created service appears as its own row and is gone after delete', async ({
-    page,
-  }) => {
+  test('A created service appears as its own row and is gone after delete', async ({ page }) => {
     const { nsp, sop } = getServicePages(page);
 
     await test.step('Create a uniquely-named service', async () => {

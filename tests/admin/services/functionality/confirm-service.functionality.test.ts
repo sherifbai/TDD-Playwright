@@ -8,9 +8,7 @@ const serviceName = createServiceName('confirmservice');
 test.describe('[services] [functional] Confirming a service changes its state', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] A saved service stays Draft until it is confirmed, then turns Ready', async ({
-    page,
-  }) => {
+  test('A saved service stays Draft until it is confirmed, then turns Ready', async ({ page }) => {
     const { nsp, sop } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');

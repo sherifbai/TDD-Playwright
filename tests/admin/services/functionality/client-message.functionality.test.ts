@@ -15,9 +15,7 @@ const neverAuthoredMessage = `Never authored ${serviceName}`;
 test.describe('[services] [functional] Message text reaches the customer exactly as authored', () => {
   registerServiceCleanup(test, serviceName);
 
-  test('[services] [functional] A {variable} placeholder is delivered literally and is not resolved by the widget', async ({
-    page,
-  }) => {
+  test('A {variable} placeholder is delivered literally and is not resolved by the widget', async ({ page }) => {
     const { nsp } = getServicePages(page);
 
     await page.goto(URLS.admin + 'services/newService');
@@ -32,7 +30,7 @@ test.describe('[services] [functional] Message text reaches the customer exactly
 
     await test.step(`Define the "${variableName}" variable in an Assign node`, async () => {
       await nsp.clickAddNodeAtEdgeIndex(0);
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonDefine);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerDefineBtn);
       await expect(nsp.getFlowNodeByTitle(assignNodeTitle)).toBeVisible();
 
       await nsp.openNodeDialogByTitle(assignNodeTitle);
@@ -41,7 +39,7 @@ test.describe('[services] [functional] Message text reaches the customer exactly
 
     await test.step('Author a message that references the variable as a placeholder', async () => {
       await nsp.clickAddNodeOnLastEdge();
-      await nsp.pickNodeTypeAndReturnToCanvas(nsp.buttonMessageForCustomer);
+      await nsp.pickNodeTypeAndReturnToCanvas(nsp.pickerMessageBtn);
       await expect(nsp.getFlowNodeByTitle(messageNodeTitle)).toBeVisible();
 
       await nsp.openNodeDialogByTitle(messageNodeTitle);
