@@ -1,7 +1,17 @@
 import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Chatbot settings page loads with its active toggle', async ({ page }) => {
+test('[SMOKE] "Administration" → "Users" page loads with the user list from the backend', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/users');
+
+  await expect(page.getByRole('button', { name: 'Add user' })).toBeVisible();
+  await expect(page.getByRole('table').first().locator('tbody tr').first()).toBeVisible();
+
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
+});
+
+test('[SMOKE] "Administration" → "Settings" page loads with its active toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/settings');
 
   await expect(page.getByLabel('Chatbot active')).toBeVisible();
@@ -9,7 +19,7 @@ test('[smoke] Chatbot settings page loads with its active toggle', async ({ page
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Welcome message page loads with its greeting toggle', async ({ page }) => {
+test('[SMOKE] "Administration" → "Welcome message" page loads with its greeting toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/welcome-message');
 
   await expect(page.getByRole('heading', { name: 'Welcome Message' })).toBeVisible();
@@ -18,7 +28,7 @@ test('[smoke] Welcome message page loads with its greeting toggle', async ({ pag
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Appearance page loads with its widget switches', async ({ page }) => {
+test('[SMOKE] "Administration" → "Appearance and behavior" page loads with its widget switches', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/appearance');
 
   await expect(page.getByRole('switch', { name: 'Widget bubble message text' })).toBeVisible();
@@ -26,7 +36,7 @@ test('[smoke] Appearance page loads with its widget switches', async ({ page }) 
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Emergency notices page loads with its notice toggle', async ({ page }) => {
+test('[SMOKE] "Administration" → "Emergency notices" page loads with its notice toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/emergency-notices');
 
   await expect(page.getByLabel('Notice active')).toBeVisible();
@@ -34,7 +44,7 @@ test('[smoke] Emergency notices page loads with its notice toggle', async ({ pag
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Feedback page loads with its feedback toggle', async ({ page }) => {
+test('[SMOKE] "Administration" → "Feedback" page loads with its feedback toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/feedback');
 
   await expect(page.getByLabel('Feedback active')).toBeVisible();
@@ -42,7 +52,9 @@ test('[smoke] Feedback page loads with its feedback toggle', async ({ page }) =>
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Working time page loads with its customer service toggle', async ({ page }) => {
+test('[SMOKE] "Administration" → "Office opening hours" page loads with its customer service toggle', async ({
+  page,
+}) => {
   const visit = await openAdminPage(page, 'chat/working-time');
 
   await expect(page.getByLabel('Use customer service')).toBeVisible();
@@ -50,7 +62,7 @@ test('[smoke] Working time page loads with its customer service toggle', async (
   visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Session length page loads with its session length field', async ({ page }) => {
+test('[SMOKE] "Administration" → "Session length" page loads with its session length field', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/session-length');
 
   await expect(page.getByLabel('Session length')).toBeVisible();
