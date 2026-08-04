@@ -1,27 +1,34 @@
-import { test, expect } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
+import { openAdminPage } from '@helpers/smoke-helpers';
+import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Landing Page', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/landing');
-  await expect(page.getByText('Tere tulemast Bürokratti')).toBeVisible();
-});
+test('[SMOKE] "Conversations" → "Unanswered" page loads with its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/unanswered');
 
-test('[smoke] Unanswered chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/unanswered');
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Active chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/active');
+test('[SMOKE] "Conversations" → "Active" page loads with its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/active');
+
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Pending chats', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/pending');
+test('[SMOKE] "Conversations" → "Pending" page loads with its chat tabs', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/pending');
+
   await expect(page.getByRole('tablist')).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Chat history', async ({ page }) => {
-  await page.goto(URLS.admin + 'chat/history');
-  await expect(page.getByText('Kuvan korraga', { exact: true })).toBeVisible();
+test('[SMOKE] "Conversations" → "History" page loads with a result count from the backend', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/history');
+  await expect(page.getByText(/Result count:?\s*\d+/i)).toBeVisible();
+
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

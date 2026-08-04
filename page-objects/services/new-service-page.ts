@@ -1,7 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
+import { normalizeServiceTitle } from '@test-data/service-data';
 
 import { RouteReadyOptions, SaveServiceOptions, ServiceData } from '@utils/interfaces';
-import { normalizeServiceTitle } from '@test-data/service-data';
 import { waitForNewServiceReady } from '@utils/waits/admin-page-ready';
 
 type ServiceInput = string | Partial<ServiceData>;
@@ -16,8 +16,6 @@ export class NewServicePage {
   readonly deleteServiceBtn: Locator;
   readonly saveServiceBtn: Locator;
   readonly confirmServiceBtn: Locator;
-  readonly buttonSave: Locator;
-  readonly buttonConfirm: Locator;
 
   readonly settingsDialog: Locator;
   readonly settingsCloseBtn: Locator;
@@ -49,23 +47,18 @@ export class NewServicePage {
   readonly pickerEndServiceBtn: Locator;
   private pickerAddApiBtn: Locator;
 
-  readonly buttonDefine: Locator;
-  readonly buttonMessageForCustomer: Locator;
-  readonly buttonCondition: Locator;
-  readonly buttonDynamicChoice: Locator;
-
   readonly nodeEditorPopup: Locator;
   readonly nodeEditorTitle: Locator;
   readonly nodeEditorCloseBtn: Locator;
   readonly nodeEditorCancelBtn: Locator;
   readonly nodeEditorSaveBtn: Locator;
   readonly nodeEditorTabs: Locator;
-  readonly nodeEditorTabSeadistamine: Locator;
-  readonly nodeEditorTabTestimine: Locator;
+  readonly nodeEditorTabSetup: Locator;
+  readonly nodeEditorTabTest: Locator;
 
   readonly messageDialog: Locator;
-  readonly messageTabSeadistamine: Locator;
-  readonly messageTabTestimine: Locator;
+  readonly messageTabSetup: Locator;
+  readonly messageTabTest: Locator;
   readonly messageCancel: Locator;
   readonly messageSave: Locator;
   readonly messageClose: Locator;
@@ -74,8 +67,8 @@ export class NewServicePage {
   readonly messageChips: Locator;
 
   readonly defineDialog: Locator;
-  readonly defineTabSeadistamine: Locator;
-  readonly defineTabTestimine: Locator;
+  readonly defineTabSetup: Locator;
+  readonly defineTabTest: Locator;
   readonly defineCancel: Locator;
   readonly defineSave: Locator;
   readonly defineClose: Locator;
@@ -91,8 +84,8 @@ export class NewServicePage {
   readonly defineValueInputs: Locator;
 
   readonly dynamicChoicesDialog: Locator;
-  readonly dynamicChoicesTabSeadistamine: Locator;
-  readonly dynamicChoicesTabTestimine: Locator;
+  readonly dynamicChoicesTabSetup: Locator;
+  readonly dynamicChoicesTabTest: Locator;
   readonly dynamicChoicesCancel: Locator;
   readonly dynamicChoicesSave: Locator;
   readonly dynamicChoicesClose: Locator;
@@ -105,20 +98,20 @@ export class NewServicePage {
   readonly conditionDialog: Locator;
   readonly conditionTitle: Locator;
   readonly conditionClose: Locator;
-  readonly conditionTabSeadistamine: Locator;
-  readonly conditionTabTestimine: Locator;
+  readonly conditionTabSetup: Locator;
+  readonly conditionTabTest: Locator;
   readonly conditionCancel: Locator;
   readonly conditionSave: Locator;
-  readonly conditionChipJa: Locator;
-  readonly conditionChipVoi: Locator;
-  readonly conditionChipMitte: Locator;
+  readonly conditionChipAnd: Locator;
+  readonly conditionChipOr: Locator;
+  readonly conditionChipNot: Locator;
   readonly conditionAddRuleButton: Locator;
   readonly conditionAddGroupButton: Locator;
   readonly conditionSectionDefineElements: Locator;
 
   readonly createEndpointModal: Locator;
   readonly createEndpointTitle: Locator;
-  readonly createEndpointTabOtspunkt: Locator;
+  readonly createEndpointTabEndpoint: Locator;
   readonly createEndpointServiceTypeCombo: Locator;
   readonly createEndpointCancel: Locator;
   readonly createEndpointCreate: Locator;
@@ -143,28 +136,18 @@ export class NewServicePage {
   constructor(page: Page) {
     this.page = page;
 
-    // =========================
-    // Header
-    // =========================
     this.header = page.locator('header.header').or(page.locator('header').first()).first();
 
-    this.backToServicesBtn = page.getByRole('button', { name: 'Tagasi teenuste lehele', exact: true }).first();
-    this.serviceSettingsBtn = page.getByRole('button', { name: 'Teenuse seaded', exact: true }).first();
+    this.backToServicesBtn = page.getByRole('button', { name: 'Back to service listing', exact: true }).first();
+    this.serviceSettingsBtn = page.getByRole('button', { name: 'Settings', exact: true }).first();
     this.stepName = this.header.locator('.naming');
 
-    this.deleteServiceBtn = page.getByRole('button', { name: 'Kustuta', exact: true }).first();
-    this.saveServiceBtn = page.getByRole('button', { name: 'Salvesta', exact: true }).first();
-    this.confirmServiceBtn = page.getByRole('button', { name: 'Kinnita', exact: true }).first();
+    this.deleteServiceBtn = page.getByRole('button', { name: 'Delete', exact: true }).first();
+    this.saveServiceBtn = page.getByRole('button', { name: 'Save', exact: true }).first();
+    this.confirmServiceBtn = page.getByRole('button', { name: 'Confirm', exact: true }).first();
 
-    // backwards-compatible aliases used by older tests
-    this.buttonSave = this.saveServiceBtn;
-    this.buttonConfirm = this.confirmServiceBtn;
-
-    // =========================
-    // Settings dialog
-    // =========================
     this.settingsDialog = page.locator('[role="dialog"]').filter({
-      has: page.getByRole('heading', { name: 'Teenuse seaded' }),
+      has: page.getByRole('heading', { name: 'Settings' }),
     });
 
     this.settingsCloseBtn = this.settingsDialog
@@ -173,9 +156,7 @@ export class NewServicePage {
           'button.dialog__close',
           'button.popup__close',
           'button[aria-label="Close"]',
-          'button[aria-label="Sulge"]',
           'button[title="Close"]',
-          'button[title="Sulge"]',
           'header button',
           '.dialog__header button',
           '.popup__header button',
@@ -183,12 +164,9 @@ export class NewServicePage {
       )
       .first();
 
-    this.serviceTitleInput = this.settingsDialog.locator('input[placeholder="Pealkiri on kohustuslik"]');
-    this.serviceDescriptionInput = this.settingsDialog.getByLabel('Kirjeldus :');
+    this.serviceTitleInput = this.settingsDialog.locator('input[placeholder="Title is mandatory"]');
+    this.serviceDescriptionInput = this.settingsDialog.getByLabel('Description :');
 
-    // =========================
-    // Canvas / React Flow
-    // =========================
     this.canvas = page
       .getByRole('application')
       .first()
@@ -206,33 +184,27 @@ export class NewServicePage {
     this.flowNodes = page.locator('.react-flow__node');
 
     this.topLeftPanel = page.locator('.react-flow__panel.top.left');
-    this.importBtn = this.topLeftPanel.getByRole('button', { name: 'Impordi', exact: true });
-    this.exportBtn = this.topLeftPanel.getByRole('button', { name: 'Ekspordi', exact: true });
+    this.importBtn = this.topLeftPanel.getByRole('button', { name: 'Import', exact: true });
+    this.exportBtn = this.topLeftPanel.getByRole('button', { name: 'Export', exact: true });
 
     this.zoomInBtn = page.getByTitle('Zoom In');
     this.zoomOutBtn = page.getByTitle('Zoom Out');
     this.fitViewBtn = page.getByTitle('Fit View');
 
-    // =========================
-    // Toasts
-    // =========================
     this.toastList = page.locator('ol.toast__list');
 
-    // =========================
-    // Node Picker
-    // =========================
     this.nodePickerDialog = page
       .locator('.dropdown__content')
       .filter({
-        has: page.getByText('Üldelemendid', { exact: true }),
+        has: page.getByText('All elements', { exact: true }),
       })
       .last();
-    this.pickerDefineBtn = this.getNodePickerItem('Määra');
-    this.pickerMessageBtn = this.getNodePickerItem('Sõnum kliendile');
-    this.pickerConditionBtn = this.getNodePickerItem('Tingimus');
-    this.pickerMultichoiceBtn = this.getNodePickerItem('Mitmevalikuline küsimus');
-    this.pickerDynamicChoiceBtn = this.getNodePickerItem('Dünaamilised valikud');
-    this.pickerEndServiceBtn = this.getNodePickerItem('Teenuse lõpetamine');
+    this.pickerDefineBtn = this.getNodePickerItem('Assign');
+    this.pickerMessageBtn = this.getNodePickerItem('Send message to client');
+    this.pickerConditionBtn = this.getNodePickerItem('Condition');
+    this.pickerMultichoiceBtn = this.getNodePickerItem('Multi-choice question');
+    this.pickerDynamicChoiceBtn = this.getNodePickerItem('Dynamic Choices');
+    this.pickerEndServiceBtn = this.getNodePickerItem('End service');
     this.pickerAddApiBtn = this.nodePickerDialog
       .locator('button')
       .filter({
@@ -240,21 +212,15 @@ export class NewServicePage {
       })
       .first();
 
-    // backwards-compatible picker aliases
-    this.buttonDefine = this.pickerDefineBtn;
-    this.buttonMessageForCustomer = this.pickerMessageBtn;
-    this.buttonCondition = this.pickerConditionBtn;
-    this.buttonDynamicChoice = this.pickerDynamicChoiceBtn;
-
     this.nodePickerDialog = page
       .locator('.dropdown__content, [role="dialog"], .modal, .popup')
       .filter({
-        has: page.getByText(/Üldelemendid|Elemendid|API elemendid|Määra|Sõnum kliendile/i),
+        has: page.getByText(/All elements|Elements|API elements|Assign|Send message to client/i),
       })
       .last();
     this.pickerAddApiBtn = this.nodePickerDialog
       .locator(
-        'xpath=.//*[contains(normalize-space(),"API elemendid")]/ancestor::*[self::div or self::section][1]//button[1]',
+        'xpath=.//*[contains(normalize-space(),"API elements")]/ancestor::*[self::div or self::section][1]//button[1]',
       )
       .first()
       .or(
@@ -266,37 +232,30 @@ export class NewServicePage {
           .first(),
       );
 
-    // =========================
-    // Generic node editor popup
-    // =========================
     this.nodeEditorPopup = page.locator('[role="dialog"].popup[data-state="open"]');
     this.nodeEditorTitle = this.nodeEditorPopup.locator('h2.popup__title');
     this.nodeEditorCloseBtn = this.nodeEditorPopup.locator('button.popup__close');
-    this.nodeEditorCancelBtn = this.nodeEditorPopup.getByRole('button', { name: 'Tühista', exact: true });
-    this.nodeEditorSaveBtn = this.nodeEditorPopup.getByRole('button', { name: 'Salvesta', exact: true });
+    this.nodeEditorCancelBtn = this.nodeEditorPopup.getByRole('button', { name: 'Cancel', exact: true });
+    this.nodeEditorSaveBtn = this.nodeEditorPopup.getByRole('button', { name: 'Save', exact: true });
     this.nodeEditorTabs = this.nodeEditorPopup.getByRole('tablist');
-    this.nodeEditorTabSeadistamine = this.nodeEditorPopup.getByRole('tab', { name: 'Seadistamine', exact: true });
-    this.nodeEditorTabTestimine = this.nodeEditorPopup.getByRole('tab', { name: 'Testimine', exact: true });
+    this.nodeEditorTabSetup = this.nodeEditorPopup.getByRole('tab', { name: 'Setup', exact: true });
+    this.nodeEditorTabTest = this.nodeEditorPopup.getByRole('tab', { name: 'Test', exact: true });
 
-    // ===== Message node =====
     this.messageDialog = this.nodeEditorPopup;
-    this.messageTabSeadistamine = this.nodeEditorTabSeadistamine;
-    this.messageTabTestimine = this.nodeEditorTabTestimine;
+    this.messageTabSetup = this.nodeEditorTabSetup;
+    this.messageTabTest = this.nodeEditorTabTest;
     this.messageCancel = this.nodeEditorCancelBtn;
     this.messageSave = this.nodeEditorSaveBtn;
     this.messageClose = this.nodeEditorCloseBtn;
     this.quillEditor = this.nodeEditorPopup.locator('.ql-editor,[contenteditable="true"]').first();
-    this.messageSectionElements = this.nodeEditorPopup
-      .locator(
-        'xpath=.//*[normalize-space()="Määra elemendid" or normalize-space()="Määra Elemendid"]/ancestor::div[2]',
-      )
-      .first();
-    this.messageChips = this.messageSectionElements.locator('[draggable="true"], .chip, .tag, .badge, button');
+    this.messageSectionElements = this.nodeEditorPopup.getByText(/Assigned\s+Variables/i).first();
+    this.messageChips = this.nodeEditorPopup.locator(
+      '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .tag, .badge',
+    );
 
-    // ===== Define node =====
     this.defineDialog = this.nodeEditorPopup;
-    this.defineTabSeadistamine = this.nodeEditorTabSeadistamine;
-    this.defineTabTestimine = this.nodeEditorTabTestimine;
+    this.defineTabSetup = this.nodeEditorTabSetup;
+    this.defineTabTest = this.nodeEditorTabTest;
     this.defineCancel = this.nodeEditorCancelBtn;
     this.defineSave = this.nodeEditorSaveBtn;
     this.defineClose = this.nodeEditorCloseBtn;
@@ -304,38 +263,28 @@ export class NewServicePage {
     this.defineRows = this.defineAssignContainer.locator(':scope > div').filter({
       has: this.page.locator('input, textarea'),
     });
-    this.defineAddElementBtn = this.nodeEditorPopup.getByRole('button', { name: /^\+\s*Element$/i }).first();
-    this.defineSectionElements = this.nodeEditorPopup
-      .getByText(/Määra\s+Elemendid/i)
-      .first()
-      .or(this.nodeEditorPopup.getByText(/Määra\s+elemendid/i).first());
-    this.defineSectionEnv = this.nodeEditorPopup.getByText(/Keskkonnamuutujad/i).first();
-    this.defineSectionDates = this.nodeEditorPopup.getByText(/Kuupäev ja kellaaeg/i).first();
-    this.defineSectionTools = this.nodeEditorPopup.getByText(/Tööriistad/i).first();
+    this.defineAddElementBtn = this.nodeEditorPopup
+      .getByRole('button', { name: /\+\s*(New variable|Element)/i })
+      .first();
+    this.defineSectionElements = this.nodeEditorPopup.getByText(/Assigned\s+Variables/i).first();
+    this.defineSectionEnv = this.nodeEditorPopup.getByText(/Environment Variables/i).first();
+    this.defineSectionDates = this.nodeEditorPopup.getByText(/Date and time/i).first();
+    this.defineSectionTools = this.nodeEditorPopup.getByText(/Tools/i).first();
     this.defineChips = this.nodeEditorPopup.locator(
       '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .badge, .tag',
     );
     this.defineNameInputs = this.defineAssignContainer.locator('input[name="key"]');
-    this.defineValueInputs = this.defineAssignContainer
-      .locator(
-        'input[placeholder="Lohista element siia"], input._dragInput_92s4r_58, input:not([name]):not([type]), input',
-      )
-      .filter({ hasNot: this.page.locator('[name="key"]') });
+    this.defineValueInputs = this.defineAssignContainer.locator('input[name="value"]');
 
-    // ===== Dynamic choices node =====
     this.dynamicChoicesDialog = this.nodeEditorPopup;
-    this.dynamicChoicesTabSeadistamine = this.nodeEditorTabSeadistamine;
-    this.dynamicChoicesTabTestimine = this.nodeEditorTabTestimine;
+    this.dynamicChoicesTabSetup = this.nodeEditorTabSetup;
+    this.dynamicChoicesTabTest = this.nodeEditorTabTest;
     this.dynamicChoicesCancel = this.nodeEditorCancelBtn;
     this.dynamicChoicesSave = this.nodeEditorSaveBtn;
     this.dynamicChoicesClose = this.nodeEditorCloseBtn;
-    this.dynamicChoicesSectionElements = this.nodeEditorPopup
-      .locator(
-        'xpath=.//*[normalize-space()="Määra elemendid" or normalize-space()="Määra Elemendid"]/ancestor::div[2]',
-      )
-      .first();
-    this.dynamicChoicesChips = this.dynamicChoicesSectionElements.locator(
-      '[draggable="true"], .chip, .badge, .tag, button',
+    this.dynamicChoicesSectionElements = this.nodeEditorPopup.getByText(/Assigned\s+Variables/i).first();
+    this.dynamicChoicesChips = this.nodeEditorPopup.locator(
+      '.box[draggable="true"], .box[draggable="false"], [draggable="true"], .chip, .badge, .tag',
     );
     this.dynamicChoicesRows = this.nodeEditorPopup
       .locator('input[name="key"]')
@@ -345,72 +294,60 @@ export class NewServicePage {
       'input[name="value"], textarea[name="value"], input:not([name="key"])',
     );
 
-    // ===== Condition node =====
     this.conditionDialog = this.page
       .locator('[role="dialog"].popup:visible')
       .filter({
-        has: this.page.locator('h2.popup__title').filter({ hasText: /^Tingimus/ }),
+        has: this.page.locator('h2.popup__title').filter({ hasText: /^Condition/ }),
       })
       .first();
     this.conditionTitle = this.conditionDialog.locator('h2.popup__title');
     this.conditionClose = this.conditionDialog.locator('button.popup__close').first();
-    this.conditionTabSeadistamine = this.conditionDialog.getByRole('tab', { name: 'Seadistamine' });
-    this.conditionTabTestimine = this.conditionDialog.getByRole('tab', { name: 'Testimine' });
-    this.conditionCancel = this.conditionDialog.getByRole('button', { name: 'Tühista', exact: true });
-    this.conditionSave = this.conditionDialog.getByRole('button', { name: 'Salvesta', exact: true });
-    this.conditionChipJa = this.conditionDialog.locator('span,div,button').filter({ hasText: /^JA$/ }).first();
-    this.conditionChipVoi = this.conditionDialog.locator('span,div,button').filter({ hasText: /^VÕI$/ }).first();
-    this.conditionChipMitte = this.conditionDialog
-      .locator('span,div,button')
-      .filter({ hasText: /^MITTE$/ })
-      .first();
-    this.conditionAddRuleButton = this.conditionDialog.getByRole('button', { name: /\+\s*Reegel/i }).first();
-    this.conditionAddGroupButton = this.conditionDialog.getByRole('button', { name: /\+\s*Grupp/i }).first();
-    this.conditionSectionDefineElements = this.conditionDialog
-      .locator(
-        'xpath=.//*[normalize-space()="Määra Elemendid" or normalize-space()="Määra elemendid"]/ancestor::div[2]',
-      )
-      .first();
+    this.conditionTabSetup = this.conditionDialog.getByRole('tab', { name: 'Setup' });
+    this.conditionTabTest = this.conditionDialog.getByRole('tab', { name: 'Test' });
+    this.conditionCancel = this.conditionDialog.getByRole('button', { name: 'Cancel', exact: true });
+    this.conditionSave = this.conditionDialog.getByRole('button', { name: 'Save', exact: true });
+    this.conditionChipAnd = this.conditionDialog.locator('span,div,button').filter({ hasText: /^AND$/ }).first();
+    this.conditionChipOr = this.conditionDialog.locator('span,div,button').filter({ hasText: /^OR$/ }).first();
+    this.conditionChipNot = this.conditionDialog.locator('span,div,button').filter({ hasText: /^NOT$/ }).first();
+    this.conditionAddRuleButton = this.conditionDialog.getByRole('button', { name: /\+\s*Rule/i }).first();
+    this.conditionAddGroupButton = this.conditionDialog.getByRole('button', { name: /\+\s*Group/i }).first();
+    this.conditionSectionDefineElements = this.conditionDialog.getByText(/Assigned\s+Variables/i).first();
 
-    // ===== Create endpoint modal =====
     this.createEndpointModal = this.page
       .locator('[role="dialog"].modal[data-state="open"]')
       .filter({
-        has: this.page.locator('h2, h3').filter({ hasText: /Loo uus otspunkt|otspunkt/i }),
+        has: this.page.locator('h2, h3').filter({ hasText: /Create endpoint|endpoint/i }),
       })
       .first();
     this.createEndpointTitle = this.createEndpointModal
       .locator('h2, h3')
-      .filter({ hasText: /Loo uus otspunkt|otspunkt|endpoint|api/i })
+      .filter({ hasText: /Create endpoint|endpoint|api/i })
       .first();
-    this.createEndpointTabOtspunkt = this.createEndpointModal.getByRole('tab', { name: /otspunkt|endpoint/i }).first();
+    this.createEndpointTabEndpoint = this.createEndpointModal.getByRole('tab', { name: /endpoint/i }).first();
     this.createEndpointServiceTypeCombo = this.createEndpointModal
-      .locator('label:has-text("Teenus kasutab")')
+      .locator('label:has-text("Service uses")')
       .locator('xpath=following-sibling::*//*[self::select or @role="combobox" or self::input][1]')
       .or(this.createEndpointModal.getByRole('combobox').first());
-    this.createEndpointCancel = this.createEndpointModal.getByRole('button', { name: /tühista|cancel/i }).first();
-    this.createEndpointCreate = this.createEndpointModal.getByRole('button', { name: /loo|create/i }).first();
+    this.createEndpointCancel = this.createEndpointModal.getByRole('button', { name: /cancel/i }).first();
+    this.createEndpointCreate = this.createEndpointModal.getByRole('button', { name: /save|create/i }).first();
     this.createEndpointName = this.createEndpointModal
-      .locator('label:has-text("Otspunkti nimetus")')
+      .locator('label:has-text("Endpoint name")')
       .locator('xpath=following-sibling::*//input[1]')
-      .or(this.createEndpointModal.getByPlaceholder(/Sisesta otspunkti nimet/i))
+      .or(this.createEndpointModal.getByPlaceholder(/Insert endpoint name/i))
       .first();
     this.createEndpointUrl = this.createEndpointModal
-      .locator('label:has-text("API otspunkti URL")')
+      .locator('label:has-text("API endpoint URL")')
       .locator('xpath=following-sibling::*//input[1]')
-      .or(this.createEndpointModal.getByPlaceholder(/Sisesta API otspunkt/i))
+      .or(this.createEndpointModal.getByPlaceholder(/Insert API endpoint/i))
       .first();
     this.createEndpointFetchEndpoints = this.createEndpointModal
-      .getByRole('button', { name: /Küsi otspunkte|otsi|fetch|endpoints?/i })
+      .getByRole('button', { name: /Ask for endpoints|fetch|endpoints?/i })
       .first();
     this.createEndpointPublicSwitch = this.createEndpointModal.getByRole('switch').first();
-    this.createEndpointPublicYes = this.createEndpointModal.getByText(/^Jah$/).first();
-    this.createEndpointPublicNo = this.createEndpointModal.getByText(/^Ei$/).first();
+    this.createEndpointPublicYes = this.createEndpointModal.getByText(/^Yes$/).first();
+    this.createEndpointPublicNo = this.createEndpointModal.getByText(/^No$/).first();
     this.apiURL = 'https://petstore3.swagger.io/api/v3/openapi.json';
 
-    // =========================
-    // Widget (Buerokratt)
-    // =========================
     this.widgetIcon = page.getByAltText('Buerokratt logo');
     this.widget = this.widgetIcon;
     this.widgetDialog = page
@@ -419,7 +356,7 @@ export class NewServicePage {
       })
       .first();
     this.widgetInput = this.widgetDialog
-      .getByPlaceholder('Sisestage sisend, eraldatud komadega')
+      .getByPlaceholder('Enter input, separated by commas')
       .or(this.widgetDialog.locator('textarea, input[type="text"]').last())
       .first();
     this.widgetCloseButton = this.widgetDialog
@@ -468,8 +405,8 @@ export class NewServicePage {
     const closeCandidates = [
       this.settingsDialog.locator('button.dialog__close').first(),
       this.settingsDialog.locator('button.popup__close').first(),
-      this.settingsDialog.locator('button[aria-label="Sulge"], button[aria-label="Close"]').first(),
-      this.settingsDialog.locator('button[title="Sulge"], button[title="Close"]').first(),
+      this.settingsDialog.locator('button[aria-label="Close"]').first(),
+      this.settingsDialog.locator('button[title="Close"]').first(),
       this.settingsDialog.locator('header button, .dialog__header button, .popup__header button').last(),
     ];
 
@@ -507,10 +444,9 @@ export class NewServicePage {
 
   async resolveVisibleTitleInput(): Promise<Locator> {
     const candidates = [
-      this.settingsDialog.getByLabel('Pealkiri :').first(),
-      this.settingsDialog.locator('label:has-text("Pealkiri")').locator('xpath=following::input[1]').first(),
-      this.settingsDialog.locator('input[name="Pealkiri"]').first(),
-      this.settingsDialog.locator('input[placeholder*="Pealkiri"]').first(),
+      this.settingsDialog.getByLabel('Title :').first(),
+      this.settingsDialog.locator('label:has-text("Title")').locator('xpath=following::input[1]').first(),
+      this.settingsDialog.locator('input[placeholder*="Title"]').first(),
       this.serviceTitleInput.first(),
     ];
     for (const candidate of candidates) {
@@ -532,6 +468,7 @@ export class NewServicePage {
     await titleInput.fill('');
     await titleInput.pressSequentially(normalizedTitle, { delay: 20 });
     const currentValue = await titleInput.inputValue().catch(() => '');
+
     if (currentValue !== normalizedTitle) {
       await titleInput.evaluate((input: HTMLInputElement, value: string) => {
         const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set;
@@ -541,6 +478,7 @@ export class NewServicePage {
         input.dispatchEvent(new Event('blur', { bubbles: true }));
       }, normalizedTitle);
     }
+
     await expect(titleInput).toHaveValue(normalizedTitle, { timeout: 10000 });
     return normalizedTitle;
   }
@@ -552,58 +490,61 @@ export class NewServicePage {
   }
 
   async saveService(options: SaveServiceOptions = {}): Promise<void> {
-    const { expectedToast = /salvest/i } = options;
+    const { expectedToast = /saved/i } = options;
     await this.waitForReady();
     await expect(this.saveServiceBtn).toBeVisible();
-    await this.saveServiceBtn.scrollIntoViewIfNeeded().catch(() => {});
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      await this.saveServiceBtn.click({ force: true }).catch(() => {});
-      const toastAppeared = await this.toastList
-        .locator('li')
-        .first()
-        .waitFor({ state: 'visible', timeout: 4000 })
-        .then(() => true)
-        .catch(() => false);
+    const wasUnsavedDraft = /services\/newService/i.test(this.page.url());
 
-      if (toastAppeared) break;
-      await this.page.waitForTimeout(1000);
-    }
+    // Clicked once on purpose. The button posts a service, so a blind retry could
+    // create a second one whenever the first save landed but its toast was slow.
+    const savePosted = wasUnsavedDraft
+      ? this.page
+          .waitForRequest((request) => request.method() === 'POST' && /\/services\/services\/add/.test(request.url()), {
+            timeout: 2000,
+          })
+          .then(
+            () => true,
+            () => false,
+          )
+      : Promise.resolve(false);
 
-    if (expectedToast) {
-      await expect.soft(this.toastList).toContainText(expectedToast, { timeout: 10000 });
+    await this.saveServiceBtn.click({ force: true });
+
+    await expect(this.toastList, `Saving the service showed no toast matching ${expectedToast}`).toContainText(
+      expectedToast,
+      { timeout: 15000 },
+    );
+
+    if (await savePosted) {
+      await expect(this.page, 'The saved draft never opened as an editable service').toHaveURL(/services\/edit\//i, {
+        timeout: 15000,
+      });
     }
   }
 
   async confirmService(options: SaveServiceOptions = {}): Promise<void> {
-    const { expectedToast = /salvest|kinnit|valmis/i } = options;
+    const { expectedToast = /saved|confirm|ready/i } = options;
     await this.waitForReady();
     await expect(this.confirmServiceBtn).toBeVisible();
-    await this.confirmServiceBtn.scrollIntoViewIfNeeded().catch(() => {});
 
-    for (let attempt = 0; attempt < 2; attempt++) {
-      await this.confirmServiceBtn.click({ force: true }).catch(() => {});
-      const toastAppeared = await this.toastList
-        .locator('li')
-        .first()
-        .waitFor({ state: 'visible', timeout: 4000 })
-        .then(() => true)
-        .catch(() => false);
+    await this.confirmServiceBtn.click({ force: true });
 
-      if (toastAppeared) break;
-      await this.page.waitForTimeout(1000);
-    }
-
-    if (expectedToast) {
-      await expect.soft(this.toastList).toContainText(expectedToast, { timeout: 10000 });
-    }
+    await expect(this.toastList, `Confirming the service showed no toast matching ${expectedToast}`).toContainText(
+      expectedToast,
+      { timeout: 15000 },
+    );
   }
 
   async returnToServicesOverview(): Promise<void> {
+    if (/services\/overview/i.test(this.page.url())) {
+      await this.page.waitForLoadState('domcontentloaded');
+      return;
+    }
+
     await this.waitForReady();
     await expect(this.backToServicesBtn).toBeVisible();
-    await this.backToServicesBtn.scrollIntoViewIfNeeded().catch(() => {});
-    await this.backToServicesBtn.click({ force: true }).catch(() => {});
+    await this.backToServicesBtn.click({ force: true });
 
     const navigated = await this.page
       .waitForURL(/services\/overview/i, { timeout: 10000 })
@@ -611,11 +552,11 @@ export class NewServicePage {
       .catch(() => false);
 
     if (!navigated) {
-      await this.page.goto('services/overview').catch(() => {});
-      await this.page.waitForURL(/services\/overview/i, { timeout: 15000 }).catch(() => {});
+      await this.page.goto('services/overview');
+      await expect(this.page).toHaveURL(/services\/overview/i, { timeout: 15000 });
     }
 
-    await this.page.waitForLoadState('domcontentloaded').catch(() => {});
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async createService(serviceData: ServiceInput = {}): Promise<Partial<ServiceData> & { title: string }> {
@@ -715,15 +656,11 @@ export class NewServicePage {
     await expect(node).toBeVisible();
 
     const buttonCandidates = [
-      node.getByRole('button', { name: /muuda|edit/i }).first(),
-      node
-        .locator(
-          'button[title*="Muuda"], button[aria-label*="Muuda"], button[title*="Edit"], button[aria-label*="Edit"]',
-        )
-        .first(),
+      node.getByRole('button', { name: /edit/i }).first(),
+      node.locator('button[title*="Edit"], button[aria-label*="Edit"]').first(),
       node
         .locator('button')
-        .filter({ hasNotText: /kustuta|delete/i })
+        .filter({ hasNotText: /delete/i })
         .first(),
       node.locator('button').first(),
     ];
@@ -751,6 +688,16 @@ export class NewServicePage {
     await this.openNodeDialogByTitle(titleText);
   }
 
+  nodeDeleteButton(titleText: string): Locator {
+    return this.getFlowNodeByTitle(titleText).locator('button').nth(1);
+  }
+
+  async deleteNodeByTitle(titleText: string): Promise<void> {
+    await expect(this.getFlowNodeByTitle(titleText)).toBeVisible();
+    await this.nodeDeleteButton(titleText).click();
+    await expect(this.getFlowNodeByTitle(titleText)).toHaveCount(0);
+  }
+
   async assertNodeEditorVisible(): Promise<void> {
     await expect(this.nodeEditorPopup).toBeVisible();
     await expect(this.nodeEditorTitle).toBeVisible();
@@ -766,28 +713,26 @@ export class NewServicePage {
   async assertTabsVisible(): Promise<void> {
     await this.assertNodeEditorVisible();
     await expect(this.nodeEditorTabs).toBeVisible();
-    await expect(this.nodeEditorTabSeadistamine).toBeVisible();
-    await expect(this.nodeEditorTabTestimine).toBeVisible();
+    await expect(this.nodeEditorTabSetup).toBeVisible();
   }
 
   async assertMessageDialogVisible(): Promise<void> {
     await this.assertNodeEditorVisible();
-    await expect(this.nodeEditorTitle).toContainText(/Sõnum kliendile/i);
+    await expect(this.nodeEditorTitle).toContainText(/Send message to client/i);
   }
 
   async assertDefineDialogVisible(): Promise<void> {
     await this.assertNodeEditorVisible();
-    await expect(this.nodeEditorTitle).toContainText(/Määra/i);
+    await expect(this.nodeEditorTitle).toContainText(/Assign/i);
   }
 
   async assertDynamicChoicesDialogVisible(): Promise<void> {
     await this.assertNodeEditorVisible();
-    await expect(this.nodeEditorTitle).toContainText(/Dünaamilised valikud/i);
+    await expect(this.nodeEditorTitle).toContainText(/Dynamic Choices/i);
   }
 
   async assertDefineTabsVisible(): Promise<void> {
-    await expect(this.defineTabSeadistamine).toBeVisible();
-    await expect(this.defineTabTestimine).toBeVisible();
+    await expect(this.defineTabSetup).toBeVisible();
   }
 
   async assertDefineFooterButtonsVisible(): Promise<void> {
@@ -807,61 +752,36 @@ export class NewServicePage {
     return explicitRows.nth(rowIndex);
   }
 
-  getVisibleDefineValueInput(scope: Locator = this.defineAssignContainer): Locator {
-    return scope
-      .locator('input:not([name="key"]):not([type="hidden"]), textarea:not([name="key"])')
-      .filter({ hasNot: scope.locator('[aria-hidden="true"]') })
-      .first();
+  getAssignNameInput(row: Locator): Locator {
+    return row.locator('input[name="key"]').first();
   }
 
-  async resolveDefineRowInputs(rowIndex: number): Promise<{ row: Locator; nameInput: Locator; valueInput: Locator }> {
-    let row = this.getDefineRow(rowIndex);
-    if (!(await row.count().catch(() => 0))) {
-      row = this.defineAssignContainer
-        .locator('div')
-        .filter({ has: this.page.locator('input, textarea') })
-        .nth(rowIndex);
-    }
-    await expect(row).toBeVisible();
+  getAssignValueInput(row: Locator): Locator {
+    return row.locator('input[name="value"]').first();
+  }
 
-    let nameInput = row.locator('input[name="key"]').first();
-    if (!(await nameInput.count().catch(() => 0))) {
-      nameInput = row.locator('input, textarea').first();
-    }
+  getAssignValueModeToggle(row: Locator): Locator {
+    return row.locator('.small-assign-button.assign-blue').first();
+  }
 
-    let valueInput = row.locator('input:not([name="key"]):not([type="hidden"]), textarea:not([name="key"])').last();
-    if (
-      !(await valueInput.count().catch(() => 0)) ||
-      (await valueInput.evaluate((el) => (el as unknown) === null).catch(() => false))
-    ) {
-      valueInput = row.locator('input, textarea').nth(1);
-    }
-    if (!(await valueInput.count().catch(() => 0))) {
-      valueInput = this.getVisibleDefineValueInput(row);
-    }
-
-    await expect(nameInput).toBeEditable();
-    await expect(valueInput).toBeEditable();
-    return { row, nameInput, valueInput };
+  async switchAssignRowToLiteralValue(row: Locator): Promise<void> {
+    await this.getAssignValueModeToggle(row).click();
+    await expect(this.getAssignValueInput(row)).toBeEditable();
   }
 
   async robustFillInput(input: Locator, value: string): Promise<void> {
     const normalizedValue = String(value);
-    await input.click({ force: true });
-    await input.fill('').catch(() => {});
-    await input.pressSequentially(normalizedValue, { delay: 20 }).catch(() => {});
-    const currentValue = await input.inputValue().catch(() => null);
-    if (currentValue !== normalizedValue) {
-      await input.evaluate((node: HTMLInputElement | HTMLTextAreaElement, nextValue: string) => {
-        const tag = node.tagName?.toLowerCase();
-        const prototype = tag === 'textarea' ? window.HTMLTextAreaElement.prototype : window.HTMLInputElement.prototype;
-        const nativeSetter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
-        nativeSetter?.call(node, nextValue);
-        node.dispatchEvent(new Event('input', { bubbles: true }));
-        node.dispatchEvent(new Event('change', { bubbles: true }));
-        node.dispatchEvent(new Event('blur', { bubbles: true }));
-      }, normalizedValue);
+    await expect(input).toBeEditable();
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await input.click();
+      await input.fill(normalizedValue);
+
+      if ((await input.inputValue()) === normalizedValue) {
+        break;
+      }
     }
+
     await expect(input).toHaveValue(normalizedValue, { timeout: 10000 });
   }
 
@@ -870,39 +790,44 @@ export class NewServicePage {
     await expect(this.defineAddElementBtn).toBeVisible();
 
     const rowsBefore = await this.defineRows.count();
-    await this.defineAddElementBtn.scrollIntoViewIfNeeded().catch(() => {});
-    await this.defineAddElementBtn.click({ force: true });
-    await this.page.waitForTimeout(500);
+    await this.defineAddElementBtn.scrollIntoViewIfNeeded();
+    await this.defineAddElementBtn.click();
+    await expect(this.defineRows).toHaveCount(rowsBefore + 1);
 
-    const rowsAfter = await this.defineRows.count().catch(() => rowsBefore);
-    const targetIndex = Math.max(rowsBefore, rowsAfter - 1, 0);
+    const row = this.getDefineRow(rowsBefore);
+    await expect(row).toBeVisible();
 
-    const { nameInput, valueInput } = await this.resolveDefineRowInputs(targetIndex);
-    await this.robustFillInput(nameInput, name);
-    await this.robustFillInput(valueInput, value);
+    await this.robustFillInput(this.getAssignNameInput(row), name);
+    await this.switchAssignRowToLiteralValue(row);
+    await this.robustFillInput(this.getAssignValueInput(row), value);
 
-    await this.defineSave.click({ force: true }).catch(() => {});
+    await this.defineSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+  }
+
+  persistedAssignValue(value: string): string {
+    return `\${"${value}"}`;
+  }
+
+  async assertAssignVariableRow(rowIndex: number, name: string, value: string): Promise<void> {
+    const row = this.getDefineRow(rowIndex);
+    await expect(row).toBeVisible();
+
+    await expect(this.getAssignNameInput(row)).toHaveValue(name);
+    await expect(this.getAssignValueInput(row)).toHaveValue(this.persistedAssignValue(value));
+  }
+
+  async closeNodeDialogWithoutSaving(): Promise<void> {
+    await this.defineCancel.click();
     await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
   }
 
   async messageSetTextAndSave(text: string): Promise<void> {
     await this.assertMessageDialogVisible();
     await expect(this.quillEditor).toBeVisible();
-    const normalizedText = String(text);
     await this.quillEditor.click();
-    await this.quillEditor.fill('').catch(() => {});
-    await this.quillEditor.type(normalizedText).catch(() => {});
-    const currentText = await this.quillEditor.textContent().catch(() => '');
-    if (!String(currentText || '').includes(normalizedText)) {
-      await this.quillEditor.evaluate((node: HTMLElement, value: string) => {
-        node.innerHTML = '';
-        node.textContent = value;
-        node.dispatchEvent(new InputEvent('input', { bubbles: true, data: value, inputType: 'insertText' }));
-        node.dispatchEvent(new Event('change', { bubbles: true }));
-        node.dispatchEvent(new Event('blur', { bubbles: true }));
-      }, normalizedText);
-    }
-    await expect(this.quillEditor).toContainText(normalizedText, { timeout: 10000 });
+    await this.quillEditor.fill(String(text));
+    await expect(this.quillEditor).toContainText(String(text), { timeout: 10000 });
     await this.messageSave.click();
     await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
     await expect(this.canvas).toBeVisible();
@@ -912,9 +837,111 @@ export class NewServicePage {
     await this.messageSetTextAndSave(text);
   }
 
+  async messageClearTextAndSave(): Promise<void> {
+    await this.assertMessageDialogVisible();
+    await expect(this.quillEditor).toBeVisible();
+    await this.quillEditor.click();
+    await this.quillEditor.fill('');
+    await expect(this.quillEditor).toHaveText('', { timeout: 10000 });
+    await this.messageSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
+  async multichoiceSetQuestionAndRenameOption(question: string, optionIndex: number, newLabel: string): Promise<void> {
+    await expect(this.nodeEditorTitle).toContainText('Multi-choice question');
+
+    await expect(this.quillEditor).toBeVisible();
+    await this.quillEditor.click();
+    await this.quillEditor.fill(String(question));
+    await expect(this.quillEditor).toContainText(String(question), { timeout: 10000 });
+
+    const previewButton = this.nodeEditorPopup.locator('.multiple-choice-question-button').nth(optionIndex);
+    const previewRow = previewButton.locator('xpath=ancestor::div[contains(@class,"track")][1]');
+    await previewRow.getByRole('button', { name: 'Edit', exact: true }).click();
+
+    const labelInput = this.nodeEditorPopup.locator(`input[name="button-title-${optionIndex}"]`);
+    await expect(labelInput).toBeEditable();
+    await labelInput.fill(newLabel);
+    await expect(labelInput).toHaveValue(newLabel);
+
+    const editRow = labelInput.locator('xpath=ancestor::div[contains(@class,"track")][1]');
+    await editRow.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(
+      this.nodeEditorPopup.locator('.multiple-choice-question-button__text', { hasText: newLabel }),
+    ).toBeVisible();
+
+    await this.nodeEditorSaveBtn.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
   async assertSectionHasButtons(sectionLocator: Locator): Promise<void> {
     const items = sectionLocator.locator('button,[draggable="true"],.chip,.badge,.tag');
     await expect(items.first()).toBeVisible();
+  }
+
+  async conditionAddLiteralRule(leftValue: string, operator: string, rightValue: string): Promise<void> {
+    await this.conditionAddRuleButton.click();
+
+    const bluePencils = this.conditionDialog.locator('.small-assign-button.assign-blue');
+    await bluePencils.first().click();
+    await bluePencils.first().click();
+
+    const leftInput = this.conditionDialog.locator('input[name="field"]');
+    const rightInput = this.conditionDialog.locator('input[name="value"]');
+
+    await leftInput.fill(leftValue);
+    await expect(leftInput).toHaveValue(leftValue);
+    await rightInput.fill(rightValue);
+    await expect(rightInput).toHaveValue(rightValue);
+
+    await this.conditionDialog.locator('[name="operator"]').click();
+    await this.conditionDialog.getByRole('option', { name: operator, exact: true }).click();
+  }
+
+  async conditionSaveNode(): Promise<void> {
+    await this.conditionSave.click();
+    await expect(this.conditionDialog).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
+  async addMessageOnConditionBranch(
+    branchLabel: 'Success' | 'Failure',
+    expectedNodeTitle: string,
+    text: string,
+  ): Promise<void> {
+    await this.canvas.getByRole('button', { name: branchLabel, exact: true }).click();
+    await this.pickNodeTypeAndReturnToCanvas(this.pickerMessageBtn);
+    await expect(this.getFlowNodeByTitle(expectedNodeTitle)).toBeVisible();
+
+    await this.openNodeDialogByTitle(expectedNodeTitle);
+    await this.messageSetTextAndSave(text);
+  }
+
+  getDynamicChoiceValueInputByKey(key: string): Locator {
+    return this.nodeEditorPopup
+      .locator('._assignElement_umtte_1')
+      .filter({ has: this.page.locator(`input[name="key"][value="${key}"]`) })
+      .locator('input[name="value"]');
+  }
+
+  async dynamicChoicesSetValuesAndSave(values: Record<string, string>): Promise<void> {
+    for (const [key, value] of Object.entries(values)) {
+      const input = this.getDynamicChoiceValueInputByKey(key);
+      await input.fill(value);
+      await expect(input).toHaveValue(value);
+    }
+
+    await this.dynamicChoicesSave.click();
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.canvas).toBeVisible();
+  }
+
+  async assertDynamicChoicesValues(values: Record<string, string>): Promise<void> {
+    for (const [key, value] of Object.entries(values)) {
+      await expect(this.getDynamicChoiceValueInputByKey(key)).toHaveValue(value);
+    }
   }
 
   async openCreateEndpointFromPicker(): Promise<void> {
@@ -924,7 +951,7 @@ export class NewServicePage {
       this.nodePickerDialog.locator('.collapsible__trigger > button').last(),
       this.nodePickerDialog
         .locator(
-          'xpath=.//*[contains(normalize-space(),"API elemendid")]/ancestor::*[self::div or self::section][1]//button[last()]',
+          'xpath=.//*[contains(normalize-space(),"API elements")]/ancestor::*[self::div or self::section][1]//button[last()]',
         )
         .first(),
       this.pickerAddApiBtn,
@@ -935,7 +962,10 @@ export class NewServicePage {
       if (!(await candidate.count().catch(() => 0))) continue;
       if (!(await candidate.isVisible().catch(() => false))) continue;
       await candidate.click({ force: true }).catch(() => {});
-      clicked = await this.createEndpointModal.isVisible().catch(() => false);
+      clicked = await this.createEndpointModal
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
       if (clicked) break;
     }
 
@@ -949,6 +979,14 @@ export class NewServicePage {
   async addNewAPI(): Promise<void> {
     await this.clickAddNodeAtEdgeIndex(0);
     await this.openCreateEndpointFromPicker();
+  }
+
+  async openCreateEndpointFromRegistry(): Promise<void> {
+    const createBtn = this.page.getByRole('button', { name: 'Create endpoint', exact: true }).first();
+    await expect(createBtn).toBeVisible({ timeout: 15000 });
+    await createBtn.scrollIntoViewIfNeeded().catch(() => {});
+    await createBtn.click({ force: true });
+    await expect(this.createEndpointModal).toBeVisible({ timeout: 10000 });
   }
 
   async assertCreateEndpointModalVisible(): Promise<void> {
@@ -979,13 +1017,45 @@ export class NewServicePage {
     await this.robustFillInput(this.createEndpointUrl, value);
   }
 
+  get createEndpointEndpointsCombo(): Locator {
+    return this.createEndpointModal.locator('[role="combobox"][name="select-endpoint"]');
+  }
+
+  async fetchEndpointsFromUrl(url: string): Promise<string[]> {
+    await this.robustFillInput(this.createEndpointUrl, url);
+    await this.createEndpointFetchEndpoints.click();
+
+    await expect(async () => {
+      await this.createEndpointEndpointsCombo.click({ force: true });
+      await expect(this.page.locator('li[role="option"]').first()).toBeVisible({ timeout: 5000 });
+    }).toPass({ timeout: 60000 });
+
+    return this.page.locator('li[role="option"]').allInnerTexts();
+  }
+
+  async selectFetchedEndpoint(label: string): Promise<void> {
+    if (
+      !(await this.page
+        .locator('li[role="option"]')
+        .first()
+        .isVisible()
+        .catch(() => false))
+    ) {
+      await this.createEndpointEndpointsCombo.click({ force: true });
+      await expect(this.page.locator('li[role="option"]').first()).toBeVisible({ timeout: 10000 });
+    }
+
+    await this.page.getByRole('option', { name: label, exact: true }).first().click();
+    await expect(this.createEndpointEndpointsCombo).toContainText(label);
+  }
+
   async createEndpoint(): Promise<void> {
     await expect(this.createEndpointCreate).toBeVisible();
     await expect(this.createEndpointCreate).toBeEnabled();
     await this.createEndpointCreate.click();
 
     await this.waitForToast({ timeout: 15000 });
-    await expect(this.toastList).toContainText(/lood|salvest|õnnest|otspunkt|endpoint/i);
+    await expect(this.toastList).toContainText(/created|saved|success|endpoint/i);
 
     await Promise.race([
       this.createEndpointModal.waitFor({ state: 'hidden', timeout: 15000 }).catch(() => null),
@@ -999,7 +1069,7 @@ export class NewServicePage {
     if (await this.createEndpointModal.isVisible().catch(() => false)) {
       const closeCandidates = [
         this.createEndpointModal.locator('button.popup__close, button.dialog__close').first(),
-        this.createEndpointModal.getByRole('button', { name: /sulge|close/i }).first(),
+        this.createEndpointModal.getByRole('button', { name: /close/i }).first(),
         this.createEndpointCancel,
       ];
 
@@ -1040,6 +1110,10 @@ export class NewServicePage {
     await expect(this.widgetMessages).toContainText(text);
   }
 
+  async expectWidgetNotToContainText(text: string | RegExp): Promise<void> {
+    await expect(this.widgetMessages).not.toContainText(text);
+  }
+
   async assertHeaderElementVisible(): Promise<void> {
     await expect(this.backToServicesBtn).toBeVisible();
     await expect(this.stepName).toBeVisible();
@@ -1075,23 +1149,22 @@ export class NewServicePage {
   async assertConditionDialogVisible(): Promise<void> {
     await expect(this.conditionDialog).toBeVisible();
     await expect(this.conditionTitle).toBeVisible();
-    await expect(this.conditionTabSeadistamine).toBeVisible();
-    await expect(this.conditionTabTestimine).toBeVisible();
+    await expect(this.conditionTabSetup).toBeVisible();
     await expect(this.conditionSave).toBeVisible();
     await expect(this.conditionCancel).toBeVisible();
     await expect(this.conditionClose).toBeVisible();
   }
 
   async assertConditionButtonsVisibleInDialog(): Promise<void> {
-    await expect(this.conditionChipJa).toBeVisible();
-    await expect(this.conditionChipVoi).toBeVisible();
-    await expect(this.conditionChipMitte).toBeVisible();
+    await expect(this.conditionChipAnd).toBeVisible();
+    await expect(this.conditionChipOr).toBeVisible();
+    await expect(this.conditionChipNot).toBeVisible();
     await expect(this.conditionAddRuleButton).toBeVisible();
     await expect(this.conditionAddGroupButton).toBeVisible();
   }
 
   async addNodes(): Promise<void> {
     await this.clickAddNodeAtEdgeIndex(0);
-    await this.pickNodeTypeAndReturnToCanvas(this.buttonMessageForCustomer);
+    await this.pickNodeTypeAndReturnToCanvas(this.pickerMessageBtn);
   }
 }

@@ -1,22 +1,26 @@
-import { test, expect } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
+import { openAdminPage } from '@helpers/smoke-helpers';
+import { expect, test } from '@setup/test-setup';
 
-test('[smoke] Analytics overview Page', async ({ page }) => {
-  await page.goto(URLS.admin + 'analytics/overview');
-  await expect(page.getByText('Vestluste koguarv')).toBeVisible();
+test('[SMOKE] "Analytics" → "Overview" page loads', async ({ page }) => {
+  const visit = await openAdminPage(page, 'analytics/overview');
+
+  await expect(page.getByText('Total number of chats')).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Chats analytics page', async ({ page }) => {
-  await page.goto(URLS.admin + 'analytics/chats');
-  await expect(page.getByRole('heading', { name: 'Vestlused' })).toBeVisible();
+test('[SMOKE] "Analytics" → "Chats" page loads', async ({ page }) => {
+  const visit = await openAdminPage(page, 'analytics/chats');
+
+  await expect(page.getByRole('heading', { name: 'Chats', exact: true })).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });
 
-test('[smoke] Feedback analytics page', async ({ page }) => {
-  await page.goto(URLS.admin + 'analytics/feedback');
-  await expect(page.getByRole('heading', { name: 'Tagasiside' })).toBeVisible();
-});
+test('[SMOKE] "Analytics" → "Feedback" page loads', async ({ page }) => {
+  const visit = await openAdminPage(page, 'analytics/feedback');
 
-test('[smoke] Advisors analytics page', async ({ page }) => {
-  await page.goto(URLS.admin + 'analytics/advisors');
-  await expect(page.getByRole('heading', { name: 'Nõustajad' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Feedback', exact: true })).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
 });

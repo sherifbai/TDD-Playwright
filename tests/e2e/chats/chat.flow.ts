@@ -1,43 +1,58 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { WidgetPage } from '@page-objects/widget';
-import { test, expect } from '@playwright/test';
 
+import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env/urls';
 
-test('[e2e] [chats] Chat flow test', async ({ browser }) => {
+const stamp = () => Date.now().toString();
+
+test('[e2e] [chats] A routed chat carries messages both ways between customer and operator', async ({ browser }) => {
+  const customerMarker = `customer says ${stamp()}`;
+  const operatorMarker = `operator says ${stamp()}`;
+  const neverSentMarker = `nobody sent this ${stamp()}`;
+
   const customerContext = await browser.newContext();
-  const csaContext = await browser.newContext({
-    storageState: 'tests/admin/.auth/user.json',
-  });
+  const csaContext = await browser.newContext({ storageState: 'tests/admin/.auth/user.json' });
 
-  const cPage = await customerContext.newPage();
-  const page = await csaContext.newPage();
+  try {
+    const cPage = await customerContext.newPage();
+    const page = await csaContext.newPage();
 
-  page.on('console', (msg) => {
-    const errorPattern =
-      /error|failed|uncaught|exception|typeerror|referenceerror|syntaxerror|rangeerror|evalerror|urlerror|is not defined|cannot read|undefined|null is not an object/i;
-    if (msg.type() === 'error' || errorPattern.test(msg.text())) {
-      console.log(`[${msg.type().toUpperCase()}] ${msg.text()}`);
-    }
-  });
+    const csaPage = new AdminPageFactory(page);
+    const customerPage = new WidgetPage(cPage);
+    const chats = csaPage.getChats();
 
-  await Promise.all([cPage.goto(URLS.customer), page.goto(`${URLS.admin}chat/unanswered`)]);
+    await test.step('An operator is on duty and watching the queue', async () => {
+      await page.goto(`${URLS.admin}chat/unanswered`);
+      await csaPage.getPageHeader().markCSAPresent();
+    });
 
-  const csaPage = new AdminPageFactory(page);
-  const customerPage = new WidgetPage(cPage);
+    await test.step('The customer asks for an agent and gets routed', async () => {
+      await cPage.goto(URLS.customer);
+      await customerPage.openChat();
+      await customerPage.getCSAChat();
+    });
 
-  await csaPage.getPageHeader().markCSAPresent();
+    await test.step('The customer sends a marker while waiting in the queue', async () => {
+      await customerPage.sendMessage(customerMarker);
+    });
 
-  await cPage.bringToFront();
-  await customerPage.openChat();
-  await customerPage.getCSAChat();
+    await test.step('The operator picks up that very chat and reads the marker', async () => {
+      await chats.takeOverChatContaining(customerMarker);
+      await chats.expectOperatorReceived(customerMarker);
 
-  await page.bringToFront();
-  await csaPage.getChats().acceptChat();
+      await expect(page.getByRole('tablist', { name: 'Active chat list' })).toBeVisible();
+      await expect(page.getByText('End chat')).toBeVisible();
+    });
 
-  await expect(page.getByRole('tablist', { name: 'Aktiivsed vestlused' })).toBeVisible();
-  await expect(page.getByText('Lõpeta vestlus')).toBeVisible();
+    await test.step('The operator answers and only that answer reaches the customer', async () => {
+      await chats.replyAsOperator(operatorMarker);
 
-  await customerContext.close();
-  await csaContext.close();
+      await customerPage.expectMessageDelivered(operatorMarker);
+      await customerPage.expectMessageNeverDelivered(neverSentMarker);
+    });
+  } finally {
+    await customerContext.close();
+    await csaContext.close();
+  }
 });

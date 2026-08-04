@@ -12,30 +12,26 @@ export class SideMenu {
   constructor(page: Page) {
     this.page = page;
 
-    this.buttonConversations = this.page.getByRole('button', { name: 'Vestlused' });
-    this.buttonAnalytics = this.page.getByRole('button', { name: 'Analüütika' });
-    this.buttonServices = this.page.getByRole('button', { name: 'Teenused' });
-    this.buttonAdministration = this.page.getByRole('button', { name: 'Haldus' });
-    this.buttonCollapseAll = this.page.getByRole('button', { name: 'Kitsenda menüü' });
+    this.buttonConversations = this.page.getByRole('button', { name: 'Conversations' });
+    this.buttonAnalytics = this.page.getByRole('button', { name: 'Analytics' });
+    this.buttonServices = this.page.getByRole('button', { name: 'Services' });
+    this.buttonAdministration = this.page.getByRole('button', { name: 'Administration' });
+    this.buttonCollapseAll = this.page.getByRole('button', { name: 'Close menu' });
   }
 
-  async isChatMenuVisible(): Promise<void> {
+  async assertConversationsButtonVisible(): Promise<void> {
     await expect(this.buttonConversations).toBeVisible();
   }
 
-  async assertVestlusedButtonVisible(): Promise<void> {
-    await expect(this.buttonConversations).toBeVisible();
-  }
-
-  async assertAnalyytikaButtonVisible(): Promise<void> {
+  async assertAnalyticsButtonVisible(): Promise<void> {
     await expect(this.buttonAnalytics).toBeVisible();
   }
 
-  async assertTeenusedButtonVisible(): Promise<void> {
+  async assertServicesButtonVisible(): Promise<void> {
     await expect(this.buttonServices).toBeVisible();
   }
 
-  async assertHaldusButtonVisible(): Promise<void> {
+  async assertAdministrationButtonVisible(): Promise<void> {
     await expect(this.buttonAdministration).toBeVisible();
   }
 

@@ -23,6 +23,9 @@ export class PaginatedDataTable {
 
   async waitUntilReady({ timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
     await expect(this.table).toBeVisible({ timeout });
+    await expect(this.getRows().first(), 'Data table rendered its frame but never received rows').toBeVisible({
+      timeout,
+    });
   }
 
   getRows(): Locator {
@@ -51,6 +54,7 @@ export class PaginatedDataTable {
   }
 
   async findRowAcrossPages(text: string, { maxPages = 10 }: FindRowOptions = {}): Promise<Locator> {
+    await this.waitUntilReady();
     await this.goToFirstPage();
 
     for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
@@ -61,7 +65,7 @@ export class PaginatedDataTable {
 
       const nextPageButton = this.table
         .locator('button, a')
-        .filter({ hasText: /^(->|→|›|next|järgmine)$/i })
+        .filter({ hasText: /^(->|→|›|next)$/i })
         .last();
 
       const canAdvance =
@@ -112,8 +116,8 @@ export class PaginatedDataTable {
       return;
     }
 
-    await this.pageSizeSelect.selectOption(desiredValue).catch(() => null);
-    await this.page.waitForLoadState('networkidle').catch(() => {});
+    await this.pageSizeSelect.selectOption(desiredValue);
+    await expect(this.pageSizeSelect).toHaveValue(desiredValue, { timeout: 15000 });
     await this.waitUntilReady();
   }
 

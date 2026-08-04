@@ -11,6 +11,8 @@ export class WidgetPage {
   private readonly buttonTC: Locator;
   private readonly buttonMinimize: Locator;
   private readonly buttonClose: Locator;
+  private readonly chatRoutedNotice: Locator;
+  private readonly operatorAwayNotice: Locator;
 
   private readonly buttonConfirmWithAnswer: Locator;
   private readonly buttonConfirmNoAnswer: Locator;
@@ -34,6 +36,8 @@ export class WidgetPage {
     this.buttonTC = this.page.getByText('Tutvuge teenuse tingimustega', { exact: true });
     this.buttonMinimize = this.page.getByTitle('Minimeeri');
     this.buttonClose = this.page.getByTitle('Sulge');
+    this.chatRoutedNotice = this.page.getByText('Vestlus suunatakse klienditoele');
+    this.operatorAwayNotice = this.page.getByText('Nõustaja on eemal', { exact: false });
 
     this.buttonConfirmWithAnswer = this.page.getByRole('button', { name: 'Jah, sain vastuse' });
     this.buttonConfirmNoAnswer = this.page.getByRole('button', { name: 'Jah, vastuseta' });
@@ -58,20 +62,58 @@ export class WidgetPage {
   }
 
   async getCSAChat(): Promise<void> {
-    await this.inputField.fill('Tere');
+    await this.inputField.fill('call a specialist');
     await this.sendButton.click();
 
-    await this.page.waitForTimeout(3000);
+    const routeYes = this.page.getByRole('button', { name: 'Jah', exact: true });
+    const offeredRouting = await routeYes.waitFor({ state: 'visible', timeout: 30000 }).then(
+      () => true,
+      () => false,
+    );
 
-    if (await this.page.getByText('Kuidas saan abiks olla?').isVisible()) {
-      await this.inputField.fill('Suuna mind');
-    } else if (await this.page.getByText('Kas suunan teid klienditeenindajale? (Jah/Ei)').isVisible()) {
-      await this.inputField.fill('Jah');
+    // Whether the bot offers an operator at all depends on its current configuration, and
+    // a bare timeout on the button says nothing about which of the known refusals happened:
+    // the operator being away, or the bot answering with contact details instead of routing.
+    expect(offeredRouting, `The bot never offered to route the chat. Its last reply: "${await this.lastReply()}"`).toBe(
+      true,
+    );
+
+    await routeYes.click();
+    await this.chatRoutedNotice.waitFor({ state: 'visible', timeout: 30000 });
+  }
+
+  private async lastReply(): Promise<string> {
+    if (await this.operatorAwayNotice.isVisible()) {
+      return 'the widget showed the "operator is away" contact form';
     }
-    await this.sendButton.click();
 
-    await this.page.waitForTimeout(3000);
-    await expect(this.page.getByText('Suunan teid klienditeenindajale. Varuge natukene kannatust.')).toBeVisible();
+    const replies = await this.page.locator('[class*="message"]').allInnerTexts();
+    const lastReply = replies
+      .map((reply) => reply.trim())
+      .filter(Boolean)
+      .pop();
+
+    return lastReply?.replace(/\s+/g, ' ') ?? 'the conversation held no messages at all';
+  }
+
+  async sendMessage(text: string): Promise<void> {
+    await this.inputField.fill(text);
+    await this.sendButton.click();
+    await expect(this.messageByText(text), 'The widget never echoed the message the customer sent').toBeVisible({
+      timeout: 15000,
+    });
+  }
+
+  async expectMessageDelivered(text: string): Promise<void> {
+    await expect(this.messageByText(text), `The customer never received "${text}"`).toBeVisible({ timeout: 30000 });
+  }
+
+  async expectMessageNeverDelivered(text: string): Promise<void> {
+    await expect(this.messageByText(text), `The customer received "${text}", which nobody sent`).toHaveCount(0);
+  }
+
+  private messageByText(text: string): Locator {
+    return this.page.getByText(text, { exact: true });
   }
 
   async openDetails(): Promise<void> {

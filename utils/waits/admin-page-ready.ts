@@ -17,37 +17,23 @@ export async function waitForServicesOverviewReady(
 ): Promise<void> {
   await waitForAppSettled(page, { timeout });
 
-  const heading = page.getByRole('heading', { name: /Teenused/i }).first();
-  const createButton = page.getByRole('button', { name: /Loo uus teenus/i }).first();
-  const table = page
-    .getByTestId('services-table')
-    .first()
-    .or(page.locator('table.data-table').first())
-    .or(page.locator('table').first());
+  const heading = page.getByRole('heading', { name: 'Services', exact: true });
+  const createButton = page.getByRole('button', { name: 'Create new service', exact: true });
+  const table = page.getByTestId('services-table').or(page.locator('table.data-table')).or(page.locator('table'));
 
-  await Promise.any([
-    heading.waitFor({ state: 'visible', timeout }),
-    createButton.waitFor({ state: 'visible', timeout }),
-    table.waitFor({ state: 'visible', timeout }),
-  ]).catch(async () => {
-    await expect(page.locator('main').first()).toBeVisible({ timeout });
-  });
+  await expect(
+    heading.or(createButton).or(table).first(),
+    'Services overview rendered neither its heading, its create button nor a services table',
+  ).toBeVisible({ timeout });
 }
 
 export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
   await waitForAppSettled(page, { timeout });
 
   const header = page.locator('header.header').first().or(page.locator('header').first());
-  const readySignals = [
-    page.getByRole('application').first(),
-    page.locator('.react-flow, .react-flow__renderer, .react-flow__viewport').first(),
-    page.locator('button.edge-button').first(),
-    page.locator('.react-flow__node-start, .start-node').first(),
-    page.getByRole('button', { name: /Teenuse seaded/i }).first(),
-  ];
 
   await expect(header).toBeVisible({ timeout });
-  await Promise.any(readySignals.map((locator) => locator.waitFor({ state: 'visible', timeout })));
+  await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout });
 }
 
 export async function waitForChatsReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
