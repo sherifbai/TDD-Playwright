@@ -22,7 +22,7 @@ test('[SMOKE] "Administration" → "Settings" page loads with its active toggle'
 test('[SMOKE] "Administration" → "Welcome message" page loads with its greeting toggle', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/chatbot/welcome-message');
 
-  await expect(page.getByRole('heading', { name: 'Welcome Message' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome Message', exact: true })).toBeVisible();
   await expect(page.locator('main').getByRole('switch')).toBeVisible();
   visit.assertBackendAnswered();
   visit.assertNoFailedApiCalls();

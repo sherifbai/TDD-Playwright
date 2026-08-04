@@ -24,7 +24,7 @@ test('[SMOKE] "Services" → "Create new service" page loads with its flow edito
 test('[SMOKE] "Services" → "Faulty Services" page loads', async ({ page }) => {
   const visit = await openAdminPage(page, 'services/faultyServices');
 
-  await expect(page.getByRole('heading', { name: 'Faulty Services' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Faulty Services', exact: true })).toBeVisible();
   visit.assertBackendAnswered();
   visit.assertNoFailedApiCalls();
 });
@@ -32,7 +32,7 @@ test('[SMOKE] "Services" → "Faulty Services" page loads', async ({ page }) => 
 test('[SMOKE] "Services" → "API Registry" page loads with its endpoint table', async ({ page }) => {
   const visit = await openAdminPage(page, 'services/api-registry');
 
-  await expect(page.getByRole('heading', { name: 'API Registry' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'API Registry', exact: true })).toBeVisible();
   await expect(page.getByRole('table').first().locator('tbody tr').first()).toBeVisible();
 
   visit.assertBackendAnswered();

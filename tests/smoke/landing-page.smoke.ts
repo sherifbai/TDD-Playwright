@@ -10,7 +10,7 @@ test('[SMOKE] "Landing" page loads with the modules an admin may open', async ({
   const topMenu = apf.getPageHeader();
   const sideMenu = apf.getSideMenu();
 
-  await expect(page.getByRole('heading', { name: 'Welcome to Bürokratt' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome to Bürokratt', exact: true })).toBeVisible();
 
   await test.step('The header offers the admin session controls', async () => {
     await topMenu.assertLogoVisible();
