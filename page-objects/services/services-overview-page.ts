@@ -56,6 +56,7 @@ export class ServicesOverviewPage {
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
     await waitForServicesOverviewReady(this.page, options);
+    await this.servicesTable.recoverIfStranded();
     await this.servicesTable.waitUntilReady(options);
   }
 

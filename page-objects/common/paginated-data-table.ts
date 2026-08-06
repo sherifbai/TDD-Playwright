@@ -1,6 +1,11 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { ExpectRowOptions, FindRowOptions, PaginatedDataTableOptions, RouteReadyOptions } from '@utils/interfaces';
+import { isEventuallyVisible } from '@utils/waits';
+
+const SETTLE_TIMEOUT = 5000;
+const PAGE_TURN_TIMEOUT = 10000;
+const EMPTY_TABLE_PROBE_TIMEOUT = 5000;
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -26,6 +31,68 @@ export class PaginatedDataTable {
     await expect(this.getRows().first(), 'Data table rendered its frame but never received rows').toBeVisible({
       timeout,
     });
+    await this.waitForRowsToSettle();
+  }
+
+  // A table left on a page past the end of a list that has since grown shorter draws an empty
+  // frame and drops its paging controls with it, so nothing on screen can bring the rows back.
+  // Loading the route again starts it on the first page. This navigates, so it belongs to the
+  // steps that decide where the table stands rather than to a wait any caller may run.
+  async recoverIfStranded({ timeout = EMPTY_TABLE_PROBE_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.table).toBeVisible({ timeout });
+
+    if (await isEventuallyVisible(this.getRows().first(), timeout)) {
+      return;
+    }
+
+    await this.page.reload();
+  }
+
+  private async rowsSignature(): Promise<string> {
+    return this.getRows()
+      .evaluateAll(
+        (rows) =>
+          `${rows.length}:${(rows[0]?.textContent ?? '').trim()}:${(rows[rows.length - 1]?.textContent ?? '').trim()}`,
+      )
+      .catch(() => '');
+  }
+
+  // The rows the table shows lag behind the page it says it is on: the paging control marks
+  // the new page at once, while the rows of the page just left stay on screen for close to a
+  // second after. Both waits below read that lag off the same sampling loop — one waits for
+  // two readings to agree, the other for the first reading that differs from what was there
+  // before the click.
+  private async pollRows(
+    accept: (current: string, previous: string) => boolean,
+    { initial, interval, timeout }: { initial?: string; interval: number; timeout: number },
+  ): Promise<boolean> {
+    const deadline = Date.now() + timeout;
+    let previous = initial ?? (await this.rowsSignature());
+
+    while (Date.now() < deadline) {
+      await this.page.waitForTimeout(interval);
+      const current = await this.rowsSignature();
+
+      if (accept(current, previous)) {
+        return true;
+      }
+
+      previous = current;
+    }
+
+    return false;
+  }
+
+  private async waitForRowsToSettle(): Promise<void> {
+    await this.pollRows((current, previous) => current === previous, { interval: 350, timeout: SETTLE_TIMEOUT });
+  }
+
+  private async waitForRowsToChange(before: string): Promise<boolean> {
+    return this.pollRows((current, previous) => current !== previous, {
+      initial: before,
+      interval: 200,
+      timeout: PAGE_TURN_TIMEOUT,
+    });
   }
 
   getRows(): Locator {
@@ -44,29 +111,54 @@ export class PaginatedDataTable {
       .or(this.getRows().filter({ hasText: rowText }));
   }
 
-  async goToFirstPage(): Promise<void> {
-    const firstPageButton = this.table.locator('button, a').filter({ hasText: /^1$/ }).first();
+  // The paging controls sit beside the table rather than inside it: the component wraps the
+  // table, its page size and its page buttons together. Looking for them within the table
+  // element finds nothing at all, and a search that cannot turn the page silently answers
+  // for the first one — which is how a row further down the list reads as missing.
+  private pagingControls(): Locator {
+    return this.table.locator('xpath=ancestor::*[contains(@class,"data-table")][1]');
+  }
 
-    if (await firstPageButton.isVisible().catch(() => false)) {
-      await firstPageButton.click({ force: true }).catch(() => {});
-      await this.waitUntilReady();
+  // The button that turns the page carries no caption in this app — it is drawn as an arrow
+  // and named only by its class. The text form is kept for a table that does label it.
+  private nextPageButton(): Locator {
+    const controls = this.pagingControls();
+
+    return controls
+      .locator('button.next')
+      .or(controls.locator('button, a').filter({ hasText: /^(->|→|›|next)$/i }))
+      .last();
+  }
+
+  async goToFirstPage(): Promise<void> {
+    const firstPageButton = this.pagingControls().locator('button, a').filter({ hasText: /^1$/ }).first();
+
+    if (!(await firstPageButton.isVisible().catch(() => false))) {
+      return;
     }
+
+    // Clicking the page the table is already on redraws the rows for nothing, and every walk
+    // starts here — the whole list is paged through again before the first row is read.
+    if ((await firstPageButton.getAttribute('aria-current').catch(() => null)) === 'true') {
+      return;
+    }
+
+    await firstPageButton.click({ force: true }).catch(() => {});
+    await this.waitUntilReady();
   }
 
   async findRowAcrossPages(text: string, { maxPages = 10 }: FindRowOptions = {}): Promise<Locator> {
+    await this.recoverIfStranded();
     await this.waitUntilReady();
     await this.goToFirstPage();
+
+    const nextPageButton = this.nextPageButton();
 
     for (let pageIndex = 0; pageIndex < maxPages; pageIndex++) {
       const row = this.getRowByText(text);
       if (await row.count().catch(() => 0)) {
         return row.first();
       }
-
-      const nextPageButton = this.table
-        .locator('button, a')
-        .filter({ hasText: /^(->|→|›|next)$/i })
-        .last();
 
       const canAdvance =
         (await nextPageButton.isVisible().catch(() => false)) && (await nextPageButton.isEnabled().catch(() => false));
@@ -75,7 +167,13 @@ export class PaginatedDataTable {
         break;
       }
 
+      const rowsBefore = await this.rowsSignature();
       await nextPageButton.click({ force: true }).catch(() => {});
+
+      if (!(await this.waitForRowsToChange(rowsBefore))) {
+        break;
+      }
+
       await this.waitUntilReady();
     }
 
@@ -118,6 +216,10 @@ export class PaginatedDataTable {
 
     await this.pageSizeSelect.selectOption(desiredValue);
     await expect(this.pageSizeSelect).toHaveValue(desiredValue, { timeout: 15000 });
+
+    // Fitting more rows on a page leaves the table on a page number the shorter list no
+    // longer has, which is the very state it cannot climb out of on its own.
+    await this.recoverIfStranded();
     await this.waitUntilReady();
   }
 
