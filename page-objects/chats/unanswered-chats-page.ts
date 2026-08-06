@@ -1,12 +1,14 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { RouteReadyOptions } from '@utils/interfaces';
+import { isEventuallyVisible } from '@utils/waits';
 import { waitForChatsReady } from '@utils/waits/admin-page-ready';
 
 export class UnansweredChatsPage {
   private readonly page: Page;
 
   private readonly list: Locator;
+  private readonly activeChatList: Locator;
   private readonly tabs: Locator;
   private readonly buttonTakeOver: Locator;
   private readonly buttonEndChat: Locator;
@@ -21,6 +23,7 @@ export class UnansweredChatsPage {
     this.page = page;
 
     this.list = this.page.getByRole('tablist');
+    this.activeChatList = this.page.getByRole('tablist', { name: 'Active chat list' });
     this.tabs = this.page.getByRole('tab');
     this.buttonTakeOver = this.page.locator('button', { hasText: 'Take Over' });
     this.buttonEndChat = this.page.locator('button', { hasText: 'End chat' });
@@ -28,8 +31,8 @@ export class UnansweredChatsPage {
     this.buttonAskContact = this.page.locator('button', { hasText: 'Ask for contact' });
     this.buttonAskPermission = this.page.locator('button', { hasText: 'Ask permission' });
     this.buttonForward = this.page.locator('button', { hasText: 'Forward to colleague' });
-    this.inputMessage = this.page.getByPlaceholder(/message|sõnum/i);
-    this.buttonSendMessage = this.page.getByRole('button', { name: /^send/i });
+    this.inputMessage = this.page.getByPlaceholder(/reply|message|sõnum/i);
+    this.buttonSendMessage = this.page.locator('button.btn--primary').filter({ hasNotText: /./ });
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -46,14 +49,38 @@ export class UnansweredChatsPage {
     await this.buttonTakeOver.click();
   }
 
-  async takeOverChatContaining(text: string): Promise<void> {
+  async takeOverChat(chatId: string): Promise<void> {
     await this.waitForReady();
 
-    const queuedChat = this.tabs.filter({ hasText: text });
-    await expect(queuedChat, `No chat in the queue contains "${text}"`).toBeVisible({ timeout: 30000 });
+    const deadline = Date.now() + 60000;
 
-    await queuedChat.click();
-    await this.buttonTakeOver.click();
+    while (Date.now() < deadline) {
+      if (await this.openChat(chatId)) {
+        await this.buttonTakeOver.click();
+        return;
+      }
+    }
+
+    throw new Error(`The queue never offered the chat ${chatId}`);
+  }
+
+  private async openChat(chatId: string): Promise<boolean> {
+    const openChatId = this.page.getByText(chatId, { exact: false });
+
+    for (let index = (await this.tabs.count()) - 1; index >= 0; index--) {
+      await this.tabs.nth(index).click();
+
+      if (await isEventuallyVisible(openChatId, 4000)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  async expectChatIsActive(): Promise<void> {
+    await expect(this.activeChatList, 'The chat never moved to the operator’s own list').toBeVisible();
+    await expect(this.buttonEndChat, 'An active chat offers no way to end it').toBeVisible();
   }
 
   async expectOperatorReceived(text: string): Promise<void> {

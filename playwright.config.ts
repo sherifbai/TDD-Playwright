@@ -63,11 +63,26 @@ export default defineConfig({
       testMatch: '**/*.flow.ts',
       use: {
         ...devices['Desktop Chrome'],
+        // The widget sometimes stops keeping its own conversation up to date, and a click
+        // aimed at it then never settles: Playwright rechecks the button until the test's
+        // whole budget is gone and reports a timeout that names no step. Capped here, the
+        // same failure arrives in seconds and points at the click that could not land.
+        actionTimeout: 15000,
         storageState: 'tests/admin/.auth/user.json',
         viewport: { width: 1720, height: 1200 },
         contextOptions: { screen: { width: 1720, height: 1200 } },
         launchOptions: {
-          args: ['--incognito', '--start-maximized'],
+          // A flow drives a customer and an operator at once, so one of the two windows is
+          // always in the background, and both sides learn about the other's messages from a
+          // pushed update rather than by polling. Chrome throttles exactly that in windows it
+          // considers hidden, which leaves the backgrounded side rendering a stale chat.
+          args: [
+            '--incognito',
+            '--start-maximized',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+          ],
         },
       },
       dependencies: ['setup'],

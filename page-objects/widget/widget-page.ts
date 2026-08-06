@@ -1,5 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { isEventuallyVisible } from '@utils/waits';
+
 export class WidgetPage {
   private readonly page: Page;
 
@@ -8,68 +10,38 @@ export class WidgetPage {
   private readonly inputField: Locator;
   private readonly sendButton: Locator;
   private readonly buttonHamburger: Locator;
-  private readonly buttonTC: Locator;
-  private readonly buttonMinimize: Locator;
-  private readonly buttonClose: Locator;
-  private readonly chatRoutedNotice: Locator;
   private readonly operatorAwayNotice: Locator;
 
-  private readonly buttonConfirmWithAnswer: Locator;
-  private readonly buttonConfirmNoAnswer: Locator;
-  private readonly buttonDeclineClose: Locator;
-
-  private readonly imgFlagsEUSI: Locator;
-  private readonly imgFlagsEUTV: Locator;
-
   private readonly buttonConfirm: Locator;
-  private readonly buttonDownload: Locator;
   private readonly inputFeedback: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.widget = this.page.getByTitle('Ava vestlus');
+    this.widget = this.page.getByTitle('Open chat');
     this.bykTitle = this.page.getByRole('heading', { name: 'Bürokratt' });
-    this.inputField = this.page.getByPlaceholder('Kirjutage oma sõnum...');
-    this.sendButton = this.page.getByTitle('Saada');
-    this.buttonHamburger = this.page.getByTitle('Detailid');
-    this.buttonTC = this.page.getByText('Tutvuge teenuse tingimustega', { exact: true });
-    this.buttonMinimize = this.page.getByTitle('Minimeeri');
-    this.buttonClose = this.page.getByTitle('Sulge');
-    this.chatRoutedNotice = this.page.getByText('Vestlus suunatakse klienditoele');
+    this.inputField = this.page.getByPlaceholder('Enter your message...');
+    this.sendButton = this.page.getByTitle('Send');
+    this.buttonHamburger = this.page.getByTitle('Details');
+
     this.operatorAwayNotice = this.page.getByText('Nõustaja on eemal', { exact: false });
 
-    this.buttonConfirmWithAnswer = this.page.getByRole('button', { name: 'Jah, sain vastuse' });
-    this.buttonConfirmNoAnswer = this.page.getByRole('button', { name: 'Jah, vastuseta' });
-    this.buttonDeclineClose = this.page.getByTitle('Kinnitusnupp ei');
-
-    this.imgFlagsEUSI = this.page.getByAltText('Euroopa Liidu Struktuuri- ja Investeerimisfondid');
-    this.imgFlagsEUTV = this.page.getByAltText('Euroopa Liidu taaste- ja vastupidavusrahastu');
-
-    this.buttonConfirm = this.page.getByRole('button', { name: 'Kinnita' });
-    this.buttonDownload = this.page.getByRole('button', { name: 'Laadi vestlus alla' });
-    this.inputFeedback = this.page.getByPlaceholder('Sisestage oma tagasiside...');
+    this.buttonConfirm = this.page.getByRole('button', { name: 'Confirm' });
+    this.inputFeedback = this.page.getByPlaceholder('Enter your feedback...');
   }
 
   async openChat(): Promise<void> {
-    const visibleWidget = await this.widget.isVisible().catch(() => false);
-
-    if (visibleWidget) {
-      await this.widget.click();
-    }
-
+    await expect(this.widget, 'The page never drew the chat launcher').toBeVisible({ timeout: 30000 });
+    await this.widget.click();
     await this.bykTitle.waitFor({ state: 'visible' });
   }
 
   async getCSAChat(): Promise<void> {
-    await this.inputField.fill('call a specialist');
+    await this.inputField.fill('I want to talk to a human');
     await this.sendButton.click();
 
-    const routeYes = this.page.getByRole('button', { name: 'Jah', exact: true });
-    const offeredRouting = await routeYes.waitFor({ state: 'visible', timeout: 30000 }).then(
-      () => true,
-      () => false,
-    );
+    const routeYes = this.page.getByRole('button', { name: 'Yes', exact: true });
+    const offeredRouting = await isEventuallyVisible(routeYes, 30000);
 
     // Whether the bot offers an operator at all depends on its current configuration, and
     // a bare timeout on the button says nothing about which of the known refusals happened:
@@ -78,8 +50,23 @@ export class WidgetPage {
       true,
     );
 
+    const forwarded = this.page.waitForResponse(
+      (response) => response.url().includes('forwards/forward-to-backoffice') && response.request().method() === 'POST',
+      { timeout: 30000 },
+    );
+
     await routeYes.click();
-    await this.chatRoutedNotice.waitFor({ state: 'visible', timeout: 30000 });
+
+    const response = await forwarded;
+    expect(response.ok(), `The back office refused to take the chat over with ${response.status()}`).toBeTruthy();
+  }
+
+  async chatId(): Promise<string> {
+    const stored = await this.page.evaluate(() => window.localStorage.getItem('byk-va-cid'));
+
+    expect(stored, 'The widget never stored an id for the conversation').toBeTruthy();
+
+    return JSON.parse(stored as string);
   }
 
   private async lastReply(): Promise<string> {
