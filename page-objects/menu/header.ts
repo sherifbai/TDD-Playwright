@@ -1,5 +1,10 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { URLS } from '@utils/env/urls';
+import { CSAActivity } from '@utils/interfaces';
+
+const CSA_ACTIVITY_URL = `${URLS.api}v2/private/backoffice/accounts/customer-support-activity`;
+
 export class Header {
   private readonly page: Page;
 
@@ -23,8 +28,34 @@ export class Header {
     // TODO: CSA menu mapping
   }
 
-  async markCSAPresent(): Promise<void> {
+  async isCSAPresent(): Promise<boolean> {
+    const response = await this.page.request.get(CSA_ACTIVITY_URL);
+
+    expect(response.ok(), `The back office would not report the operator's status (${response.status()})`).toBeTruthy();
+
+    const { response: activity } = (await response.json()) as { response: CSAActivity };
+
+    return activity.active && activity.status === 'online';
+  }
+
+  async ensureCSAPresent(): Promise<void> {
+    if (await this.isCSAPresent()) {
+      return;
+    }
+
+    await this.page.goto(`${URLS.admin}chat/landing`);
+
+    await expect(
+      this.toggleSwitchStatus,
+      `The operator is away and the back office renders no status switch to fix that with. ` +
+        `Sign in at ${URLS.admin}chat/landing and set the switch to Present.`,
+    ).toBeVisible({ timeout: 30000 });
+
     await this.setCSAStatus('online');
+
+    await expect(async () => {
+      expect(await this.isCSAPresent(), 'The operator stayed away after the switch was set to Present').toBeTruthy();
+    }).toPass({ timeout: 15000 });
   }
 
   // Leaves the account deactivated: the back office then renders no header at all on

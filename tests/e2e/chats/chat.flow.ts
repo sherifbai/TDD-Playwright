@@ -26,10 +26,13 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
     const customerPage = new WidgetPage(cPage);
     const chats = csaPage.getChats();
 
-    await test.step('An operator is on duty and watching the queue', async () => {
+    await test.step('The operator is present before the customer writes', async () => {
       await page.bringToFront();
+      await csaPage.getPageHeader().ensureCSAPresent();
+    });
+
+    await test.step('The operator is watching the queue', async () => {
       await page.goto(`${URLS.admin}chat/unanswered`);
-      await csaPage.getPageHeader().markCSAPresent();
     });
 
     // Each step raises the window it is about to act through. Both the widget and the queue
