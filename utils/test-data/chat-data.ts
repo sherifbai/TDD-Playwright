@@ -5,3 +5,13 @@ export function createChatMarker(prefix: string): string {
 
   return `${prefix} ${token}`;
 }
+
+export function markerPhrase(marker: string): string {
+  const token = marker.lastIndexOf(' ');
+
+  if (token < 1) {
+    throw new Error(`A chat marker needs wording around its token, got "${marker}"`);
+  }
+
+  return marker.slice(0, token);
+}

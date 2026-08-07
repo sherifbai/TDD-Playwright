@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { RouteReadyOptions } from '@utils/interfaces';
+import { markerPhrase } from '@utils/test-data/chat-data';
 import { isEventuallyVisible } from '@utils/waits';
 import { waitForChatsReady } from '@utils/waits/admin-page-ready';
 
@@ -18,6 +19,8 @@ export class UnansweredChatsPage {
   private readonly buttonForward: Locator;
   private readonly inputMessage: Locator;
   private readonly buttonSendMessage: Locator;
+  private readonly transcript: Locator;
+  private readonly customerMessages: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -33,6 +36,9 @@ export class UnansweredChatsPage {
     this.buttonForward = this.page.locator('button', { hasText: 'Forward to colleague' });
     this.inputMessage = this.page.getByPlaceholder(/reply|message|sõnum/i);
     this.buttonSendMessage = this.page.locator('button.btn--primary').filter({ hasNotText: /./ });
+
+    this.transcript = this.page.locator('.active-chat__group-wrapper');
+    this.customerMessages = this.transcript.locator('.active-chat__group--end-user');
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -83,20 +89,23 @@ export class UnansweredChatsPage {
     await expect(this.buttonEndChat, 'An active chat offers no way to end it').toBeVisible();
   }
 
-  async expectOperatorReceived(text: string): Promise<void> {
+  async expectOperatorReceived(marker: string): Promise<void> {
     await expect(
-      this.page.getByText(text, { exact: true }),
-      `The operator never received "${text}" from the customer`,
+      this.messageContaining(marker, this.customerMessages),
+      `The operator never received "${marker}" from the customer`,
     ).toBeVisible({ timeout: 30000 });
   }
 
-  async replyAsOperator(text: string): Promise<void> {
+  async replyAsOperator(marker: string): Promise<void> {
     await expect(this.inputMessage, 'The active chat offered no message input').toBeVisible({ timeout: 15000 });
-    await this.inputMessage.fill(text);
+    await this.inputMessage.fill(marker);
     await this.buttonSendMessage.click();
-    await expect(
-      this.page.getByText(text, { exact: true }),
-      'The operator’s own message never appeared in their chat',
-    ).toBeVisible({ timeout: 15000 });
+    await expect(this.messageContaining(marker), 'The operator’s own message never appeared in their chat').toBeVisible(
+      { timeout: 15000 },
+    );
+  }
+
+  private messageContaining(marker: string, within: Locator = this.transcript): Locator {
+    return within.getByText(markerPhrase(marker), { exact: false }).first();
   }
 }
