@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page, expect, test } from '@playwright/test';
 
 import { isEventuallyVisible } from '@utils/waits';
 
@@ -83,7 +83,27 @@ export class WidgetPage {
     return lastReply?.replace(/\s+/g, ' ') ?? 'the conversation held no messages at all';
   }
 
+  private async waitForMessageBox(): Promise<void> {
+    if (await isEventuallyVisible(this.inputField, 10000)) {
+      return;
+    }
+
+    test.info().annotations.push({
+      type: 'widget stalled',
+      description: `The widget hid its message box until the page was reloaded. Its last reply: "${await this.lastReply()}"`,
+    });
+
+    await this.page.reload();
+
+    if (await isEventuallyVisible(this.widget, 15000)) {
+      await this.widget.click();
+    }
+
+    await expect(this.inputField, 'The widget hid its message box even after a reload').toBeVisible({ timeout: 30000 });
+  }
+
   async sendMessage(text: string): Promise<void> {
+    await this.waitForMessageBox();
     await this.inputField.fill(text);
     await this.sendButton.click();
     await expect(this.messageByText(text), 'The widget never echoed the message the customer sent').toBeVisible({
