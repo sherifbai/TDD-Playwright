@@ -6,7 +6,7 @@ export function createChatMarker(prefix: string): string {
   return `${prefix} ${token}`;
 }
 
-export function markerPhrase(marker: string): string {
+export function chatMarkerPhrase(marker: string): string {
   const token = marker.lastIndexOf(' ');
 
   if (token < 1) {

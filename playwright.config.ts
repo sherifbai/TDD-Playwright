@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 
-import { URLS } from '@utils/env/urls';
+import { URLS } from '@utils/env';
 
 export default defineConfig({
   timeout: 120000,

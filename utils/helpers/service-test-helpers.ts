@@ -1,7 +1,7 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { Page, TestType } from '@playwright/test';
 
-import { URLS } from '@utils/env/urls';
+import { URLS } from '@utils/env';
 
 type ServiceNames = string | string[];
 type ServiceNamesResolver = ServiceNames | (() => ServiceNames | Promise<ServiceNames>);

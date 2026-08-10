@@ -2,7 +2,7 @@ import { PaginatedDataTable } from '@page-objects/common';
 import { Locator, Page, expect } from '@playwright/test';
 
 import { ExpectRowOptions, FindServiceRowOptions, RouteReadyOptions } from '@utils/interfaces';
-import { waitForServicesOverviewReady } from '@utils/waits/admin-page-ready';
+import { waitForServicesOverviewReady } from '@utils/waits';
 
 export class ServicesOverviewPage {
   private readonly page: Page;

@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
-import { URLS } from '@utils/env/urls';
+import { URLS } from '@utils/env';
 import { AdminPageVisit, FailedApiCall, ServerError } from '@utils/interfaces';
 
 const isApiCall = (url: string): boolean => url.includes('ruuter');

@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
-import { URLS } from '@utils/env/urls';
+import { URLS } from '@utils/env';
 import { waitForServicesOverviewReady } from '@utils/waits';
 
 const GENERATED_SERVICE = /\d{14}/;
