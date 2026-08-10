@@ -36,7 +36,7 @@ export class WidgetPage {
     await this.bykTitle.waitFor({ state: 'visible' });
   }
 
-  async getCSAChat(): Promise<void> {
+  async getCsaChat(): Promise<void> {
     await this.inputField.fill('I want to talk to a human');
     await this.sendButton.click();
 
