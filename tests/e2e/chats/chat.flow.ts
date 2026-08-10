@@ -3,8 +3,8 @@ import { WidgetPage } from '@page-objects/widget';
 
 import { seedEnglishLocale } from '@helpers/locale';
 import { test } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
-import { createChatMarker } from '@utils/test-data/chat-data';
+import { URLS } from '@utils/env';
+import { createChatMarker } from '@utils/test-data';
 
 test('[e2e] [chats] A routed chat carries messages both ways between customer and operator', async ({ browser }) => {
   const customerMarker = createChatMarker('the customer wrote');
@@ -24,11 +24,12 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
 
     const csaPage = new AdminPageFactory(page);
     const customerPage = new WidgetPage(cPage);
-    const chats = csaPage.getChats();
+    const unansweredChats = csaPage.getUnansweredChats();
+    const activeChats = csaPage.getActiveChats();
 
     await test.step('The operator is present before the customer writes', async () => {
       await page.bringToFront();
-      await csaPage.getPageHeader().ensureCSAPresent();
+      await csaPage.getPageHeader().ensureCsaPresent();
     });
 
     await test.step('The operator is watching the queue', async () => {
@@ -42,7 +43,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
       await cPage.bringToFront();
       await cPage.goto(URLS.customer);
       await customerPage.openChat();
-      await customerPage.getCSAChat();
+      await customerPage.getCsaChat();
     });
 
     // The widget hides its message box while a question of the bot's is still unanswered, and
@@ -52,8 +53,8 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
     // has been told an operator is on the other end.
     await test.step('The operator picks that very chat out of the queue', async () => {
       await page.bringToFront();
-      await chats.takeOverChat(await customerPage.chatId());
-      await chats.expectChatIsActive();
+      await unansweredChats.takeOverChat(await customerPage.chatId());
+      await activeChats.expectChatIsActive();
     });
 
     await test.step('The customer writes to the operator who took the chat', async () => {
@@ -61,11 +62,11 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
       await customerPage.sendMessage(customerMarker);
 
       await page.bringToFront();
-      await chats.expectOperatorReceived(customerMarker);
+      await activeChats.expectOperatorReceived(customerMarker);
     });
 
     await test.step('The operator answers and only that answer reaches the customer', async () => {
-      await chats.replyAsOperator(operatorMarker);
+      await activeChats.replyAsOperator(operatorMarker);
 
       await cPage.bringToFront();
       await customerPage.expectMessageDelivered(operatorMarker);

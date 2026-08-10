@@ -1,4 +1,4 @@
-import { UnansweredChatsPage } from '@page-objects/chats';
+import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
 import { Page } from '@playwright/test';
@@ -18,8 +18,12 @@ export class AdminPageFactory {
     return new SideMenu(this.page);
   }
 
-  getChats(): UnansweredChatsPage {
+  getUnansweredChats(): UnansweredChatsPage {
     return new UnansweredChatsPage(this.page);
+  }
+
+  getActiveChats(): ActiveChatsPage {
+    return new ActiveChatsPage(this.page);
   }
 
   getServicesOverview(): ServicesOverviewPage {
