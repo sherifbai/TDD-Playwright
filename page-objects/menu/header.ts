@@ -1,9 +1,8 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { URLS } from '@utils/env/urls';
-import { CSAActivity } from '@utils/interfaces';
-
-const CSA_ACTIVITY_URL = `${URLS.api}v2/private/backoffice/accounts/customer-support-activity`;
+import { CSA_ACTIVITY_PATH, CSA_ACTIVITY_URL } from '@utils/constants';
+import { URLS } from '@utils/env';
+import { CsaActivity } from '@utils/interfaces';
 
 export class Header {
   private readonly page: Page;
@@ -28,18 +27,18 @@ export class Header {
     // TODO: CSA menu mapping
   }
 
-  async isCSAPresent(): Promise<boolean> {
+  async isCsaPresent(): Promise<boolean> {
     const response = await this.page.request.get(CSA_ACTIVITY_URL);
 
     expect(response.ok(), `The back office would not report the operator's status (${response.status()})`).toBeTruthy();
 
-    const { response: activity } = (await response.json()) as { response: CSAActivity };
+    const { response: activity } = (await response.json()) as { response: CsaActivity };
 
     return activity.active && activity.status === 'online';
   }
 
-  async ensureCSAPresent(): Promise<void> {
-    if (await this.isCSAPresent()) {
+  async ensureCsaPresent(): Promise<void> {
+    if (await this.isCsaPresent()) {
       return;
     }
 
@@ -51,18 +50,18 @@ export class Header {
         `Sign in at ${URLS.admin}chat/landing and set the switch to Present.`,
     ).toBeVisible({ timeout: 30000 });
 
-    await this.setCSAStatus('online');
+    await this.setCsaStatus('online');
 
     await expect(async () => {
-      expect(await this.isCSAPresent(), 'The operator stayed away after the switch was set to Present').toBeTruthy();
+      expect(await this.isCsaPresent(), 'The operator stayed away after the switch was set to Present').toBeTruthy();
     }).toPass({ timeout: 15000 });
   }
 
   // Leaves the account deactivated: the back office then renders no header at all on
   // the next load, so presence cannot be restored through the UI and every later test
   // sharing this account needs a fresh login. Only call it if the test restores presence.
-  async markCSAAway(): Promise<void> {
-    await this.setCSAStatus('offline');
+  async markCsaAway(): Promise<void> {
+    await this.setCsaStatus('offline');
   }
 
   // The switch renders from the account's `active` flag, not from its status, so
@@ -70,7 +69,7 @@ export class Header {
   // answers an escalation with "Nõustaja on eemal" instead of offering an agent.
   // Flip the switch away from the target state, then flip it back, and take the
   // status POST the admin itself sends as the proof of what the server now holds.
-  private async setCSAStatus(status: 'online' | 'offline'): Promise<void> {
+  private async setCsaStatus(status: 'online' | 'offline'): Promise<void> {
     const targetState = status === 'online' ? 'checked' : 'unchecked';
     const oppositeState = status === 'online' ? 'unchecked' : 'checked';
 
@@ -83,7 +82,7 @@ export class Header {
 
     const statusPosted = this.page.waitForResponse(
       (response) =>
-        response.url().includes('accounts/customer-support-activity') &&
+        response.url().includes(CSA_ACTIVITY_PATH) &&
         response.request().method() === 'POST' &&
         (response.request().postData() ?? '').includes(`"customerSupportStatus":"${status}"`),
       { timeout: 15000 },
@@ -108,7 +107,7 @@ export class Header {
     await expect(this.buttonLogOut).toBeVisible();
   }
 
-  async saveCSAStatus(): Promise<void> {
+  async saveCsaStatus(): Promise<void> {
     await this.inputStatusClarification.fill('CSA autotest');
     await this.buttonStatusClarificationSave.click();
   }

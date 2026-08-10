@@ -1,11 +1,8 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { EMPTY_TABLE_PROBE_TIMEOUT, TABLE_PAGE_TURN_TIMEOUT, TABLE_SETTLE_TIMEOUT } from '@utils/constants';
 import { ExpectRowOptions, FindRowOptions, PaginatedDataTableOptions, RouteReadyOptions } from '@utils/interfaces';
 import { isEventuallyVisible } from '@utils/waits';
-
-const SETTLE_TIMEOUT = 5000;
-const PAGE_TURN_TIMEOUT = 10000;
-const EMPTY_TABLE_PROBE_TIMEOUT = 5000;
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -84,14 +81,14 @@ export class PaginatedDataTable {
   }
 
   private async waitForRowsToSettle(): Promise<void> {
-    await this.pollRows((current, previous) => current === previous, { interval: 350, timeout: SETTLE_TIMEOUT });
+    await this.pollRows((current, previous) => current === previous, { interval: 350, timeout: TABLE_SETTLE_TIMEOUT });
   }
 
   private async waitForRowsToChange(before: string): Promise<boolean> {
     return this.pollRows((current, previous) => current !== previous, {
       initial: before,
       interval: 200,
-      timeout: PAGE_TURN_TIMEOUT,
+      timeout: TABLE_PAGE_TURN_TIMEOUT,
     });
   }
 
