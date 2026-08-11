@@ -1,8 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { EMPTY_TABLE_PROBE_TIMEOUT, TABLE_PAGE_TURN_TIMEOUT, TABLE_SETTLE_TIMEOUT } from '@utils/constants';
+import { TABLE_PAGE_TURN_TIMEOUT, TABLE_SETTLE_TIMEOUT } from '@utils/constants';
 import { ExpectRowOptions, FindRowOptions, PaginatedDataTableOptions, RouteReadyOptions } from '@utils/interfaces';
-import { isEventuallyVisible } from '@utils/waits';
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -29,20 +28,6 @@ export class PaginatedDataTable {
       timeout,
     });
     await this.waitForRowsToSettle();
-  }
-
-  // A table left on a page past the end of a list that has since grown shorter draws an empty
-  // frame and drops its paging controls with it, so nothing on screen can bring the rows back.
-  // Loading the route again starts it on the first page. This navigates, so it belongs to the
-  // steps that decide where the table stands rather than to a wait any caller may run.
-  async recoverIfStranded({ timeout = EMPTY_TABLE_PROBE_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
-    await expect(this.table).toBeVisible({ timeout });
-
-    if (await isEventuallyVisible(this.getRows().first(), timeout)) {
-      return;
-    }
-
-    await this.page.reload();
   }
 
   private async rowsSignature(): Promise<string> {
@@ -145,7 +130,6 @@ export class PaginatedDataTable {
   }
 
   async findRowAcrossPages(text: string, { maxPages = 10 }: FindRowOptions = {}): Promise<Locator> {
-    await this.recoverIfStranded();
     await this.waitUntilReady();
     await this.goToFirstPage();
 
@@ -214,9 +198,6 @@ export class PaginatedDataTable {
     await this.pageSizeSelect.selectOption(desiredValue);
     await expect(this.pageSizeSelect).toHaveValue(desiredValue, { timeout: 15000 });
 
-    // Fitting more rows on a page leaves the table on a page number the shorter list no
-    // longer has, which is the very state it cannot climb out of on its own.
-    await this.recoverIfStranded();
     await this.waitUntilReady();
   }
 
