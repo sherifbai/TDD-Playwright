@@ -1,6 +1,7 @@
 import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
+import { OfficeHoursPage } from '@page-objects/settings';
 import { Page } from '@playwright/test';
 
 export class AdminPageFactory {
@@ -32,5 +33,9 @@ export class AdminPageFactory {
 
   getNewServicePage(): NewServicePage {
     return new NewServicePage(this.page);
+  }
+
+  getOfficeHours(): OfficeHoursPage {
+    return new OfficeHoursPage(this.page);
   }
 }

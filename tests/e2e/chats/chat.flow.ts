@@ -43,7 +43,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
       await cPage.bringToFront();
       await cPage.goto(URLS.customer);
       await customerPage.openChat();
-      await customerPage.getCsaChat();
+      await customerPage.getCsaChat(await csaPage.getOfficeHours().noCsaAvailableMessage());
     });
 
     // The widget hides its message box while a question of the bot's is still unanswered, and

@@ -10,7 +10,6 @@ export class WidgetPage {
   private readonly inputField: Locator;
   private readonly sendButton: Locator;
   private readonly buttonHamburger: Locator;
-  private readonly operatorAwayNotice: Locator;
 
   private readonly buttonConfirm: Locator;
   private readonly inputFeedback: Locator;
@@ -24,8 +23,6 @@ export class WidgetPage {
     this.sendButton = this.page.getByTitle('Send');
     this.buttonHamburger = this.page.getByTitle('Details');
 
-    this.operatorAwayNotice = this.page.getByText('Nõustaja on eemal', { exact: false });
-
     this.buttonConfirm = this.page.getByRole('button', { name: 'Confirm' });
     this.inputFeedback = this.page.getByPlaceholder('Enter your feedback...');
   }
@@ -36,7 +33,12 @@ export class WidgetPage {
     await this.bykTitle.waitFor({ state: 'visible' });
   }
 
-  async getCsaChat(): Promise<void> {
+  /**
+   * The notice the bot answers with when no operator is available is a free-text field of the
+   * back office's, so it carries whatever wording and language an administrator last typed.
+   * The caller reads it from there and passes it in rather than this page assuming a phrase.
+   */
+  async getCsaChat(noCsaAvailableMessage: string): Promise<void> {
     await this.inputField.fill('I want to talk to a human');
     await this.sendButton.click();
 
@@ -46,9 +48,10 @@ export class WidgetPage {
     // Whether the bot offers an operator at all depends on its current configuration, and
     // a bare timeout on the button says nothing about which of the known refusals happened:
     // the operator being away, or the bot answering with contact details instead of routing.
-    expect(offeredRouting, `The bot never offered to route the chat. Its last reply: "${await this.lastReply()}"`).toBe(
-      true,
-    );
+    expect(
+      offeredRouting,
+      `The bot never offered to route the chat. Its last reply: "${await this.lastReply(noCsaAvailableMessage)}"`,
+    ).toBe(true);
 
     const forwarded = this.page.waitForResponse(
       (response) => response.url().includes('forwards/forward-to-backoffice') && response.request().method() === 'POST',
@@ -69,9 +72,9 @@ export class WidgetPage {
     return JSON.parse(stored as string);
   }
 
-  private async lastReply(): Promise<string> {
-    if (await this.operatorAwayNotice.isVisible()) {
-      return 'the widget showed the "operator is away" contact form';
+  private async lastReply(noCsaAvailableMessage?: string): Promise<string> {
+    if (noCsaAvailableMessage && (await this.page.getByText(noCsaAvailableMessage, { exact: false }).isVisible())) {
+      return 'the widget showed the "no operator available" notice instead of routing the chat';
     }
 
     const replies = await this.page.locator('[class*="message"]').allInnerTexts();
