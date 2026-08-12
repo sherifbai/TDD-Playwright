@@ -1,7 +1,6 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-
-import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
+import { openAdminPage } from '@utils/helpers';
 
 test('[SMOKE] "Landing" page loads with the modules an admin may open', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/landing');

@@ -1,6 +1,6 @@
-import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { Page, TestType } from '@playwright/test';
 
+import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { URLS } from '@utils/env';
 
 type ServiceNames = string | string[];

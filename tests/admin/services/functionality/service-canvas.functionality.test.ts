@@ -1,6 +1,6 @@
-import { getServicePages, registerServiceCleanup } from '@helpers/service-test-helpers';
 import { expect, test } from '@setup/test-setup';
 import { URLS } from '@utils/env';
+import { getServicePages, registerServiceCleanup } from '@utils/helpers';
 import { createServiceName, createValidServiceData } from '@utils/test-data';
 
 const serviceName = createServiceName('canvas');

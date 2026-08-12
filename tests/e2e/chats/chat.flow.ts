@@ -1,9 +1,8 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { WidgetPage } from '@page-objects/widget';
-
-import { seedEnglishLocale } from '@helpers/locale';
 import { test } from '@setup/test-setup';
 import { URLS } from '@utils/env';
+import { seedEnglishLocale } from '@utils/helpers';
 import { createChatMarker } from '@utils/test-data';
 
 test('[e2e] [chats] A routed chat carries messages both ways between customer and operator', async ({ browser }) => {

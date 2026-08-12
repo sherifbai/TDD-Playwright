@@ -1,5 +1,5 @@
-import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
+import { openAdminPage } from '@utils/helpers';
 
 test('[SMOKE] "Administration" → "Users" page loads with the user list from the backend', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/users');

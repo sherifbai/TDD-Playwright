@@ -1,6 +1,6 @@
 import { AUTH_FILE, ensureAuthDirectory } from '@auth/auth.helpers';
-import { seedEnglishLocale } from '@helpers/locale';
 import { expect, test as setup } from '@setup/test-setup';
+import { seedEnglishLocale } from '@utils/helpers';
 
 setup('authenticate', async ({ page }) => {
   await ensureAuthDirectory(AUTH_FILE);

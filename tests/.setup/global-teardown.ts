@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 
 import { chromium } from '@playwright/test';
 
-import { removeGeneratedServices } from '@helpers/generated-services';
+import { removeGeneratedServices } from '@utils/helpers';
 
 const AUTH_FILE = 'tests/admin/.auth/user.json';
 
