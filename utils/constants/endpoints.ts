@@ -1,6 +1,6 @@
 import { URLS } from '@utils/env';
 
-export const BACKOFFICE_V2_BASE = `${URLS.api}v2/private/backoffice`;
+const BACKOFFICE_V2_BASE = `${URLS.api}v2/private/backoffice`;
 
 /** The back office's own status endpoint: read with GET, written with POST by the header switch. */
 export const CSA_ACTIVITY_PATH = 'accounts/customer-support-activity';
