@@ -56,7 +56,7 @@ export default [
           order: 'asc',
           ignoreCase: true,
           newlinesBetween: 1,
-          internalPattern: ['^@(utils|pages|setup|auth|helpers)/'],
+          internalPattern: ['^@(utils|page-objects|setup|auth)/'],
           groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
         },
       ],

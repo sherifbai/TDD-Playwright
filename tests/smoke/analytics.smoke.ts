@@ -1,5 +1,5 @@
-import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
+import { openAdminPage } from '@utils/helpers';
 
 test('[SMOKE] "Analytics" → "Overview" page loads', async ({ page }) => {
   const visit = await openAdminPage(page, 'analytics/overview');

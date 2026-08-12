@@ -12,6 +12,7 @@
     "test:test": "cross-env ENV=test npx playwright test",
     "test:test:smoke": "cross-env ENV=test npx playwright test --project smoke",
     "test:test:tests": "cross-env ENV=test npx playwright test --project tests",
+    "test:test:flow": "cross-env ENV=test npx playwright test --project flow",
     "test:test:debug": "cross-env ENV=test npx playwright test --debug",
     "test:stage": "cross-env ENV=stage npx playwright test",
     "test:stage:smoke": "cross-env ENV=stage npx playwright test --project smoke",

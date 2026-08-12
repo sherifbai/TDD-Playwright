@@ -1,7 +1,6 @@
 import { NewServicePage } from '@page-objects/services';
-
 import { expect, test } from '@setup/test-setup';
-import { URLS } from '@utils/env/urls';
+import { URLS } from '@utils/env';
 
 const inventoryOperation = 'GET /store/inventory';
 const inventoryDescription = /Returns pet inventories by status/i;

@@ -1,5 +1,5 @@
-import { openAdminPage } from '@helpers/smoke-helpers';
 import { expect, test } from '@setup/test-setup';
+import { openAdminPage } from '@utils/helpers';
 
 test('[SMOKE] "Conversations" → "Unanswered" page loads with its chat tabs', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/unanswered');

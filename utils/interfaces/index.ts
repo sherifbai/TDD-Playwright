@@ -1,4 +1,5 @@
 export * from './admin-page-visit.interface';
+export * from './csa-activity.interface';
 export * from './env-urls.interface';
 export * from './expect-row-options.interface';
 export * from './failed-api-call.interface';

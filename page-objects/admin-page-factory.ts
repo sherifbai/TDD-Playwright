@@ -1,7 +1,9 @@
-import { UnansweredChatsPage } from '@page-objects/chats';
+import { Page } from '@playwright/test';
+
+import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
-import { Page } from '@playwright/test';
+import { OfficeOpeningHoursPage } from '@page-objects/settings';
 
 export class AdminPageFactory {
   private readonly page: Page;
@@ -18,15 +20,23 @@ export class AdminPageFactory {
     return new SideMenu(this.page);
   }
 
-  getChats(): UnansweredChatsPage {
+  getUnansweredChatsPage(): UnansweredChatsPage {
     return new UnansweredChatsPage(this.page);
   }
 
-  getServicesOverview(): ServicesOverviewPage {
+  getActiveChatsPage(): ActiveChatsPage {
+    return new ActiveChatsPage(this.page);
+  }
+
+  getServicesOverviewPage(): ServicesOverviewPage {
     return new ServicesOverviewPage(this.page);
   }
 
   getNewServicePage(): NewServicePage {
     return new NewServicePage(this.page);
+  }
+
+  getOfficeOpeningHoursPage(): OfficeOpeningHoursPage {
+    return new OfficeOpeningHoursPage(this.page);
   }
 }
