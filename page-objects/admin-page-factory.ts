@@ -3,7 +3,7 @@ import { Page } from '@playwright/test';
 import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
-import { OfficeHoursPage } from '@page-objects/settings';
+import { OfficeOpeningHoursPage } from '@page-objects/settings';
 
 export class AdminPageFactory {
   private readonly page: Page;
@@ -36,7 +36,7 @@ export class AdminPageFactory {
     return new NewServicePage(this.page);
   }
 
-  getOfficeOpeningHoursPage(): OfficeHoursPage {
-    return new OfficeHoursPage(this.page);
+  getOfficeOpeningHoursPage(): OfficeOpeningHoursPage {
+    return new OfficeOpeningHoursPage(this.page);
   }
 }

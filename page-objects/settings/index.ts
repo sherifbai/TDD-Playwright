@@ -1,1 +1,1 @@
-export * from './office-hours-page';
+export * from './office-opening-hours-page';

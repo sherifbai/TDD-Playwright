@@ -5,7 +5,7 @@ import { URLS } from '@utils/env';
 import { CsaActivity } from '@utils/interfaces';
 
 /** Administration -> Office opening hours, where the texts the bot falls back on are edited. */
-export class OfficeHoursPage {
+export class OfficeOpeningHoursPage {
   private readonly page: Page;
 
   constructor(page: Page) {
