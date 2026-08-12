@@ -23,8 +23,8 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
 
     const csaPage = new AdminPageFactory(page);
     const customerPage = new WidgetPage(cPage);
-    const unansweredChats = csaPage.getUnansweredChats();
-    const activeChats = csaPage.getActiveChats();
+    const unansweredChats = csaPage.getUnansweredChatsPage();
+    const activeChats = csaPage.getActiveChatsPage();
 
     await test.step('The operator is present before the customer writes', async () => {
       await page.bringToFront();
@@ -42,7 +42,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
       await cPage.bringToFront();
       await cPage.goto(URLS.customer);
       await customerPage.openChat();
-      await customerPage.getCsaChat(await csaPage.getOfficeHours().noCsaAvailableMessage());
+      await customerPage.getCsaChat(await csaPage.getOfficeOpeningHoursPage().noCsaAvailableMessage());
     });
 
     // The widget hides its message box while a question of the bot's is still unanswered, and

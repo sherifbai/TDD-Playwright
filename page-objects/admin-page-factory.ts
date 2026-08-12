@@ -20,15 +20,15 @@ export class AdminPageFactory {
     return new SideMenu(this.page);
   }
 
-  getUnansweredChats(): UnansweredChatsPage {
+  getUnansweredChatsPage(): UnansweredChatsPage {
     return new UnansweredChatsPage(this.page);
   }
 
-  getActiveChats(): ActiveChatsPage {
+  getActiveChatsPage(): ActiveChatsPage {
     return new ActiveChatsPage(this.page);
   }
 
-  getServicesOverview(): ServicesOverviewPage {
+  getServicesOverviewPage(): ServicesOverviewPage {
     return new ServicesOverviewPage(this.page);
   }
 
@@ -36,7 +36,7 @@ export class AdminPageFactory {
     return new NewServicePage(this.page);
   }
 
-  getOfficeHours(): OfficeHoursPage {
+  getOfficeOpeningHoursPage(): OfficeHoursPage {
     return new OfficeHoursPage(this.page);
   }
 }

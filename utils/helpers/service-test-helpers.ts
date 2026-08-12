@@ -25,7 +25,7 @@ export function registerServiceCleanup(test: TestType<any, any>, resolveNames: S
       return;
     }
 
-    const sop = new AdminPageFactory(page).getServicesOverview();
+    const sop = new AdminPageFactory(page).getServicesOverviewPage();
     await page.goto(URLS.admin + 'services/overview');
 
     for (const name of names) {
@@ -39,6 +39,6 @@ export function getServicePages(page: Page) {
   return {
     apf,
     nsp: apf.getNewServicePage(),
-    sop: apf.getServicesOverview(),
+    sop: apf.getServicesOverviewPage(),
   };
 }
