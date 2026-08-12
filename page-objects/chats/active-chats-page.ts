@@ -21,7 +21,7 @@ export class ActiveChatsPage extends ChatsPage {
 
     this.activeChatList = this.page.getByRole('tablist', { name: 'Active chat list' });
     this.buttonEndChat = this.page.locator('button', { hasText: 'End chat' });
-    this.inputMessage = this.page.getByPlaceholder(/reply|message|sõnum/i);
+    this.inputMessage = this.page.getByPlaceholder(/reply|message/i);
     this.buttonSendMessage = this.page.locator('button.btn--primary').filter({ hasNotText: /./ });
 
     this.transcript = this.page.locator('.active-chat__group-wrapper');
