@@ -1,13 +1,13 @@
 import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 
-import { ADMIN_STORAGE_STATE, VIEWPORT } from '@utils/constants';
+import { ADMIN_AUTH_STATE, GLOBAL_TEARDOWN, TEST_DIR, TEST_RESULTS_DIR, VIEWPORT } from '@utils/constants';
 import { URLS } from '@utils/env';
 
 export default defineConfig({
   timeout: 120000,
-  testDir: './tests',
-  globalTeardown: './tests/.setup/global-teardown.ts',
+  testDir: TEST_DIR,
+  globalTeardown: GLOBAL_TEARDOWN,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -25,7 +25,7 @@ export default defineConfig({
     },
   },
 
-  outputDir: 'test-results/',
+  outputDir: TEST_RESULTS_DIR,
 
   projects: [
     {
@@ -50,7 +50,7 @@ export default defineConfig({
       testMatch: '**/working-time.setup.ts',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: ADMIN_STORAGE_STATE,
+        storageState: ADMIN_AUTH_STATE,
         viewport: VIEWPORT,
         contextOptions: { screen: VIEWPORT },
         launchOptions: {
@@ -64,7 +64,7 @@ export default defineConfig({
       testMatch: '**/*.smoke.ts',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: ADMIN_STORAGE_STATE,
+        storageState: ADMIN_AUTH_STATE,
         viewport: VIEWPORT,
         contextOptions: { screen: VIEWPORT },
         launchOptions: {
@@ -83,7 +83,7 @@ export default defineConfig({
         // whole budget is gone and reports a timeout that names no step. Capped here, the
         // same failure arrives in seconds and points at the click that could not land.
         actionTimeout: 15000,
-        storageState: ADMIN_STORAGE_STATE,
+        storageState: ADMIN_AUTH_STATE,
         viewport: VIEWPORT,
         contextOptions: { screen: VIEWPORT },
         launchOptions: {
@@ -107,7 +107,7 @@ export default defineConfig({
       testMatch: '**/*.test.ts',
       use: {
         ...devices['Desktop Chrome'],
-        storageState: ADMIN_STORAGE_STATE,
+        storageState: ADMIN_AUTH_STATE,
         viewport: VIEWPORT,
         contextOptions: { screen: VIEWPORT },
         launchOptions: {

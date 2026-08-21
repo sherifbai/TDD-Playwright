@@ -1,7 +1,7 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { WidgetPage } from '@page-objects/widget';
 import { test } from '@setup/test-setup';
-import { ADMIN_STORAGE_STATE } from '@utils/constants';
+import { ADMIN_AUTH_STATE } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { seedEnglishLocale } from '@utils/helpers';
 import { createChatMarker } from '@utils/test-data';
@@ -12,7 +12,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
   const neverSentMarker = createChatMarker('nobody wrote');
 
   const customerContext = await browser.newContext();
-  const csaContext = await browser.newContext({ storageState: ADMIN_STORAGE_STATE });
+  const csaContext = await browser.newContext({ storageState: ADMIN_AUTH_STATE });
 
   // The operator inherits English from the storage state auth.setup saved, but the customer
   // starts from a blank context, where the widget would default to Estonian.
@@ -79,7 +79,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
 });
 
 test('[e2e] [chats] The widget offers no operator while customer service is switched off', async ({ browser }) => {
-  const csaContext = await browser.newContext({ storageState: ADMIN_STORAGE_STATE });
+  const csaContext = await browser.newContext({ storageState: ADMIN_AUTH_STATE });
   const customerContext = await browser.newContext();
 
   try {

@@ -2,17 +2,16 @@ import { existsSync } from 'node:fs';
 
 import { chromium } from '@playwright/test';
 
+import { ADMIN_AUTH_STATE } from '@utils/constants';
 import { removeGeneratedServices } from '@utils/helpers';
 
-const AUTH_FILE = 'tests/admin/.auth/user.json';
-
 export default async function removeServicesLeftBehind(): Promise<void> {
-  if (!existsSync(AUTH_FILE)) {
+  if (!existsSync(ADMIN_AUTH_STATE)) {
     return;
   }
 
   const browser = await chromium.launch();
-  const context = await browser.newContext({ storageState: AUTH_FILE });
+  const context = await browser.newContext({ storageState: ADMIN_AUTH_STATE });
 
   try {
     const removed = await removeGeneratedServices(await context.newPage());
