@@ -84,7 +84,10 @@ export class WidgetPage {
       `The widget never showed "${botCannotAnswerMessage}". Its last reply: "${await this.lastReply()}"`,
     ).toBe(true);
 
-    await expect(this.routeYes, 'The widget offered to route the chat although the office was closed').toBeHidden();
+    await expect(
+      this.routeYes,
+      'The widget offered to route the chat although customer service was switched off',
+    ).toBeHidden();
   }
 
   async chatId(): Promise<string> {
