@@ -29,16 +29,18 @@ The `setup` project writes these before any test starts, so a local run needs no
 
 Nothing else on that page is touched: the notices keep whatever the back office holds, because the tests read their wording from there rather than assuming it. One test in `tests/e2e/chats/chat.flow.ts` shuts the office to chat (both switches off) on purpose and puts the configuration back when it ends; if it is killed mid-run, the next run's `setup` opens the office again.
 
-Both switches matter because the bot offers an operator when **the office is open OR an operator is online**:
+Both switches matter because the bot offers an operator only when **the office is open AND an operator is online**:
 
 | Opening hours | Operator | What the bot does |
 |---|---|---|
-| 24/7 | Present or Away | offers an operator, the chat reaches the queue |
-| closed | Present | offers one anyway |
-| closed | Away | shows the "no operator available" notice and a contact form |
+| 24/7 | Present | offers an operator, the chat reaches the queue |
+| 24/7 | Away | shows the "no operator available" notice and a contact form |
+| closed | Present or Away | shows the "outside working hours" notice |
 | any | any, with **Use customer service = No** | never offers one: shows the "bot cannot answer" notice |
 
-So opening hours alone cannot express "no operator on offer" — with an operator online the case would pass for the wrong reason, and the routing test leaves the operator Present. Turning both switches off is the mirror image of what `setup` writes.
+The two 24/7 rows were measured on the `test` stand on 21.08.2026. The closed rows are what the back office is specified to do and no test covers them: `CLOSED_TO_CHAT` turns **Use customer service** off along with the hours, so the closed-office test lands on the last row rather than the third.
+
+So neither switch alone stands for what a test asserts. `tests/e2e/chats/chat.flow.ts` turns both off and matches on the "bot cannot answer" notice, the mirror image of what `setup` writes; the routing test needs the hours open *and* the operator Present, because at 24/7 with the operator Away the chat never reaches the queue.
 
 Not covered by these tests, in case a later one needs it: the time zone the server reads the daily windows in (they are stored as bare `"11:00"`), which branch shows `organizationOutsideWorkingHoursMessage`, and whether national holidays and weekend switches change the bot's answer.
 
