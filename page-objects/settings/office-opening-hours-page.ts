@@ -2,8 +2,8 @@ import { APIResponse, Page, expect, test } from '@playwright/test';
 
 import {
   CHAT_FLAGS,
-  CLOSED_TO_CHAT,
   CSA_ACTIVITY_URL,
+  CUSTOMER_SERVICE_OFF,
   OPEN_TO_CHAT,
   ORGANIZATION_WORKING_TIME_URL,
   WIDGET_DATA_URL,
@@ -55,16 +55,16 @@ export class OfficeOpeningHoursPage {
     await this.write(OPEN_TO_CHAT);
   }
 
-  async whileClosedToChat(body: () => Promise<void>): Promise<void> {
-    const openOffice = await this.settings();
+  async whileCustomerServiceIsOff(body: () => Promise<void>): Promise<void> {
+    const settingsBefore = await this.settings();
 
     try {
-      await this.write(CLOSED_TO_CHAT);
+      await this.write(CUSTOMER_SERVICE_OFF);
       await body();
     } finally {
-      await this.write(openOffice).catch((error: unknown) => {
+      await this.write(settingsBefore).catch((error: unknown) => {
         test.info().annotations.push({
-          type: 'office left closed to chat',
+          type: 'customer service left switched off',
           description: error instanceof Error ? error.message.split('\n')[0] : String(error),
         });
       });
