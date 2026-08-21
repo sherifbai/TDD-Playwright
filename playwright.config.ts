@@ -1,11 +1,19 @@
 import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 
-import { ADMIN_AUTH_STATE, GLOBAL_TEARDOWN, TEST_DIR, TEST_RESULTS_DIR, VIEWPORT } from '@utils/constants';
+import {
+  ACTION_TIMEOUT,
+  ADMIN_AUTH_STATE,
+  GLOBAL_TEARDOWN,
+  TEST_DIR,
+  TEST_RESULTS_DIR,
+  TEST_TIMEOUT,
+  VIEWPORT,
+} from '@utils/constants';
 import { URLS } from '@utils/env';
 
 export default defineConfig({
-  timeout: 120000,
+  timeout: TEST_TIMEOUT,
   testDir: TEST_DIR,
   globalTeardown: GLOBAL_TEARDOWN,
   fullyParallel: false,
@@ -82,7 +90,7 @@ export default defineConfig({
         // aimed at it then never settles: Playwright rechecks the button until the test's
         // whole budget is gone and reports a timeout that names no step. Capped here, the
         // same failure arrives in seconds and points at the click that could not land.
-        actionTimeout: 15000,
+        actionTimeout: ACTION_TIMEOUT,
         storageState: ADMIN_AUTH_STATE,
         viewport: VIEWPORT,
         contextOptions: { screen: VIEWPORT },

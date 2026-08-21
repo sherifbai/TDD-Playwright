@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { CSA_ACTIVITY_PATH, CSA_ACTIVITY_URL } from '@utils/constants';
+import { ACTION_TIMEOUT, CSA_ACTIVITY_PATH, CSA_ACTIVITY_URL } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { CsaActivity } from '@utils/interfaces';
 
@@ -54,7 +54,7 @@ export class Header {
 
     await expect(async () => {
       expect(await this.isCsaPresent(), 'The operator stayed away after the switch was set to Present').toBeTruthy();
-    }).toPass({ timeout: 15000 });
+    }).toPass({ timeout: ACTION_TIMEOUT });
   }
 
   // Leaves the account deactivated: the back office then renders no header at all on
@@ -77,7 +77,7 @@ export class Header {
 
     if ((await this.toggleSwitchStatus.getAttribute('data-state')) !== oppositeState) {
       await this.toggleSwitchStatus.click();
-      await expect(this.toggleSwitchStatus).toHaveAttribute('data-state', oppositeState, { timeout: 15000 });
+      await expect(this.toggleSwitchStatus).toHaveAttribute('data-state', oppositeState, { timeout: ACTION_TIMEOUT });
     }
 
     const statusPosted = this.page.waitForResponse(
@@ -85,14 +85,14 @@ export class Header {
         response.url().includes(CSA_ACTIVITY_PATH) &&
         response.request().method() === 'POST' &&
         (response.request().postData() ?? '').includes(`"customerSupportStatus":"${status}"`),
-      { timeout: 15000 },
+      { timeout: ACTION_TIMEOUT },
     );
 
     await this.toggleSwitchStatus.click();
 
     const response = await statusPosted;
     expect(response.ok(), `The admin rejected the switch to "${status}" with ${response.status()}`).toBeTruthy();
-    await expect(this.toggleSwitchStatus).toHaveAttribute('data-state', targetState, { timeout: 15000 });
+    await expect(this.toggleSwitchStatus).toHaveAttribute('data-state', targetState, { timeout: ACTION_TIMEOUT });
   }
 
   async assertLogoVisible(): Promise<void> {

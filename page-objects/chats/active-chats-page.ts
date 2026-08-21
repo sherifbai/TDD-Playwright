@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { chatMarkerPhrase } from '@utils/test-data';
 
 import { ChatsPage } from './chats-page';
@@ -41,11 +42,13 @@ export class ActiveChatsPage extends ChatsPage {
   }
 
   async replyAsOperator(marker: string): Promise<void> {
-    await expect(this.inputMessage, 'The active chat offered no message input').toBeVisible({ timeout: 15000 });
+    await expect(this.inputMessage, 'The active chat offered no message input').toBeVisible({
+      timeout: ACTION_TIMEOUT,
+    });
     await this.inputMessage.fill(marker);
     await this.buttonSendMessage.click();
     await expect(this.messageContaining(marker), 'The operator’s own message never appeared in their chat').toBeVisible(
-      { timeout: 15000 },
+      { timeout: ACTION_TIMEOUT },
     );
   }
 

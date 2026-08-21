@@ -1,5 +1,6 @@
 import { test as base, expect } from '@playwright/test';
 
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { ReadyPageInterface } from '@utils/interfaces';
 import { waitForRouteReady } from '@utils/waits';
 
@@ -13,7 +14,7 @@ export const test = base.extend<{ page: ReadyPageInterface }>({
         waitUntil: 'domcontentloaded',
         ...options,
       });
-      await waitForRouteReady(page, url, { timeout: options.timeout ?? 15000 });
+      await waitForRouteReady(page, url, { timeout: options.timeout ?? ACTION_TIMEOUT });
       return result;
     };
 
