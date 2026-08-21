@@ -78,7 +78,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
   }
 });
 
-test('[e2e] [chats] The widget offers no operator while the office is closed to chat', async ({ browser }) => {
+test('[e2e] [chats] The widget offers no operator while customer service is switched off', async ({ browser }) => {
   const csaContext = await browser.newContext({ storageState: ADMIN_STORAGE_STATE });
   const customerContext = await browser.newContext();
 
