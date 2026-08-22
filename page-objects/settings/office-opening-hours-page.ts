@@ -2,8 +2,8 @@ import { APIResponse, Page, expect, test } from '@playwright/test';
 
 import {
   CSA_ACTIVITY_URL,
-  CUSTOMER_SERVICE_OFF,
-  OPEN_TO_CHAT,
+  CSA_AVAILABLE_ALL_TIME,
+  CSA_UNAVAILABLE,
   ORGANIZATION_WORKING_TIME_URL,
   WIDGET_DATA_URL,
 } from '@utils/constants';
@@ -50,15 +50,15 @@ export class OfficeOpeningHoursPage {
     return notice;
   }
 
-  async openOffice(): Promise<void> {
-    await this.write(OPEN_TO_CHAT);
+  async enableCsaAllTime(): Promise<void> {
+    await this.write(CSA_AVAILABLE_ALL_TIME);
   }
 
   async whileCsaUnavailable(body: () => Promise<void>): Promise<void> {
     const settingsBefore = await this.settings();
 
     try {
-      await this.write(CUSTOMER_SERVICE_OFF);
+      await this.write(CSA_UNAVAILABLE);
       await body();
     } finally {
       await this.write(settingsBefore).catch((error: unknown) => {

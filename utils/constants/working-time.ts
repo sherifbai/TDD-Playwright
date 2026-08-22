@@ -1,6 +1,6 @@
 import { WorkingTimeSettings } from '@utils/interfaces';
 
-export const OPEN_TO_CHAT: Partial<WorkingTimeSettings> = {
+export const CSA_AVAILABLE_ALL_TIME: Partial<WorkingTimeSettings> = {
   organizationWorkingAllTime: 'true',
   organizationUseCSA: 'true',
 };
@@ -8,6 +8,6 @@ export const OPEN_TO_CHAT: Partial<WorkingTimeSettings> = {
 // Use customer service is what decides the answer: with it off the bot shows the "bot cannot
 // answer" notice whatever the hours say, so this leaves the 24/7 hours `setup` wrote in place.
 // What a closed office does on its own, with customer service still on, no test here measures.
-export const CUSTOMER_SERVICE_OFF: Partial<WorkingTimeSettings> = {
+export const CSA_UNAVAILABLE: Partial<WorkingTimeSettings> = {
   organizationUseCSA: 'false',
 };
