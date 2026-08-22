@@ -11,5 +11,3 @@ export const OPEN_TO_CHAT: Partial<WorkingTimeSettings> = {
 export const CUSTOMER_SERVICE_OFF: Partial<WorkingTimeSettings> = {
   organizationUseCSA: 'false',
 };
-
-export const CHAT_FLAGS = ['organizationWorkingAllTime', 'organizationUseCSA'] as const;

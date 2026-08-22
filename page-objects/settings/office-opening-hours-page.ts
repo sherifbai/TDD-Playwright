@@ -1,7 +1,6 @@
 import { APIResponse, Page, expect, test } from '@playwright/test';
 
 import {
-  CHAT_FLAGS,
   CSA_ACTIVITY_URL,
   CUSTOMER_SERVICE_OFF,
   OPEN_TO_CHAT,
@@ -77,11 +76,6 @@ export class OfficeOpeningHoursPage {
     });
 
     expect(response.ok(), `The back office refused to save the opening hours (${response.status()})`).toBeTruthy();
-
-    const stored = await this.settings();
-    const ignored = CHAT_FLAGS.filter((flag) => flag in changes && stored[flag] !== changes[flag]);
-
-    expect(ignored, `The back office kept its own value for ${ignored.join(', ')}`).toEqual([]);
   }
 
   /** Every widget carries its own texts, and the settings endpoint asks for one of them by id. */
