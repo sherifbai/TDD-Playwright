@@ -1,6 +1,6 @@
 export interface WorkingTimeSettings {
-  readonly organizationWorkingAllTime: string;
-  readonly organizationUseCSA: string;
+  readonly organizationUseCSA: 'true' | 'false';
+  readonly organizationWorkingAllTime: 'true' | 'false';
   readonly organizationNoCsaAvailableMessage: string;
   readonly organizationBotCannotAnswerMessage: string;
   readonly [setting: string]: string;
