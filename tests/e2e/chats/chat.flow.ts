@@ -88,7 +88,7 @@ test('[e2e] [chats] The widget offers no operator while customer service is swit
     const officeHours = new AdminPageFactory(await csaContext.newPage()).getOfficeOpeningHoursPage();
     const botCannotAnswer = await officeHours.botCannotAnswerMessage();
 
-    await officeHours.whileCustomerServiceIsOff(async () => {
+    await officeHours.whileCsaUnavailable(async () => {
       const cPage = await customerContext.newPage();
       const customerPage = new WidgetPage(cPage);
 

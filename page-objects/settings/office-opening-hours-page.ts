@@ -54,7 +54,7 @@ export class OfficeOpeningHoursPage {
     await this.write(OPEN_TO_CHAT);
   }
 
-  async whileCustomerServiceIsOff(body: () => Promise<void>): Promise<void> {
+  async whileCsaUnavailable(body: () => Promise<void>): Promise<void> {
     const settingsBefore = await this.settings();
 
     try {
