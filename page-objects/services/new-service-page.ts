@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { RouteReadyOptions, SaveServiceOptions, ServiceData } from '@utils/interfaces';
 import { normalizeServiceTitle } from '@utils/test-data';
 import { waitForNewServiceReady } from '@utils/waits';
@@ -387,7 +388,7 @@ export class NewServicePage {
     return this.flowNodes.filter({ has: this.page.getByText(titleText, { exact: true }) }).first();
   }
 
-  async waitForToast({ timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
+  async waitForToast({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
     await expect(this.toastList.locator('li').first()).toBeVisible({ timeout });
   }
 
@@ -513,12 +514,12 @@ export class NewServicePage {
 
     await expect(this.toastList, `Saving the service showed no toast matching ${expectedToast}`).toContainText(
       expectedToast,
-      { timeout: 15000 },
+      { timeout: ACTION_TIMEOUT },
     );
 
     if (await savePosted) {
       await expect(this.page, 'The saved draft never opened as an editable service').toHaveURL(/services\/edit\//i, {
-        timeout: 15000,
+        timeout: ACTION_TIMEOUT,
       });
     }
   }
@@ -532,7 +533,7 @@ export class NewServicePage {
 
     await expect(this.toastList, `Confirming the service showed no toast matching ${expectedToast}`).toContainText(
       expectedToast,
-      { timeout: 15000 },
+      { timeout: ACTION_TIMEOUT },
     );
   }
 
@@ -553,7 +554,7 @@ export class NewServicePage {
 
     if (!navigated) {
       await this.page.goto('services/overview');
-      await expect(this.page).toHaveURL(/services\/overview/i, { timeout: 15000 });
+      await expect(this.page).toHaveURL(/services\/overview/i, { timeout: ACTION_TIMEOUT });
     }
 
     await this.page.waitForLoadState('domcontentloaded');
@@ -802,7 +803,7 @@ export class NewServicePage {
     await this.robustFillInput(this.getAssignValueInput(row), value);
 
     await this.defineSave.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
   }
 
   persistedAssignValue(value: string): string {
@@ -819,7 +820,7 @@ export class NewServicePage {
 
   async closeNodeDialogWithoutSaving(): Promise<void> {
     await this.defineCancel.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
   }
 
   async messageSetTextAndSave(text: string): Promise<void> {
@@ -829,7 +830,7 @@ export class NewServicePage {
     await this.quillEditor.fill(String(text));
     await expect(this.quillEditor).toContainText(String(text), { timeout: 10000 });
     await this.messageSave.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
     await expect(this.canvas).toBeVisible();
   }
 
@@ -844,7 +845,7 @@ export class NewServicePage {
     await this.quillEditor.fill('');
     await expect(this.quillEditor).toHaveText('', { timeout: 10000 });
     await this.messageSave.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
     await expect(this.canvas).toBeVisible();
   }
 
@@ -872,7 +873,7 @@ export class NewServicePage {
     ).toBeVisible();
 
     await this.nodeEditorSaveBtn.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
     await expect(this.canvas).toBeVisible();
   }
 
@@ -902,7 +903,7 @@ export class NewServicePage {
 
   async conditionSaveNode(): Promise<void> {
     await this.conditionSave.click();
-    await expect(this.conditionDialog).toBeHidden({ timeout: 15000 });
+    await expect(this.conditionDialog).toBeHidden({ timeout: ACTION_TIMEOUT });
     await expect(this.canvas).toBeVisible();
   }
 
@@ -934,7 +935,7 @@ export class NewServicePage {
     }
 
     await this.dynamicChoicesSave.click();
-    await expect(this.nodeEditorPopup).toBeHidden({ timeout: 15000 });
+    await expect(this.nodeEditorPopup).toBeHidden({ timeout: ACTION_TIMEOUT });
     await expect(this.canvas).toBeVisible();
   }
 
@@ -983,7 +984,7 @@ export class NewServicePage {
 
   async openCreateEndpointFromRegistry(): Promise<void> {
     const createBtn = this.page.getByRole('button', { name: 'Create endpoint', exact: true }).first();
-    await expect(createBtn).toBeVisible({ timeout: 15000 });
+    await expect(createBtn).toBeVisible({ timeout: ACTION_TIMEOUT });
     await createBtn.scrollIntoViewIfNeeded().catch(() => {});
     await createBtn.click({ force: true });
     await expect(this.createEndpointModal).toBeVisible({ timeout: 10000 });
@@ -1054,15 +1055,15 @@ export class NewServicePage {
     await expect(this.createEndpointCreate).toBeEnabled();
     await this.createEndpointCreate.click();
 
-    await this.waitForToast({ timeout: 15000 });
+    await this.waitForToast({ timeout: ACTION_TIMEOUT });
     await expect(this.toastList).toContainText(/created|saved|success|endpoint/i);
 
     await Promise.race([
-      this.createEndpointModal.waitFor({ state: 'hidden', timeout: 15000 }).catch(() => null),
+      this.createEndpointModal.waitFor({ state: 'hidden', timeout: ACTION_TIMEOUT }).catch(() => null),
       this.toastList
         .locator('li')
         .first()
-        .waitFor({ state: 'visible', timeout: 15000 })
+        .waitFor({ state: 'visible', timeout: ACTION_TIMEOUT })
         .catch(() => null),
     ]);
 
@@ -1096,8 +1097,8 @@ export class NewServicePage {
       if (opened) break;
     }
 
-    await expect(this.widgetDialog).toBeVisible({ timeout: 15000 });
-    await expect(this.widgetInput).toBeVisible({ timeout: 15000 });
+    await expect(this.widgetDialog).toBeVisible({ timeout: ACTION_TIMEOUT });
+    await expect(this.widgetInput).toBeVisible({ timeout: ACTION_TIMEOUT });
   }
 
   async widgetSendText(text: string): Promise<void> {

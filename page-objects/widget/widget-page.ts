@@ -1,6 +1,9 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
+import { WIDGET_MESSAGE_BOX_TIMEOUT, WIDGET_REDRAW_TIMEOUT, WIDGET_REPLY_TIMEOUT } from '@utils/constants';
 import { isEventuallyVisible } from '@utils/waits';
+
+const ASK_FOR_OPERATOR = 'I want to talk to a human';
 
 export class WidgetPage {
   private readonly page: Page;
@@ -10,6 +13,7 @@ export class WidgetPage {
   private readonly inputField: Locator;
   private readonly sendButton: Locator;
   private readonly buttonHamburger: Locator;
+  private readonly routeYes: Locator;
 
   private readonly buttonConfirm: Locator;
   private readonly inputFeedback: Locator;
@@ -22,13 +26,16 @@ export class WidgetPage {
     this.inputField = this.page.getByPlaceholder('Enter your message...');
     this.sendButton = this.page.getByTitle('Send');
     this.buttonHamburger = this.page.getByTitle('Details');
+    this.routeYes = this.page.getByRole('button', { name: 'Yes', exact: true });
 
     this.buttonConfirm = this.page.getByRole('button', { name: 'Confirm' });
     this.inputFeedback = this.page.getByPlaceholder('Enter your feedback...');
   }
 
   async openChat(): Promise<void> {
-    await expect(this.widget, 'The page never drew the chat launcher').toBeVisible({ timeout: 30000 });
+    await expect(this.widget, 'The page never drew the chat launcher').toBeVisible({
+      timeout: WIDGET_REPLY_TIMEOUT,
+    });
     await this.widget.click();
     await this.bykTitle.waitFor({ state: 'visible' });
   }
@@ -39,11 +46,10 @@ export class WidgetPage {
    * The caller reads it from there and passes it in rather than this page assuming a phrase.
    */
   async getCsaChat(noCsaAvailableMessage: string): Promise<void> {
-    await this.inputField.fill('I want to talk to a human');
+    await this.inputField.fill(ASK_FOR_OPERATOR);
     await this.sendButton.click();
 
-    const routeYes = this.page.getByRole('button', { name: 'Yes', exact: true });
-    const offeredRouting = await isEventuallyVisible(routeYes, 30000);
+    const offeredRouting = await isEventuallyVisible(this.routeYes, WIDGET_REPLY_TIMEOUT);
 
     // Whether the bot offers an operator at all depends on its current configuration, and
     // a bare timeout on the button says nothing about which of the known refusals happened:
@@ -55,13 +61,33 @@ export class WidgetPage {
 
     const forwarded = this.page.waitForResponse(
       (response) => response.url().includes('forwards/forward-to-backoffice') && response.request().method() === 'POST',
-      { timeout: 30000 },
+      { timeout: WIDGET_REPLY_TIMEOUT },
     );
 
-    await routeYes.click();
+    await this.routeYes.click();
 
     const response = await forwarded;
     expect(response.ok(), `The back office refused to take the chat over with ${response.status()}`).toBeTruthy();
+  }
+
+  async expectNoOperatorOffered(botCannotAnswerMessage: string): Promise<void> {
+    await this.inputField.fill(ASK_FOR_OPERATOR);
+    await this.sendButton.click();
+
+    const showedNotice = await isEventuallyVisible(
+      this.page.getByText(botCannotAnswerMessage, { exact: false }),
+      WIDGET_REPLY_TIMEOUT,
+    );
+
+    expect(
+      showedNotice,
+      `The widget never showed "${botCannotAnswerMessage}". Its last reply: "${await this.lastReply()}"`,
+    ).toBe(true);
+
+    await expect(
+      this.routeYes,
+      'The widget offered to route the chat although customer service was switched off',
+    ).toBeHidden();
   }
 
   async chatId(): Promise<string> {
@@ -87,7 +113,7 @@ export class WidgetPage {
   }
 
   private async waitForMessageBox(): Promise<void> {
-    if (await isEventuallyVisible(this.inputField, 10000)) {
+    if (await isEventuallyVisible(this.inputField, WIDGET_MESSAGE_BOX_TIMEOUT)) {
       return;
     }
 
@@ -98,11 +124,13 @@ export class WidgetPage {
 
     await this.page.reload();
 
-    if (await isEventuallyVisible(this.widget, 15000)) {
+    if (await isEventuallyVisible(this.widget, WIDGET_REDRAW_TIMEOUT)) {
       await this.widget.click();
     }
 
-    await expect(this.inputField, 'The widget hid its message box even after a reload').toBeVisible({ timeout: 30000 });
+    await expect(this.inputField, 'The widget hid its message box even after a reload').toBeVisible({
+      timeout: WIDGET_REPLY_TIMEOUT,
+    });
   }
 
   async sendMessage(text: string): Promise<void> {
@@ -110,12 +138,14 @@ export class WidgetPage {
     await this.inputField.fill(text);
     await this.sendButton.click();
     await expect(this.messageByText(text), 'The widget never echoed the message the customer sent').toBeVisible({
-      timeout: 15000,
+      timeout: WIDGET_REDRAW_TIMEOUT,
     });
   }
 
   async expectMessageDelivered(text: string): Promise<void> {
-    await expect(this.messageByText(text), `The customer never received "${text}"`).toBeVisible({ timeout: 30000 });
+    await expect(this.messageByText(text), `The customer never received "${text}"`).toBeVisible({
+      timeout: WIDGET_REPLY_TIMEOUT,
+    });
   }
 
   async expectMessageNeverDelivered(text: string): Promise<void> {

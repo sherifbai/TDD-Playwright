@@ -1,6 +1,7 @@
 import { Locator, Page, expect } from '@playwright/test';
 
 import { PaginatedDataTable } from '@page-objects/common';
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { ExpectRowOptions, FindServiceRowOptions, RouteReadyOptions } from '@utils/interfaces';
 import { waitForServicesOverviewReady } from '@utils/waits';
 
@@ -100,7 +101,7 @@ export class ServicesOverviewPage {
   async clickCreateNew(): Promise<void> {
     await this.waitForReady();
     await this.buttonCreateNewService.click();
-    await this.page.waitForURL(/services\/newService/i, { timeout: 15000 }).catch(() => {});
+    await this.page.waitForURL(/services\/newService/i, { timeout: ACTION_TIMEOUT }).catch(() => {});
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
   }
 
@@ -109,7 +110,7 @@ export class ServicesOverviewPage {
     const button = this.servicesTable.getActionButton(row, 'Edit');
     await expect(button).toBeVisible();
     await button.click({ force: true });
-    await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
+    await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: ACTION_TIMEOUT }).catch(() => {});
     await this.page.waitForLoadState('domcontentloaded').catch(() => {});
   }
 
@@ -137,7 +138,7 @@ export class ServicesOverviewPage {
       const editButton = this.servicesTable.getActionButton(row, 'Edit');
       await expect(editButton).toBeVisible();
       await editButton.first().click({ force: true });
-      await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: 15000 }).catch(() => {});
+      await this.page.waitForURL(/services\/(edit|newService)/i, { timeout: ACTION_TIMEOUT }).catch(() => {});
       await this.page.waitForLoadState('domcontentloaded').catch(() => {});
 
       const headerDeleteButton = this.page.getByRole('button', { name: 'Delete', exact: true }).first();

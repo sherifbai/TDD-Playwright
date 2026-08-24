@@ -95,6 +95,7 @@ Base URLs are defined centrally in `playwright.config.js`.
 The repository currently defines these Playwright projects:
 
 - `mock`
+- `auth`
 - `setup`
 - `smoke`
 - `flow`

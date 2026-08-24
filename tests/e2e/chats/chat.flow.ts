@@ -1,6 +1,7 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { WidgetPage } from '@page-objects/widget';
 import { test } from '@setup/test-setup';
+import { ADMIN_AUTH_STATE } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { seedEnglishLocale } from '@utils/helpers';
 import { createChatMarker } from '@utils/test-data';
@@ -11,7 +12,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
   const neverSentMarker = createChatMarker('nobody wrote');
 
   const customerContext = await browser.newContext();
-  const csaContext = await browser.newContext({ storageState: 'tests/admin/.auth/user.json' });
+  const csaContext = await browser.newContext({ storageState: ADMIN_AUTH_STATE });
 
   // The operator inherits English from the storage state auth.setup saved, but the customer
   // starts from a blank context, where the widget would default to Estonian.
@@ -70,6 +71,30 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
       await cPage.bringToFront();
       await customerPage.expectMessageDelivered(operatorMarker);
       await customerPage.expectMessageNeverDelivered(neverSentMarker);
+    });
+  } finally {
+    await customerContext.close();
+    await csaContext.close();
+  }
+});
+
+test('[e2e] [chats] The widget offers no operator while the CSA is unavailable', async ({ browser }) => {
+  const csaContext = await browser.newContext({ storageState: ADMIN_AUTH_STATE });
+  const customerContext = await browser.newContext();
+
+  try {
+    await seedEnglishLocale(customerContext);
+
+    const officeHours = new AdminPageFactory(await csaContext.newPage()).getOfficeOpeningHoursPage();
+    const botCannotAnswer = await officeHours.botCannotAnswerMessage();
+
+    await officeHours.whileCsaUnavailable(async () => {
+      const cPage = await customerContext.newPage();
+      const customerPage = new WidgetPage(cPage);
+
+      await cPage.goto(URLS.customer);
+      await customerPage.openChat();
+      await customerPage.expectNoOperatorOffered(botCannotAnswer);
     });
   } finally {
     await customerContext.close();

@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { TABLE_PAGE_TURN_TIMEOUT, TABLE_SETTLE_TIMEOUT } from '@utils/constants';
+import { ACTION_TIMEOUT, TABLE_PAGE_TURN_TIMEOUT, TABLE_SETTLE_TIMEOUT } from '@utils/constants';
 import { ExpectRowOptions, FindRowOptions, PaginatedDataTableOptions, RouteReadyOptions } from '@utils/interfaces';
 
 function escapeRegex(value: string): string {
@@ -22,7 +22,7 @@ export class PaginatedDataTable {
     this.pageSizeSelect = options.pageSizeSelect;
   }
 
-  async waitUntilReady({ timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
+  async waitUntilReady({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
     await expect(this.table).toBeVisible({ timeout });
     await expect(this.getRows().first(), 'Data table rendered its frame but never received rows').toBeVisible({
       timeout,
@@ -196,14 +196,14 @@ export class PaginatedDataTable {
     }
 
     await this.pageSizeSelect.selectOption(desiredValue);
-    await expect(this.pageSizeSelect).toHaveValue(desiredValue, { timeout: 15000 });
+    await expect(this.pageSizeSelect).toHaveValue(desiredValue, { timeout: ACTION_TIMEOUT });
 
     await this.waitUntilReady();
   }
 
   async expectRowVisible(
     text: string,
-    { pageSize = this.defaultPageSize, timeout = 15000 }: ExpectRowOptions = {},
+    { pageSize = this.defaultPageSize, timeout = ACTION_TIMEOUT }: ExpectRowOptions = {},
   ): Promise<void> {
     await this.ensureRowsPerPage(pageSize);
     await expect(await this.findRowAcrossPages(text), `Row "${text}" should be visible in paginated table`).toBeVisible(
@@ -213,7 +213,7 @@ export class PaginatedDataTable {
 
   async expectRowDeleted(
     text: string,
-    { pageSize = this.defaultPageSize, timeout = 15000 }: ExpectRowOptions = {},
+    { pageSize = this.defaultPageSize, timeout = ACTION_TIMEOUT }: ExpectRowOptions = {},
   ): Promise<void> {
     await this.ensureRowsPerPage(pageSize);
     await this.findRowAcrossPages(text);

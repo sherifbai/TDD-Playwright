@@ -1,8 +1,12 @@
 import { Page, expect } from '@playwright/test';
 
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { RouteReadyOptions } from '@utils/interfaces';
 
-export async function waitForAppSettled(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
+export async function waitForAppSettled(
+  page: Page,
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
+): Promise<void> {
   await page.waitForLoadState('domcontentloaded', { timeout }).catch(() => {});
   await page
     .waitForFunction(() => document.readyState === 'interactive' || document.readyState === 'complete', undefined, {
@@ -13,7 +17,7 @@ export async function waitForAppSettled(page: Page, { timeout = 15000 }: RouteRe
 
 export async function waitForServicesOverviewReady(
   page: Page,
-  { timeout = 15000 }: RouteReadyOptions = {},
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
 ): Promise<void> {
   await waitForAppSettled(page, { timeout });
 
@@ -27,7 +31,10 @@ export async function waitForServicesOverviewReady(
   ).toBeVisible({ timeout });
 }
 
-export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
+export async function waitForNewServiceReady(
+  page: Page,
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
+): Promise<void> {
   await waitForAppSettled(page, { timeout });
 
   const header = page.locator('header.header').first().or(page.locator('header').first());
@@ -36,7 +43,10 @@ export async function waitForNewServiceReady(page: Page, { timeout = 15000 }: Ro
   await expect(page.locator('.react-flow__node').first()).toBeVisible({ timeout });
 }
 
-export async function waitForChatsReady(page: Page, { timeout = 15000 }: RouteReadyOptions = {}): Promise<void> {
+export async function waitForChatsReady(
+  page: Page,
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
+): Promise<void> {
   await waitForAppSettled(page, { timeout });
   const main = page.locator('main').first();
   const heading = page.getByRole('heading').first();

@@ -1,5 +1,6 @@
 import { Page, expect } from '@playwright/test';
 
+import { ACTION_TIMEOUT } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { waitForServicesOverviewReady } from '@utils/waits';
 
@@ -17,7 +18,7 @@ export async function removeGeneratedServices(page: Page): Promise<number> {
   // there is simply nothing to clean up.
   await waitForServicesOverviewReady(page, { timeout: 30000 });
 
-  const tableRendered = await table.waitFor({ state: 'visible', timeout: 15000 }).then(
+  const tableRendered = await table.waitFor({ state: 'visible', timeout: ACTION_TIMEOUT }).then(
     () => true,
     () => false,
   );
@@ -38,7 +39,7 @@ export async function removeGeneratedServices(page: Page): Promise<number> {
     await confirmDialog.getByRole('button', { name: 'Delete', exact: true }).click();
 
     await expect(generatedRows, 'Confirming the dialog did not remove the service').toHaveCount(remaining - 1, {
-      timeout: 15000,
+      timeout: ACTION_TIMEOUT,
     });
 
     removed += 1;
