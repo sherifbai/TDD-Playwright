@@ -61,19 +61,40 @@ export async function waitForChatsReady(
   });
 }
 
+export async function waitForMultiDomainsReady(
+  page: Page,
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
+): Promise<void> {
+  await waitForAppSettled(page, { timeout });
+
+  await expect(
+    page.getByRole('heading', { name: 'Multidomains', exact: true }),
+    'Multidomains never rendered its heading',
+  ).toBeVisible({ timeout });
+}
+
 export async function waitForRouteReady(page: Page, url: string, options?: RouteReadyOptions): Promise<void> {
   const target = String(url || '');
+
   if (target.includes('services/overview')) {
     await waitForServicesOverviewReady(page, options);
     return;
   }
+
   if (target.includes('services/newService')) {
     await waitForNewServiceReady(page, options);
     return;
   }
+
+  if (target.includes('chat/multi-domains')) {
+    await waitForMultiDomainsReady(page, options);
+    return;
+  }
+
   if (/\/chat(?:\/|$)/i.test(target)) {
     await waitForChatsReady(page, options);
     return;
   }
+
   await waitForAppSettled(page, options);
 }
