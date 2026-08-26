@@ -1,5 +1,7 @@
 import { ServiceData } from '@utils/interfaces';
 
+import { uniqueSuffix } from './shared-data';
+
 export function normalizeServiceTitle(value?: string): string {
   return (value ?? '')
     .normalize('NFKD')
@@ -9,15 +11,7 @@ export function normalizeServiceTitle(value?: string): string {
 
 export function createServiceName(prefix: string): string {
   const normalizedPrefix = normalizeServiceTitle(prefix).toLowerCase();
-  const stamp = new Date()
-    .toISOString()
-    .replace(/[-:.TZ]/g, '')
-    .slice(0, 14);
-  const random = Math.random()
-    .toString(36)
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 6);
-  return normalizeServiceTitle(`${normalizedPrefix}${stamp}${random}`);
+  return normalizeServiceTitle(`${normalizedPrefix}${uniqueSuffix()}`);
 }
 
 export function createUpdatedServiceName(baseName: string): string {

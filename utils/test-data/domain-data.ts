@@ -1,18 +1,7 @@
-function domainToken(): string {
-  const stamp = new Date()
-    .toISOString()
-    .replace(/[-:.TZ]/g, '')
-    .slice(0, 14);
-  const random = Math.random()
-    .toString(36)
-    .replace(/[^a-z0-9]/g, '')
-    .slice(0, 6);
-
-  return `${stamp}${random}`;
-}
+import { uniqueSuffix } from './shared-data';
 
 export function createDomainName(prefix = 'autotestdomain'): string {
-  return `${prefix}${domainToken()}`;
+  return `${prefix}${uniqueSuffix()}`;
 }
 
 export function createUpdatedDomainName(baseName: string): string {
