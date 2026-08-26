@@ -1,27 +1,14 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { ACTION_TIMEOUT } from '@utils/constants';
+import {
+  ACTION_TIMEOUT,
+  EXPIRING_CONVERSATION_COLUMNS,
+  EXPIRING_CONVERSATION_RANGE_SHORTCUTS,
+  EXPIRING_CONVERSATION_RESULT_COUNTS,
+} from '@utils/constants';
 import { URLS } from '@utils/env';
-import { RouteReadyOptions } from '@utils/interfaces';
+import { DeleteConversationSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForDeleteConversationsReady } from '@utils/waits';
-
-const EXPIRING_CONVERSATION_COLUMNS = [
-  'Start time',
-  'End time',
-  'Customer support name',
-  'Name',
-  'ID code',
-  'Contact',
-  'Comment',
-  'Rating',
-  'Feedback',
-  'Status',
-  'ID',
-];
-
-const RESULT_COUNT_OPTIONS = ['10', '20', '30', '40', '50'];
-
-const DATE_RANGE_SHORTCUTS = ['1 day', '7 days', '31 day', '90 days'];
 
 export class DeleteConversationsPage {
   private readonly page: Page;
@@ -60,6 +47,7 @@ export class DeleteConversationsPage {
   private readonly selectResultCount: Locator;
 
   private readonly buttonSave: Locator;
+  private readonly toastList: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -96,7 +84,7 @@ export class DeleteConversationsPage {
     this.inputRangeUntil = this.page.locator('main .endTime input');
     this.tooltipExpiringRange = this.page
       .locator('div.track')
-      .filter({ has: this.buttonRangeShortcut(DATE_RANGE_SHORTCUTS[0]) })
+      .filter({ has: this.buttonRangeShortcut(EXPIRING_CONVERSATION_RANGE_SHORTCUTS[0]) })
       .last()
       .locator('span[data-state]')
       .first();
@@ -114,6 +102,7 @@ export class DeleteConversationsPage {
     this.selectResultCount = this.page.locator('main .data-table__page-size select');
 
     this.buttonSave = this.page.getByRole('button', { name: 'Save', exact: true });
+    this.toastList = this.page.locator('ol.toast__list');
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -197,7 +186,7 @@ export class DeleteConversationsPage {
     await expect(this.inputRangeUntil, 'The expiring conversations filter takes no date to end at').toBeVisible();
     await expect(this.tooltipExpiringRange, 'The expiring conversations filter carries no tooltip').toBeVisible();
 
-    for (const shortcut of DATE_RANGE_SHORTCUTS) {
+    for (const shortcut of EXPIRING_CONVERSATION_RANGE_SHORTCUTS) {
       await expect(this.buttonRangeShortcut(shortcut), `The filter offers no "${shortcut}" shortcut`).toBeVisible();
     }
   }
@@ -271,12 +260,12 @@ export class DeleteConversationsPage {
   async assertResultCountOffered(): Promise<void> {
     await expect(this.selectResultCount, 'The table offers no choice of how many rows to show').toBeVisible();
     await expect(this.selectResultCount, 'The result count does not start on the page size the case names').toHaveValue(
-      RESULT_COUNT_OPTIONS[0],
+      EXPIRING_CONVERSATION_RESULT_COUNTS[0],
     );
     await expect(
       this.selectResultCount.locator('option'),
       'The result count offers a different set of page sizes',
-    ).toHaveText(RESULT_COUNT_OPTIONS);
+    ).toHaveText(EXPIRING_CONVERSATION_RESULT_COUNTS);
   }
 
   async assertAuthenticatedPeriodHidden(): Promise<void> {
@@ -293,6 +282,75 @@ export class DeleteConversationsPage {
       'Anonymous removal was switched off but still asks for a period',
     ).toHaveCount(0);
     await expect(this.noteAnonymous, 'The note of a switched off removal stayed on the page').toHaveCount(0);
+  }
+
+  async readFormSettings(): Promise<DeleteConversationSettings> {
+    const authenticatedRemoval = (await this.switchAuthenticatedRemoval.getAttribute('aria-checked')) === 'true';
+    const anonymousRemoval = (await this.switchAnonymousRemoval.getAttribute('aria-checked')) === 'true';
+    const anyRemoval = authenticatedRemoval || anonymousRemoval;
+
+    return {
+      authenticatedRemoval,
+      authenticatedPeriod: authenticatedRemoval ? await this.inputAuthenticatedPeriod.inputValue() : undefined,
+      anonymousRemoval,
+      anonymousPeriod: anonymousRemoval ? await this.inputAnonymousPeriod.inputValue() : undefined,
+      deletionTime: anyRemoval ? await this.inputDeletionTime.inputValue() : undefined,
+    };
+  }
+
+  async applySettings(settings: DeleteConversationSettings): Promise<void> {
+    await this.setAuthenticatedRemoval(settings.authenticatedRemoval);
+    await this.setAnonymousRemoval(settings.anonymousRemoval);
+
+    if (settings.authenticatedPeriod !== undefined) {
+      await this.inputAuthenticatedPeriod.fill(settings.authenticatedPeriod);
+    }
+
+    if (settings.anonymousPeriod !== undefined) {
+      await this.inputAnonymousPeriod.fill(settings.anonymousPeriod);
+    }
+
+    if (settings.deletionTime !== undefined) {
+      await this.inputDeletionTime.fill(settings.deletionTime);
+    }
+  }
+
+  async save(): Promise<void> {
+    await this.buttonSave.click();
+  }
+
+  async assertSaveWasConfirmed({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, 'Saving the deletion rules raised no notification').toContainText(
+      'Updated Successfully',
+      { timeout },
+    );
+  }
+
+  async assertStoredSettings(expected: DeleteConversationSettings): Promise<void> {
+    await expect(
+      this.switchAuthenticatedRemoval,
+      'Authenticated removal came back in a state it was not saved in',
+    ).toHaveAttribute('aria-checked', String(expected.authenticatedRemoval));
+    await expect(
+      this.switchAnonymousRemoval,
+      'Anonymous removal came back in a state it was not saved in',
+    ).toHaveAttribute('aria-checked', String(expected.anonymousRemoval));
+
+    if (expected.authenticatedPeriod !== undefined) {
+      await expect(this.inputAuthenticatedPeriod, 'The period of authenticated removal came back changed').toHaveValue(
+        expected.authenticatedPeriod,
+      );
+    }
+
+    if (expected.anonymousPeriod !== undefined) {
+      await expect(this.inputAnonymousPeriod, 'The period of anonymous removal came back changed').toHaveValue(
+        expected.anonymousPeriod,
+      );
+    }
+
+    if (expected.deletionTime !== undefined) {
+      await expect(this.inputDeletionTime, 'The deletion time came back changed').toHaveValue(expected.deletionTime);
+    }
   }
 
   async assertExpiringBlockHidden(): Promise<void> {
