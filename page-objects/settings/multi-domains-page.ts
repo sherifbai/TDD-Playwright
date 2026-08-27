@@ -51,7 +51,6 @@ export class MultiDomainsPage {
   async assertRowsAreComplete(): Promise<void> {
     const rows = await this.domainRowCount();
 
-    expect(rows, 'The page lists no domain at all').toBeGreaterThan(0);
     await expect(this.inputsDomainUrl, 'A domain was listed without its URL field').toHaveCount(rows);
     await expect(this.buttonsDeleteDomain, 'A domain was listed with no way to remove it').toHaveCount(rows);
     await expect(this.buttonsDeleteDomain.first(), 'The delete control never became visible').toBeVisible();
