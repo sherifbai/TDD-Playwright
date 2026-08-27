@@ -1,4 +1,5 @@
 export * from './admin-page-visit.interface';
+export * from './chat-analysis-label-section.interface';
 export * from './csa-activity.interface';
 export * from './env-urls.interface';
 export * from './expect-row-options.interface';
