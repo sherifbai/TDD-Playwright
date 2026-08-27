@@ -20,6 +20,10 @@ export class ChatAnalysisPage {
   private readonly labelSections: Locator;
   private readonly buttonSave: Locator;
 
+  private readonly deleteDialog: Locator;
+  private readonly buttonConfirmDelete: Locator;
+  private readonly toastList: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -34,6 +38,11 @@ export class ChatAnalysisPage {
 
     this.labelSections = this.page.locator('main .label-section');
     this.buttonSave = this.page.locator('main').getByRole('button', { name: 'Save', exact: true });
+
+    this.deleteDialog = this.page.getByRole('dialog');
+    this.buttonConfirmDelete = this.deleteDialog.getByRole('button', { name: 'Delete', exact: true });
+
+    this.toastList = this.page.locator('ol.toast__list');
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -53,6 +62,18 @@ export class ChatAnalysisPage {
   async assertDomainTabsAreShown({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
     await expect(this.domainTabs.first(), 'The page rendered no domain tab').toBeVisible({ timeout });
     await expect(this.domainTabsActive, 'The domain tabs left no domain selected').toHaveCount(1);
+  }
+
+  async selectFirstDomainTab({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    const tab = this.domainTabs.first();
+
+    await expect(tab, 'The page rendered no domain tab to select').toBeVisible({ timeout });
+
+    await tab.click();
+    await expect(tab, 'The domain that was picked did not become the selected one').toHaveClass(
+      /domain-tab-selector__tab--active/,
+      { timeout },
+    );
   }
 
   async assertCopyToDomainIsOffered(): Promise<void> {
@@ -119,7 +140,7 @@ export class ChatAnalysisPage {
   }
 
   async assertLabelIsShownAsChip({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
-    const chip = this.labelSection(title).locator('.label-section__chip').filter({ hasText: label });
+    const chip = this.labelChip(title, label);
 
     await expect(chip, `"${title}" does not list "${label}"`).toBeVisible();
     await expect(
@@ -132,11 +153,41 @@ export class ChatAnalysisPage {
     ).toBeVisible();
   }
 
+  async hasLabel({ title }: ChatAnalysisLabelSection, label: string): Promise<boolean> {
+    return (await this.labelChip(title, label).count()) > 0;
+  }
+
+  async deleteLabel({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
+    const chip = this.labelChip(title, label);
+
+    await chip.getByRole('button', { name: `Remove ${label}` }).click();
+
+    await expect(this.deleteDialog, `Removing "${label}" asked for no confirmation`).toBeVisible();
+    await this.buttonConfirmDelete.click();
+
+    await expect(chip, `"${title}" kept "${label}" after it was removed`).toHaveCount(0);
+  }
+
+  async saveSettings(): Promise<void> {
+    await this.buttonSave.click();
+  }
+
+  async assertSaveWasConfirmed({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, 'Saving the chat analysis settings raised no notification').toContainText(
+      'Chat analysis settings saved successfully',
+      { timeout },
+    );
+  }
+
   async assertReorderingIsExplained({ title }: ChatAnalysisLabelSection): Promise<void> {
     await expect(
       this.labelSection(title).locator('.label-section__drag-hint'),
       `"${title}" lists labels without saying they can be reordered`,
     ).toHaveText('You can change the order of the labels by dragging them.');
+  }
+
+  private labelChip(title: string, label: string): Locator {
+    return this.labelSection(title).locator('.label-section__chip').filter({ hasText: label });
   }
 
   private labelSection(title: string): Locator {
