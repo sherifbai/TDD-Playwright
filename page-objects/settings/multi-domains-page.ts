@@ -24,7 +24,6 @@ export class MultiDomainsPage {
     this.inputsDomainUrl = this.page.locator('main input[name^="widgetDomains."][name$=".url"]');
 
     this.buttonsDeleteDomain = this.page.locator('main button.btn--error');
-
     this.buttonAddNew = this.page.getByRole('button', { name: 'Add new', exact: true });
     this.buttonSave = this.page.getByRole('button', { name: 'Save', exact: true });
 
