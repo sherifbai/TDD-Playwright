@@ -70,7 +70,6 @@ test('[SMOKE] "Administration" → "Session length" page loads with its session 
   visit.assertNoFailedApiCalls();
 });
 
-// Kiwi case: https://monitooring.test.buerokratt.ee/case/151/
 test('[SMOKE] "Administration" → "Multi-Domains" page loads with its heading', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/multi-domains');
 
