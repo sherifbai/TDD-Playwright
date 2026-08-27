@@ -70,22 +70,24 @@ test('[SMOKE] "Administration" → "Session length" page loads with its session 
   visit.assertNoFailedApiCalls();
 });
 
-// Kiwi case: https://monitooring.test.buerokratt.ee/case/156/
-test('[SMOKE] "Administration" → "Delete Conversations" page loads with its removal toggles', async ({ page }) => {
-  const visit = await openAdminPage(page, 'chat/delete-conversations');
+test(
+  '[SMOKE] "Administration" → "Delete Conversations" page loads with its removal toggles',
+  { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/156/' } },
+  async ({ page }) => {
+    const visit = await openAdminPage(page, 'chat/delete-conversations');
 
-  await expect(page.getByRole('heading', { name: 'Conversation deletion', exact: true })).toBeVisible();
-  await expect(page.getByText('Automatic expiration and deletion rules', { exact: true })).toBeVisible();
-  await expect(page.getByRole('switch', { name: 'Authenticated conversations removal' })).toBeVisible();
-  await expect(page.getByRole('switch', { name: 'Anonymous conversations removal' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Conversation deletion', exact: true })).toBeVisible();
+    await expect(page.getByText('Automatic expiration and deletion rules', { exact: true })).toBeVisible();
+    await expect(page.getByRole('switch', { name: 'Authenticated conversations removal' })).toBeVisible();
+    await expect(page.getByRole('switch', { name: 'Anonymous conversations removal' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Save', exact: true })).toBeVisible();
 
-  visit.assertBackendAnswered();
-  visit.assertNoFailedApiCalls();
-});
+    visit.assertBackendAnswered();
+    visit.assertNoFailedApiCalls();
+  },
+);
 
-// Kiwi case: https://monitooring.test.buerokratt.ee/case/151/
-test('[SMOKE] "Administration" → "Multi-Domains" page loads with its domain rows and controls', async ({ page }) => {
+test('[SMOKE] "Administration" → "Multi-Domains" page loads with its heading', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/multi-domains');
 
   await expect(page.getByRole('heading', { name: 'Multidomains', exact: true })).toBeVisible();
