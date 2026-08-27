@@ -69,3 +69,11 @@ test('[SMOKE] "Administration" → "Session length" page loads with its session 
   visit.assertBackendAnswered();
   visit.assertNoFailedApiCalls();
 });
+
+test('[SMOKE] "Administration" → "Multi-Domains" page loads with its heading', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/multi-domains');
+
+  await expect(page.getByRole('heading', { name: 'Multidomains', exact: true })).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
+});
