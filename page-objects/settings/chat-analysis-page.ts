@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page, Response, expect } from '@playwright/test';
 
 import { ACTION_TIMEOUT } from '@utils/constants';
 import { URLS } from '@utils/env';
@@ -50,8 +50,11 @@ export class ChatAnalysisPage {
   }
 
   async open(): Promise<void> {
+    const settingsLoaded = this.settingsLoaded();
+
     await this.page.goto(URLS.admin + 'chat/chat-analysis');
     await this.waitForReady();
+    await settingsLoaded;
   }
 
   async assertPageIsShown(): Promise<void> {
@@ -69,11 +72,14 @@ export class ChatAnalysisPage {
 
     await expect(tab, 'The page rendered no domain tab to select').toBeVisible({ timeout });
 
+    const settingsLoaded = this.settingsLoaded({ timeout });
+
     await tab.click();
     await expect(tab, 'The domain that was picked did not become the selected one').toHaveClass(
       /domain-tab-selector__tab--active/,
       { timeout },
     );
+    await settingsLoaded;
   }
 
   async assertCopyToDomainIsOffered(): Promise<void> {
@@ -139,6 +145,13 @@ export class ChatAnalysisPage {
     await section.locator('.label-section__add-button').click();
   }
 
+  async addLabelWithEnter({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
+    const input = this.labelSection(title).locator('.label-section__input');
+
+    await input.fill(label);
+    await input.press('Enter');
+  }
+
   async assertLabelIsShownAsChip({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
     const chip = this.labelChip(title, label);
 
@@ -184,6 +197,13 @@ export class ChatAnalysisPage {
       this.labelSection(title).locator('.label-section__drag-hint'),
       `"${title}" lists labels without saying they can be reordered`,
     ).toHaveText('You can change the order of the labels by dragging them.');
+  }
+
+  private settingsLoaded({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<Response> {
+    return this.page.waitForResponse(
+      (response) => response.url().includes('configs/chat-analysis') && response.request().method() === 'GET',
+      { timeout },
+    );
   }
 
   private labelChip(title: string, label: string): Locator {
