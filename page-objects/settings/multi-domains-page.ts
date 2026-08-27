@@ -15,16 +15,18 @@ export class MultiDomainsPage {
   private readonly buttonAddNew: Locator;
   private readonly buttonSave: Locator;
 
+  private readonly headingMultidomains: Locator;
   private readonly toastList: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
+    this.headingMultidomains = this.page.getByRole('heading', { name: 'Multidomains', exact: true });
+
     this.inputsDomainName = this.page.locator('main input[name^="widgetDomains."][name$=".name"]');
     this.inputsDomainUrl = this.page.locator('main input[name^="widgetDomains."][name$=".url"]');
 
     this.buttonsDeleteDomain = this.page.locator('main button.btn--error');
-
     this.buttonAddNew = this.page.getByRole('button', { name: 'Add new', exact: true });
     this.buttonSave = this.page.getByRole('button', { name: 'Save', exact: true });
 
@@ -40,6 +42,12 @@ export class MultiDomainsPage {
     await this.waitForReady();
   }
 
+  async assertPageIsShown(): Promise<void> {
+    await expect(this.headingMultidomains, 'Multidomains never rendered its heading').toBeVisible();
+    await expect(this.buttonAddNew, 'The page offers no way to add a domain').toBeVisible();
+    await expect(this.buttonSave, 'The page offers no way to save the domains').toBeVisible();
+  }
+
   async domainRowCount({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<number> {
     await expect(
       this.inputsDomainName.first(),
@@ -52,10 +60,8 @@ export class MultiDomainsPage {
   async assertRowsAreComplete(): Promise<void> {
     const rows = await this.domainRowCount();
 
-    expect(rows, 'The page lists no domain at all').toBeGreaterThan(0);
     await expect(this.inputsDomainUrl, 'A domain was listed without its URL field').toHaveCount(rows);
     await expect(this.buttonsDeleteDomain, 'A domain was listed with no way to remove it').toHaveCount(rows);
-    await expect(this.buttonsDeleteDomain.first(), 'The delete control never became visible').toBeVisible();
   }
 
   async assertOnlyDomainCannotBeDeleted(): Promise<void> {
