@@ -15,10 +15,13 @@ export class MultiDomainsPage {
   private readonly buttonAddNew: Locator;
   private readonly buttonSave: Locator;
 
+  private readonly headingMultidomains: Locator;
   private readonly toastList: Locator;
 
   constructor(page: Page) {
     this.page = page;
+
+    this.headingMultidomains = this.page.getByRole('heading', { name: 'Multidomains', exact: true });
 
     this.inputsDomainName = this.page.locator('main input[name^="widgetDomains."][name$=".name"]');
     this.inputsDomainUrl = this.page.locator('main input[name^="widgetDomains."][name$=".url"]');
@@ -37,6 +40,12 @@ export class MultiDomainsPage {
   async open(): Promise<void> {
     await this.page.goto(URLS.admin + 'chat/multi-domains');
     await this.waitForReady();
+  }
+
+  async assertPageIsShown(): Promise<void> {
+    await expect(this.headingMultidomains, 'Multidomains never rendered its heading').toBeVisible();
+    await expect(this.buttonAddNew, 'The page offers no way to add a domain').toBeVisible();
+    await expect(this.buttonSave, 'The page offers no way to save the domains').toBeVisible();
   }
 
   async domainRowCount({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<number> {
