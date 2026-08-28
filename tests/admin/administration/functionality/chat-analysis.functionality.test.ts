@@ -79,6 +79,34 @@ test.describe('[administration] [functional] A value entered in a label section 
   );
 });
 
+test.describe('[administration] [functional] A chip is deleted once the deletion is confirmed', () => {
+  test(
+    'A chip is gone from its section after the confirmation is given',
+    { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/194/' } },
+    async ({ page }) => {
+      const cap = new AdminPageFactory(page).getChatAnalysisPage();
+      const label = createChatAnalysisLabel('autotestdeleted');
+
+      await cap.open();
+
+      await test.step('The page opens with chat analysis turned on', async () => {
+        await cap.assertPageIsShown();
+        await cap.enableAnalysis();
+      });
+
+      await test.step(`"${fieldSection.title}" holds a label of the run's own to delete`, async () => {
+        await cap.addLabel(fieldSection, label);
+        await cap.assertLabelIsShownAsChip(fieldSection, label);
+      });
+
+      await test.step('Confirming the deletion takes the chip out of its section', async () => {
+        await cap.deleteLabel(fieldSection, label);
+        await cap.assertLabelIsNotListed(fieldSection, label);
+      });
+    },
+  );
+});
+
 test.describe('[administration] [functional] A label over the length limit is refused', () => {
   test(
     'A value longer than 50 characters is reported and left out of the section',

@@ -175,7 +175,7 @@ export class ChatAnalysisPage {
 
     await chip.getByRole('button', { name: `Remove ${label}` }).click();
 
-    await expect(this.deleteDialog, `Removing "${label}" asked for no confirmation`).toBeVisible();
+    await expect(this.deleteDialog, `Removing "${label}" asked for no confirmation`).toContainText('Confirm deletion');
     await this.buttonConfirmDelete.click();
 
     await expect(chip, `"${title}" kept "${label}" after it was removed`).toHaveCount(0);
