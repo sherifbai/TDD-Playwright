@@ -192,6 +192,17 @@ export class ChatAnalysisPage {
     );
   }
 
+  async assertLabelIsNotListed({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
+    await expect(this.labelChip(title, label), `"${title}" took "${label}" after it was rejected`).toHaveCount(0);
+  }
+
+  async assertLabelTooLongWasReported({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, 'A label over the length limit was taken without a complaint').toContainText(
+      'Label cannot be longer than 50 characters',
+      { timeout },
+    );
+  }
+
   async assertReorderingIsExplained({ title }: ChatAnalysisLabelSection): Promise<void> {
     await expect(
       this.labelSection(title).locator('.label-section__drag-hint'),
