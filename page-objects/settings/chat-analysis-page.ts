@@ -2,7 +2,7 @@ import { Locator, Page, Response, expect } from '@playwright/test';
 
 import { ACTION_TIMEOUT } from '@utils/constants';
 import { URLS } from '@utils/env';
-import { ChatAnalysisLabelSection, RouteReadyOptions } from '@utils/interfaces';
+import { ChatAnalysisLabelSection, ChatAnalysisSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForChatAnalysisReady } from '@utils/waits';
 
 export class ChatAnalysisPage {
@@ -67,10 +67,20 @@ export class ChatAnalysisPage {
     await expect(this.domainTabsActive, 'The domain tabs left no domain selected').toHaveCount(1);
   }
 
-  async selectFirstDomainTab({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
-    const tab = this.domainTabs.first();
+  async domainTabCount({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<number> {
+    await expect(this.domainTabs.first(), 'The page rendered no domain tab').toBeVisible({ timeout });
 
-    await expect(tab, 'The page rendered no domain tab to select').toBeVisible({ timeout });
+    return this.domainTabs.count();
+  }
+
+  async domainTabName(index: number): Promise<string> {
+    return (await this.domainTabs.nth(index).innerText()).trim();
+  }
+
+  async selectDomainTab(index = 0, { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<string> {
+    const tab = this.domainTabs.nth(index);
+
+    await expect(tab, `The page rendered no domain tab at position ${index}`).toBeVisible({ timeout });
 
     const settingsLoaded = this.settingsLoaded({ timeout });
 
@@ -79,7 +89,12 @@ export class ChatAnalysisPage {
       /domain-tab-selector__tab--active/,
       { timeout },
     );
-    await settingsLoaded;
+
+    const domainId = new URL((await settingsLoaded).url()).searchParams.get('domain');
+
+    expect(domainId, 'The page asked for its settings without naming a domain').toBeTruthy();
+
+    return domainId as string;
   }
 
   async assertCopyToDomainIsOffered(): Promise<void> {
@@ -192,6 +207,53 @@ export class ChatAnalysisPage {
     );
   }
 
+  async readSettings(sections: ChatAnalysisLabelSection[]): Promise<ChatAnalysisSettings> {
+    const labels: Record<string, string[]> = {};
+
+    for (const section of sections) {
+      labels[section.title] = await this.listedLabels(section);
+    }
+
+    return { enabled: (await this.switchChatAnalysis.getAttribute('data-state')) === 'checked', labels };
+  }
+
+  async copySettingsTo(domainName: string, { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await this.buttonCopyToDomain.click();
+
+    const dialog = this.page.getByRole('dialog');
+
+    await expect(dialog, 'Copying the settings opened no dialog').toContainText('Copy to domain');
+
+    const trigger = dialog.locator('.select__trigger');
+    const options = dialog.locator('.select__menu li');
+
+    await trigger.click();
+
+    const option = options.filter({ has: this.page.getByText(domainName, { exact: true }) }).first();
+
+    await option.click();
+    await expect(option.locator('input[type="checkbox"]'), `"${domainName}" was not taken as a target`).toBeChecked();
+
+    await trigger.click();
+    await expect(options, 'The list of target domains stayed open over the copy control').toHaveCount(0);
+
+    const transferred = this.page.waitForResponse(
+      (response) => response.url().includes('configs/transfer/chat-analysis') && response.request().method() === 'POST',
+      { timeout },
+    );
+
+    await dialog.getByRole('button', { name: 'Copy', exact: true }).click();
+
+    const response = await transferred;
+
+    expect(
+      response.ok(),
+      `The admin rejected copying the settings onto "${domainName}" (${response.status()})`,
+    ).toBeTruthy();
+
+    await expect(dialog, 'The copy dialog stayed open after the settings were copied').toBeHidden({ timeout });
+  }
+
   async assertLabelIsNotListed({ title }: ChatAnalysisLabelSection, label: string): Promise<void> {
     await expect(this.labelChip(title, label), `"${title}" took "${label}" after it was rejected`).toHaveCount(0);
   }
@@ -215,6 +277,10 @@ export class ChatAnalysisPage {
       (response) => response.url().includes('configs/chat-analysis') && response.request().method() === 'GET',
       { timeout },
     );
+  }
+
+  private async listedLabels({ title }: ChatAnalysisLabelSection): Promise<string[]> {
+    return this.labelSection(title).locator('.label-section__chip-label').allInnerTexts();
   }
 
   private labelChip(title: string, label: string): Locator {

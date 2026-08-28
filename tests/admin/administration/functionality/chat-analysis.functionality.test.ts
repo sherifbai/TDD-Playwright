@@ -1,6 +1,8 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-import { test } from '@setup/test-setup';
-import { chatAnalysisCleanup } from '@utils/helpers';
+import { expect, test } from '@setup/test-setup';
+import { ACTION_TIMEOUT } from '@utils/constants';
+import { chatAnalysisCleanup, chatAnalysisConfigRestore, readChatAnalysisConfig } from '@utils/helpers';
+import { ChatAnalysisDomainSnapshot, ChatAnalysisSettings } from '@utils/interfaces';
 import {
   CHAT_ANALYSIS_LABEL_SECTIONS,
   createChatAnalysisLabel,
@@ -9,6 +11,7 @@ import {
 
 const [fieldSection, qualitySection] = CHAT_ANALYSIS_LABEL_SECTIONS;
 const savedLabel = createChatAnalysisLabel('autotestsavedfield');
+const copiedLabel = createChatAnalysisLabel('autotestcopiedfield');
 
 test.describe('[administration] [functional] Chat analysis settings are saved for the selected domain', () => {
   test.afterEach(chatAnalysisCleanup(() => savedLabel));
@@ -23,7 +26,7 @@ test.describe('[administration] [functional] Chat analysis settings are saved fo
 
       await test.step('The page opens on a domain of its own', async () => {
         await cap.assertPageIsShown();
-        await cap.selectFirstDomainTab();
+        await cap.selectDomainTab();
       });
 
       await test.step(`Chat analysis is on and "${fieldSection.title}" takes a label of the run's own`, async () => {
@@ -74,6 +77,68 @@ test.describe('[administration] [functional] A value entered in a label section 
 
         await cap.addLabelWithEnter(fieldSection, label);
         await cap.assertLabelIsShownAsChip(fieldSection, label);
+      });
+    },
+  );
+});
+
+test.describe('[administration] [functional] Settings are copied from one domain onto another', () => {
+  let targetSnapshot: ChatAnalysisDomainSnapshot | undefined;
+
+  test.afterEach(chatAnalysisConfigRestore(() => targetSnapshot));
+  test.afterEach(chatAnalysisCleanup(() => copiedLabel));
+
+  test(
+    'The target domain is confirmed and comes back holding the settings of the source',
+    { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/191/' } },
+    async ({ page }) => {
+      const cap = new AdminPageFactory(page).getChatAnalysisPage();
+
+      await cap.open();
+
+      const domains = await cap.domainTabCount();
+
+      expect(domains, 'Copying settings is only offered where a second domain exists').toBeGreaterThan(1);
+
+      const targetIndex = domains - 1;
+      const targetName = await cap.domainTabName(targetIndex);
+
+      await test.step('The settings the target domain holds today are kept to be put back', async () => {
+        const targetId = await cap.selectDomainTab(targetIndex);
+
+        targetSnapshot = { domainId: targetId, config: await readChatAnalysisConfig(page, targetId) };
+      });
+
+      let sourceSettings: ChatAnalysisSettings;
+
+      await test.step('The source domain is given settings the target does not have', async () => {
+        await cap.selectDomainTab();
+        await cap.enableAnalysis();
+        await cap.addLabel(fieldSection, copiedLabel);
+
+        await cap.saveSettings();
+        await cap.assertSaveWasConfirmed();
+
+        sourceSettings = await cap.readSettings(CHAT_ANALYSIS_LABEL_SECTIONS);
+      });
+
+      await test.step(`Copying them onto "${targetName}" reports the settings went through`, async () => {
+        await cap.open();
+        await cap.selectDomainTab();
+
+        await cap.copySettingsTo(targetName);
+        await cap.assertSaveWasConfirmed();
+      });
+
+      await test.step('The target domain comes back with the settings of the source', async () => {
+        await cap.selectDomainTab(targetIndex);
+
+        await expect
+          .poll(() => cap.readSettings(CHAT_ANALYSIS_LABEL_SECTIONS), {
+            message: `"${targetName}" came back with settings of its own`,
+            timeout: ACTION_TIMEOUT,
+          })
+          .toEqual(sourceSettings);
       });
     },
   );

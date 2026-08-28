@@ -85,6 +85,22 @@ export async function waitForChatAnalysisReady(
   ).toBeVisible({ timeout });
 }
 
+export async function waitForHistoryReady(
+  page: Page,
+  { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {},
+): Promise<void> {
+  await waitForAppSettled(page, { timeout });
+
+  await expect(page.getByRole('heading', { name: /^History/ }), 'History never rendered its heading').toBeVisible({
+    timeout,
+  });
+
+  await expect(
+    page.locator('table.data-table tbody tr').first(),
+    'History rendered its heading but never received a conversation',
+  ).toBeVisible({ timeout });
+}
+
 export async function waitForRouteReady(page: Page, url: string, options?: RouteReadyOptions): Promise<void> {
   const target = String(url || '');
 
@@ -105,6 +121,11 @@ export async function waitForRouteReady(page: Page, url: string, options?: Route
 
   if (target.includes('chat/chat-analysis')) {
     await waitForChatAnalysisReady(page, options);
+    return;
+  }
+
+  if (target.includes('chat/history')) {
+    await waitForHistoryReady(page, options);
     return;
   }
 

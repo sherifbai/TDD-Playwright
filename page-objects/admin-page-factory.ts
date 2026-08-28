@@ -1,6 +1,6 @@
 import { Page } from '@playwright/test';
 
-import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
+import { ActiveChatsPage, HistoryPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
 import { ChatAnalysisPage, MultiDomainsPage, OfficeOpeningHoursPage } from '@page-objects/settings';
@@ -26,6 +26,10 @@ export class AdminPageFactory {
 
   getActiveChatsPage(): ActiveChatsPage {
     return new ActiveChatsPage(this.page);
+  }
+
+  getHistoryPage(): HistoryPage {
+    return new HistoryPage(this.page);
   }
 
   getServicesOverviewPage(): ServicesOverviewPage {

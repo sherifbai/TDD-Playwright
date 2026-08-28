@@ -1,4 +1,5 @@
 export * from './chat-analysis-test-helpers';
+export * from './conversation-analysis-test-helpers';
 export * from './domain-test-helpers';
 export * from './generated-services';
 export * from './locale';
