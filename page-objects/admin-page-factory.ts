@@ -3,7 +3,7 @@ import { Page } from '@playwright/test';
 import { ActiveChatsPage, UnansweredChatsPage } from '@page-objects/chats';
 import { Header, SideMenu } from '@page-objects/menu';
 import { NewServicePage, ServicesOverviewPage } from '@page-objects/services';
-import { MultiDomainsPage, OfficeOpeningHoursPage } from '@page-objects/settings';
+import { MultiDomainsPage, OfficeOpeningHoursPage, SessionLengthPage } from '@page-objects/settings';
 
 export class AdminPageFactory {
   private readonly page: Page;
@@ -42,5 +42,9 @@ export class AdminPageFactory {
 
   getMultiDomainsPage(): MultiDomainsPage {
     return new MultiDomainsPage(this.page);
+  }
+
+  getSessionLengthPage(): SessionLengthPage {
+    return new SessionLengthPage(this.page);
   }
 }
