@@ -83,6 +83,11 @@ export async function waitForSessionLengthReady(
     page.getByRole('heading', { name: 'Session length', exact: true }),
     'Session length never rendered its heading',
   ).toBeVisible({ timeout });
+
+  await expect(
+    page.locator('input[name="session-length"]'),
+    'Session length rendered its heading but never received the settings it holds',
+  ).not.toHaveValue('', { timeout });
 }
 
 export async function waitForRouteReady(page: Page, url: string, options?: RouteReadyOptions): Promise<void> {
