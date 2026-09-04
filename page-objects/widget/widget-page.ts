@@ -1,6 +1,11 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
-import { WIDGET_MESSAGE_BOX_TIMEOUT, WIDGET_REDRAW_TIMEOUT, WIDGET_REPLY_TIMEOUT } from '@utils/constants';
+import {
+  IDLE_WARNING_TIMEOUT,
+  WIDGET_MESSAGE_BOX_TIMEOUT,
+  WIDGET_REDRAW_TIMEOUT,
+  WIDGET_REPLY_TIMEOUT,
+} from '@utils/constants';
 import { isEventuallyVisible } from '@utils/waits';
 
 const ASK_FOR_OPERATOR = 'I want to talk to a human';
@@ -17,6 +22,7 @@ export class WidgetPage {
 
   private readonly buttonConfirm: Locator;
   private readonly inputFeedback: Locator;
+  private readonly buttonContinue: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -30,6 +36,7 @@ export class WidgetPage {
 
     this.buttonConfirm = this.page.getByRole('button', { name: 'Confirm' });
     this.inputFeedback = this.page.getByPlaceholder('Enter your feedback...');
+    this.buttonContinue = this.page.getByRole('button', { name: 'Continue', exact: true });
   }
 
   async openChat(): Promise<void> {
@@ -154,6 +161,17 @@ export class WidgetPage {
 
   private messageByText(text: string): Locator {
     return this.page.getByText(text, { exact: true });
+  }
+
+  async expectIdleWarningShown(idleWarningMessage: string): Promise<void> {
+    await expect(
+      this.messageByText(idleWarningMessage),
+      `The widget never asked the idle customer "${idleWarningMessage}"`,
+    ).toBeVisible({ timeout: IDLE_WARNING_TIMEOUT });
+
+    await expect(this.buttonContinue, 'The idle warning offered no way to continue the conversation').toBeVisible({
+      timeout: WIDGET_REDRAW_TIMEOUT,
+    });
   }
 
   async openDetails(): Promise<void> {
