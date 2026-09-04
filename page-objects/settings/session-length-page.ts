@@ -162,6 +162,14 @@ export class SessionLengthPage {
     );
   }
 
+  async fillSessionLength(value: string): Promise<void> {
+    await this.inputSessionLength.fill(value);
+  }
+
+  async fillResponseTime(value: string): Promise<void> {
+    await this.inputResponseTime.fill(value);
+  }
+
   async saveSettings(): Promise<void> {
     await this.buttonSave.click();
   }
@@ -171,6 +179,12 @@ export class SessionLengthPage {
       'Session length changed successfully',
       { timeout },
     );
+  }
+
+  async assertSaveWasRejected(message: string, { timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, `Saving raised no notification reading "${message}"`).toContainText(message, {
+      timeout,
+    });
   }
 
   async assertSettingsStored(expected: SessionLengthSettings): Promise<void> {
