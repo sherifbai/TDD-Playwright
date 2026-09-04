@@ -1,4 +1,4 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page, expect, test } from '@playwright/test';
 
 import { ACTION_TIMEOUT } from '@utils/constants';
 import { URLS } from '@utils/env';
@@ -187,10 +187,34 @@ export class SessionLengthPage {
     });
   }
 
+  async whileSettingsAre(changes: Partial<SessionLengthSettings>, body: () => Promise<void>): Promise<void> {
+    await this.open();
+    const settingsBefore = await this.readSettings();
+
+    try {
+      await this.write({ ...settingsBefore, ...changes });
+      await body();
+    } finally {
+      await this.write(settingsBefore).catch((error: unknown) => {
+        test.info().annotations.push({
+          type: 'session length left changed',
+          description: error instanceof Error ? error.message.split('\n')[0] : String(error),
+        });
+      });
+    }
+  }
+
   async assertSettingsStored(expected: SessionLengthSettings): Promise<void> {
     expect(await this.readSettings(), 'The page came back holding settings other than the ones saved').toEqual(
       expected,
     );
+  }
+
+  private async write(settings: SessionLengthSettings): Promise<void> {
+    await this.open();
+    await this.applySettings(settings);
+    await this.saveSettings();
+    await this.assertSaveWasConfirmed();
   }
 
   private async readMessageBehindToggle(toggle: Locator, field: Locator, shown: boolean): Promise<string> {
