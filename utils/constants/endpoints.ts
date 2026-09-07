@@ -15,3 +15,5 @@ export const WIDGET_DATA_URL = `${BACKOFFICE_V2_BASE}/accounts/widget-data`;
  * Asks for one widget by `domain`, answers 500 without it.
  */
 export const ORGANIZATION_WORKING_TIME_URL = `${BACKOFFICE_V2_BASE}/configs/organization-working-time`;
+
+export const ANONYMIZER_CONFIG_PATH = 'configs/anonymizer';
