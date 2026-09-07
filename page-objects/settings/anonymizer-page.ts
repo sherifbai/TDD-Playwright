@@ -1,9 +1,11 @@
-import { Locator, Page, expect } from '@playwright/test';
+import { Locator, Page, expect, test } from '@playwright/test';
 
-import { ANONYMIZER_APPROACHES, ANONYMIZER_ENTITIES } from '@utils/constants';
+import { ACTION_TIMEOUT, ANONYMIZER_APPROACHES, ANONYMIZER_CONFIG_PATH, ANONYMIZER_ENTITIES } from '@utils/constants';
 import { URLS } from '@utils/env';
-import { RouteReadyOptions } from '@utils/interfaces';
+import { AnonymizerSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForAnonymizerReady } from '@utils/waits';
+
+const SELECT_PLACEHOLDER = '- Select option -';
 
 export class AnonymizerPage {
   private readonly page: Page;
@@ -19,12 +21,13 @@ export class AnonymizerPage {
   private readonly buttonCopyToDomain: Locator;
 
   private readonly selectApproach: Locator;
+  private readonly textApproach: Locator;
   private readonly approachOptions: Locator;
 
+  private readonly sectionEntities: Locator;
+  private readonly sectionAllowlist: Locator;
+  private readonly sectionDenylist: Locator;
   private readonly entityCheckboxes: Locator;
-
-  private readonly inputAllowlist: Locator;
-  private readonly inputDenylist: Locator;
 
   private readonly rowAnonymizationBeforeLlm: Locator;
   private readonly rowRecordAnonymously: Locator;
@@ -32,6 +35,7 @@ export class AnonymizerPage {
   private readonly switchRecordAnonymously: Locator;
 
   private readonly buttonSaveSettings: Locator;
+  private readonly toastList: Locator;
 
   private readonly textareaInputText: Locator;
   private readonly textareaOutputText: Locator;
@@ -41,26 +45,29 @@ export class AnonymizerPage {
   constructor(page: Page) {
     this.page = page;
 
+    const heading = (name: string): Locator => this.page.getByRole('heading', { name, exact: true });
+    const section = (name: string): Locator => this.page.locator('main div.collapsible').filter({ has: heading(name) });
     const switchRow = (label: string): Locator =>
       this.page.locator('main div.track:has(> div.icon-switch)').filter({ hasText: label });
 
-    this.headingSettings = this.page.getByRole('heading', { name: 'Anonymizer Settings', exact: true });
-    this.headingTesting = this.page.getByRole('heading', { name: 'Anonymizer Testing', exact: true });
-    this.headingEntities = this.page.getByRole('heading', { name: 'Entities to anonymize', exact: true });
-    this.headingAllowlist = this.page.getByRole('heading', { name: 'Add words to the allowlist', exact: true });
-    this.headingDenylist = this.page.getByRole('heading', { name: 'Add words to the denylist', exact: true });
+    this.headingSettings = heading('Anonymizer Settings');
+    this.headingTesting = heading('Anonymizer Testing');
+    this.headingEntities = heading('Entities to anonymize');
+    this.headingAllowlist = heading('Add words to the allowlist');
+    this.headingDenylist = heading('Add words to the denylist');
 
     this.domainTabs = this.page.locator('main .domain-tab-selector__tab');
     this.domainTabsActive = this.page.locator('main .domain-tab-selector__tab--active');
     this.buttonCopyToDomain = this.page.getByRole('button', { name: 'Copy to domain', exact: true });
 
     this.selectApproach = this.page.getByRole('combobox').first();
+    this.textApproach = this.selectApproach.locator('p');
     this.approachOptions = this.page.getByRole('option');
 
-    this.entityCheckboxes = this.page.locator('main input[type="checkbox"]');
-
-    this.inputAllowlist = this.page.getByPlaceholder('Enter a word and press Enter to add to the allowlist');
-    this.inputDenylist = this.page.getByPlaceholder('Enter a word and press Enter to add to the denylist');
+    this.sectionEntities = section('Entities to anonymize');
+    this.sectionAllowlist = section('Add words to the allowlist');
+    this.sectionDenylist = section('Add words to the denylist');
+    this.entityCheckboxes = this.sectionEntities.locator('input[type="checkbox"]');
 
     this.rowAnonymizationBeforeLlm = switchRow('Anonymization before LLM');
     this.rowRecordAnonymously = switchRow('Record conversations anonymously');
@@ -68,6 +75,7 @@ export class AnonymizerPage {
     this.switchRecordAnonymously = this.rowRecordAnonymously.getByRole('switch');
 
     this.buttonSaveSettings = this.page.getByRole('button', { name: 'Save Settings', exact: true });
+    this.toastList = this.page.locator('ol.toast__list');
 
     this.textareaInputText = this.page.getByPlaceholder('Enter text to be anonymized');
     this.textareaOutputText = this.page.getByPlaceholder('Anonymized text will appear here');
@@ -80,8 +88,15 @@ export class AnonymizerPage {
   }
 
   async open(): Promise<void> {
+    const settingsLoaded = this.page.waitForResponse(
+      (response) => response.url().includes(ANONYMIZER_CONFIG_PATH) && response.ok(),
+      { timeout: ACTION_TIMEOUT },
+    );
+
     await this.page.goto(URLS.admin + 'chat/anonymizer');
     await this.waitForReady();
+    await settingsLoaded;
+    await this.waitForSettingsRendered();
   }
 
   async assertSettingsCardIsShown(): Promise<void> {
@@ -119,10 +134,10 @@ export class AnonymizerPage {
 
   async assertWordListsAreOffered(): Promise<void> {
     await expect(this.headingAllowlist, 'The settings hold no allowlist section').toBeVisible();
-    await expect(this.inputAllowlist, 'The allowlist section takes no word').toBeVisible();
+    await expect(this.wordInput(this.sectionAllowlist), 'The allowlist section takes no word').toBeVisible();
 
     await expect(this.headingDenylist, 'The settings hold no denylist section').toBeVisible();
-    await expect(this.inputDenylist, 'The denylist section takes no word').toBeVisible();
+    await expect(this.wordInput(this.sectionDenylist), 'The denylist section takes no word').toBeVisible();
   }
 
   async assertTogglesAreShown(): Promise<void> {
@@ -150,8 +165,165 @@ export class AnonymizerPage {
     await expect(this.textareaOutputText, 'The testing card shows no anonymized text back').toBeVisible();
   }
 
+  async selectFirstDomain(): Promise<string> {
+    const tab = this.domainTabs.first();
+    const domain = (await tab.innerText()).trim();
+
+    await tab.click();
+    await expect(tab, `The domain tabs never moved to "${domain}"`).toHaveClass(/domain-tab-selector__tab--active/);
+
+    return domain;
+  }
+
+  async readSettings(): Promise<AnonymizerSettings> {
+    return {
+      approach: (await this.textApproach.innerText()).trim(),
+      entities: await this.checkedEntities(),
+      allowlist: await this.listedWords(this.sectionAllowlist),
+      denylist: await this.listedWords(this.sectionDenylist),
+      anonymizationBeforeLlm: await this.isSwitchOn(this.switchAnonymizationBeforeLlm),
+      recordAnonymously: await this.isSwitchOn(this.switchRecordAnonymously),
+    };
+  }
+
+  async applySettings(settings: AnonymizerSettings): Promise<void> {
+    await this.chooseApproach(settings.approach);
+    await this.setEntities(settings.entities);
+    await this.setWords(this.sectionAllowlist, settings.allowlist);
+    await this.setWords(this.sectionDenylist, settings.denylist);
+    await this.setSwitch(this.switchAnonymizationBeforeLlm, settings.anonymizationBeforeLlm);
+    await this.setSwitch(this.switchRecordAnonymously, settings.recordAnonymously);
+  }
+
+  async saveSettings(): Promise<void> {
+    await this.buttonSaveSettings.click();
+  }
+
+  async assertSaveWasConfirmed({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, 'Saving the anonymizer settings raised no notification').toContainText(
+      'Anonymizer settings saved successfully',
+      { timeout },
+    );
+  }
+
+  async assertSettingsStored(expected: AnonymizerSettings): Promise<void> {
+    await expect(async () => {
+      expect(await this.readSettings(), 'The page came back holding settings other than the ones saved').toEqual(
+        expected,
+      );
+    }).toPass({ timeout: ACTION_TIMEOUT });
+  }
+
+  async withSettingsRestored(body: (settingsBefore: AnonymizerSettings) => Promise<void>): Promise<void> {
+    const settingsBefore = await this.readSettings();
+
+    try {
+      await body(settingsBefore);
+    } finally {
+      await this.restore(settingsBefore).catch((error: unknown) => {
+        test.info().annotations.push({
+          type: 'anonymizer settings left changed',
+          description: error instanceof Error ? error.message.split('\n')[0] : String(error),
+        });
+      });
+    }
+  }
+
+  private async restore(settings: AnonymizerSettings): Promise<void> {
+    await this.open();
+    await this.applySettings(settings);
+    await this.saveSettings();
+    await this.assertSaveWasConfirmed();
+  }
+
+  private async waitForSettingsRendered(): Promise<void> {
+    await expect(this.textApproach, 'The anonymizer never filled its settings in').not.toHaveText(SELECT_PLACEHOLDER, {
+      timeout: ACTION_TIMEOUT,
+    });
+  }
+
   private entityCheckbox(entity: string): Locator {
-    return this.page.locator(`main input[type="checkbox"][name="${entity}"]`);
+    return this.sectionEntities.locator(`input[type="checkbox"][name="${entity}"]`);
+  }
+
+  private wordInput(section: Locator): Locator {
+    return section.locator('input.tag-input__input');
+  }
+
+  private wordTags(section: Locator): Locator {
+    return section.locator('.tag-input__tag-text');
+  }
+
+  private async checkedEntities(): Promise<string[]> {
+    const checked: string[] = [];
+
+    for (const entity of ANONYMIZER_ENTITIES) {
+      if (await this.entityCheckbox(entity).isChecked()) {
+        checked.push(entity);
+      }
+    }
+
+    return checked;
+  }
+
+  private async listedWords(section: Locator): Promise<string[]> {
+    return (await this.wordTags(section).allInnerTexts()).map((word) => word.trim());
+  }
+
+  private async chooseApproach(approach: string): Promise<void> {
+    if ((await this.textApproach.innerText()).trim() === approach) {
+      return;
+    }
+
+    await this.selectApproach.click();
+    await this.approachOptions.filter({ hasText: new RegExp(`^${approach}$`) }).click();
+    await expect(this.textApproach, 'The approach dropdown kept the option it was clicked out of').toHaveText(approach);
+  }
+
+  private async setEntities(entities: string[]): Promise<void> {
+    for (const entity of ANONYMIZER_ENTITIES) {
+      const checkbox = this.entityCheckbox(entity);
+      const wanted = entities.includes(entity);
+
+      if ((await checkbox.isChecked()) !== wanted) {
+        await checkbox.setChecked(wanted);
+      }
+    }
+
+    expect(await this.checkedEntities(), 'The entities section kept a selection other than the one made').toEqual(
+      entities,
+    );
+  }
+
+  private async setWords(section: Locator, words: string[]): Promise<void> {
+    const clearAll = section.locator('button.tag-input__clear-all');
+
+    if (await clearAll.count()) {
+      await clearAll.click();
+    }
+
+    const input = this.wordInput(section);
+
+    for (const word of words) {
+      await input.fill(word);
+      await input.press('Enter');
+    }
+
+    await expect(this.wordTags(section), 'The word list kept words other than the ones entered').toHaveText(words);
+  }
+
+  private async isSwitchOn(toggle: Locator): Promise<boolean> {
+    return (await toggle.getAttribute('aria-checked')) === 'true';
+  }
+
+  private async setSwitch(toggle: Locator, on: boolean): Promise<void> {
+    await expect(async () => {
+      if ((await this.isSwitchOn(toggle)) !== on) {
+        await toggle.click();
+      }
+
+      expect(await this.isSwitchOn(toggle), 'The toggle kept the state it was clicked out of').toBe(on);
+    }).toPass({ timeout: ACTION_TIMEOUT });
   }
 
   private async assertTooltipIsOffered(row: Locator, describedAs: string): Promise<void> {
