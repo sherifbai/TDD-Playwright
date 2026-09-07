@@ -2,7 +2,7 @@ import { Locator, Page, expect, test } from '@playwright/test';
 
 import { ACTION_TIMEOUT, ANONYMIZER_APPROACHES, ANONYMIZER_CONFIG_PATH, ANONYMIZER_ENTITIES } from '@utils/constants';
 import { URLS } from '@utils/env';
-import { AnonymizerSettings, RouteReadyOptions } from '@utils/interfaces';
+import { AnonymizedText, AnonymizerSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForAnonymizerReady } from '@utils/waits';
 
 const SELECT_PLACEHOLDER = '- Select option -';
@@ -165,6 +165,44 @@ export class AnonymizerPage {
     await expect(this.textareaOutputText, 'The testing card shows no anonymized text back').toBeVisible();
   }
 
+  async anonymize(text: string): Promise<void> {
+    await this.textareaInputText.fill(text);
+    await this.buttonAnonymize.click();
+  }
+
+  async assertAnonymizationWasConfirmed({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<void> {
+    await expect(this.toastList, 'Anonymizing the text raised no notification').toContainText(
+      'Text anonymized successfully',
+      { timeout },
+    );
+  }
+
+  async assertOutputAnonymizes({ hidden, kept }: AnonymizedText): Promise<void> {
+    await expect(async () => {
+      const output = await this.textareaOutputText.inputValue();
+
+      expect(output, 'The testing card showed no anonymized text back').not.toBe('');
+
+      for (const value of hidden) {
+        expect(output, `The anonymized text still carries "${value}"`).not.toContain(value);
+      }
+
+      for (const value of kept) {
+        expect(output, `The anonymized text lost "${value}"`).toContain(value);
+      }
+    }).toPass({ timeout: ACTION_TIMEOUT });
+  }
+
+  async clearTestingInput(): Promise<void> {
+    await this.buttonClear.click();
+  }
+
+  async assertTestingInputIsCleared(): Promise<void> {
+    await expect(this.textareaInputText, 'The "Clear" button left the text entered in place').toHaveValue('', {
+      timeout: ACTION_TIMEOUT,
+    });
+  }
+
   async selectFirstDomain(): Promise<string> {
     const tab = this.domainTabs.first();
     const domain = (await tab.innerText()).trim();
@@ -281,18 +319,20 @@ export class AnonymizerPage {
   }
 
   private async setEntities(entities: string[]): Promise<void> {
-    for (const entity of ANONYMIZER_ENTITIES) {
-      const checkbox = this.entityCheckbox(entity);
-      const wanted = entities.includes(entity);
+    await expect(async () => {
+      for (const entity of ANONYMIZER_ENTITIES) {
+        const checkbox = this.entityCheckbox(entity);
+        const wanted = entities.includes(entity);
 
-      if ((await checkbox.isChecked()) !== wanted) {
-        await checkbox.setChecked(wanted);
+        if ((await checkbox.isChecked()) !== wanted) {
+          await checkbox.setChecked(wanted);
+        }
       }
-    }
 
-    expect(await this.checkedEntities(), 'The entities section kept a selection other than the one made').toEqual(
-      entities,
-    );
+      expect(await this.checkedEntities(), 'The entities section kept a selection other than the one made').toEqual(
+        entities,
+      );
+    }).toPass({ timeout: ACTION_TIMEOUT });
   }
 
   private async setWords(section: Locator, words: string[]): Promise<void> {

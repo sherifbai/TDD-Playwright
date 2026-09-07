@@ -6,6 +6,10 @@ export function createAnonymizerWord(prefix = 'autotestword'): string {
   return `${prefix}${uniqueSuffix()}`;
 }
 
+export function createAnonymizerEmail(prefix = 'autotestmail'): string {
+  return `${prefix}${uniqueSuffix()}@example.com`;
+}
+
 export function nextAnonymizerApproach(current: string): string {
   const approaches: readonly string[] = ANONYMIZER_APPROACHES;
   const index = approaches.indexOf(current);

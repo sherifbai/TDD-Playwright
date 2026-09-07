@@ -1,7 +1,12 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { test } from '@setup/test-setup';
 import { AnonymizerSettings } from '@utils/interfaces';
-import { createAnonymizerWord, nextAnonymizerApproach, toggledAnonymizerEntities } from '@utils/test-data';
+import {
+  createAnonymizerEmail,
+  createAnonymizerWord,
+  nextAnonymizerApproach,
+  toggledAnonymizerEntities,
+} from '@utils/test-data';
 
 test.describe('[administration] [functional] Anonymizer settings are saved for the selected domain', () => {
   test(
@@ -35,6 +40,66 @@ test.describe('[administration] [functional] Anonymizer settings are saved for t
         await test.step('The page reopens holding the settings that were saved', async () => {
           await ap.open();
           await ap.assertSettingsStored(settings);
+        });
+      });
+    },
+  );
+});
+
+test.describe('[administration] [functional] The anonymizer testing card anonymizes text by the settings of the domain', () => {
+  test(
+    'Anonymize hides the entity value and the denied word, keeps the allowed one, and Clear empties the input',
+    { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/175/' } },
+    async ({ page }) => {
+      const ap = new AdminPageFactory(page).getAnonymizerPage();
+
+      const anonymizedEmail = createAnonymizerEmail('anonymized');
+      const allowedEmail = createAnonymizerEmail('allowed');
+      const deniedWord = createAnonymizerWord('deny');
+      const untouchedWord = createAnonymizerWord('random');
+
+      const textToAnonymize = [
+        `Write to ${anonymizedEmail} or to ${allowedEmail}.`,
+        `The word ${deniedWord} is denied and ${untouchedWord} is nothing at all.`,
+      ].join(' ');
+
+      await ap.open();
+
+      await test.step('The settings are opened on the first domain offered', async () => {
+        await ap.selectFirstDomain();
+      });
+
+      await ap.withSettingsRestored(async (settingsBefore) => {
+        const settings: AnonymizerSettings = {
+          approach: 'Replace',
+          entities: ['EMAIL_ADDRESS'],
+          allowlist: [allowedEmail],
+          denylist: [deniedWord],
+          anonymizationBeforeLlm: settingsBefore.anonymizationBeforeLlm,
+          recordAnonymously: settingsBefore.recordAnonymously,
+        };
+
+        await test.step('The domain is set to replace e-mail addresses, with one address allowed and one word denied', async () => {
+          await ap.applySettings(settings);
+          await ap.saveSettings();
+          await ap.assertSaveWasConfirmed();
+        });
+
+        await test.step('Anonymizing the text is confirmed on the page', async () => {
+          await ap.anonymize(textToAnonymize);
+          await ap.assertAnonymizationWasConfirmed();
+        });
+
+        await test.step('The output hides the address and the denied word, and keeps the allowed address and the rest of the text', async () => {
+          await ap.assertOutputAnonymizes({
+            hidden: [anonymizedEmail, deniedWord],
+            kept: [allowedEmail, untouchedWord],
+          });
+        });
+
+        await test.step('Clearing the testing card empties the text that was entered', async () => {
+          await ap.clearTestingInput();
+          await ap.assertTestingInputIsCleared();
         });
       });
     },
