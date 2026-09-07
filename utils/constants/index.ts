@@ -1,3 +1,4 @@
+export * from './anonymizer';
 export * from './browser';
 export * from './endpoints';
 export * from './paths';
