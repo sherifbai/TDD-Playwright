@@ -17,7 +17,7 @@ export function deleteConversationsCleanup(resolveSettings: SettingsResolver) {
 
     await dcp.open();
     await dcp.applySettings(settings);
-    await dcp.save();
+    await dcp.saveSettings();
     await dcp.assertSaveWasConfirmed();
   };
 }

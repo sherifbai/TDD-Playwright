@@ -323,7 +323,7 @@ export class DeleteConversationsPage {
     }
   }
 
-  async save(): Promise<void> {
+  async saveSettings(): Promise<void> {
     await this.buttonSave.click();
   }
 

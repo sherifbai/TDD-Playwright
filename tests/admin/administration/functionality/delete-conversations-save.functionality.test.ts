@@ -44,7 +44,7 @@ test.describe(
       });
 
       await test.step('Saving reports the update went through', async () => {
-        await dcp.save();
+        await dcp.saveSettings();
         await dcp.assertSaveWasConfirmed();
       });
 
@@ -65,7 +65,7 @@ test.describe(
       });
 
       await test.step('Saving reports the update went through', async () => {
-        await dcp.save();
+        await dcp.saveSettings();
         await dcp.assertSaveWasConfirmed();
       });
 
