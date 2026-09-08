@@ -13,8 +13,8 @@ import { waitForDeleteConversationsReady } from '@utils/waits';
 export class DeleteConversationsPage {
   private readonly page: Page;
 
-  private readonly headingPage: Locator;
-  private readonly textRules: Locator;
+  private readonly headingDeleteConversations: Locator;
+  private readonly textDescription: Locator;
 
   private readonly switchAuthenticatedRemoval: Locator;
   private readonly switchAnonymousRemoval: Locator;
@@ -52,8 +52,8 @@ export class DeleteConversationsPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.headingPage = this.page.getByRole('heading', { name: 'Conversation deletion', exact: true });
-    this.textRules = this.page.getByText('Automatic expiration and deletion rules', { exact: true });
+    this.headingDeleteConversations = this.page.getByRole('heading', { name: 'Conversation deletion', exact: true });
+    this.textDescription = this.page.getByText('Automatic expiration and deletion rules', { exact: true });
 
     this.switchAuthenticatedRemoval = this.page.getByRole('switch', { name: 'Authenticated conversations removal' });
     this.switchAnonymousRemoval = this.page.getByRole('switch', { name: 'Anonymous conversations removal' });
@@ -119,8 +119,8 @@ export class DeleteConversationsPage {
   }
 
   async assertPageNamesItself(): Promise<void> {
-    await expect(this.headingPage, 'The page does not name itself').toBeVisible();
-    await expect(this.textRules, 'The page does not say what the rules below it do').toBeVisible();
+    await expect(this.headingDeleteConversations, 'The page does not name itself').toBeVisible();
+    await expect(this.textDescription, 'The page does not say what the rules below it do').toBeVisible();
   }
 
   async assertRemovalTogglesOffered(): Promise<void> {
