@@ -126,7 +126,7 @@ export class DeleteConversationsPage {
     return this.page.getByRole('button', { name: caption, exact: true });
   }
 
-  async assertPageNamesItself(): Promise<void> {
+  async assertPageHeadingAndDescriptionAreShown(): Promise<void> {
     await expect(this.headingDeleteConversations, 'The page does not name itself').toBeVisible();
     await expect(this.textDescription, 'The page does not say what the rules below it do').toBeVisible();
   }

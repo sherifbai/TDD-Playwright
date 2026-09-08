@@ -5,13 +5,15 @@ test.describe(
   '[administration] [visibility] "Delete Conversations" shows the whole deletion form',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/156/' } },
   () => {
-    test('The page names itself and offers both removals with a way to save them', async ({ page }) => {
+    test('The page shows its heading and description and offers both removals with a way to save them', async ({
+      page,
+    }) => {
       const dcp = new AdminPageFactory(page).getDeleteConversationsPage();
 
       await dcp.open();
 
-      await test.step('The page names itself and the rules it applies', async () => {
-        await dcp.assertPageNamesItself();
+      await test.step('The page shows its heading and description', async () => {
+        await dcp.assertPageHeadingAndDescriptionAreShown();
       });
 
       await test.step('Both removals are offered as toggles with their tooltips', async () => {
