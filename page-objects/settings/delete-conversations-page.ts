@@ -2,9 +2,9 @@ import { Locator, Page, expect } from '@playwright/test';
 
 import {
   ACTION_TIMEOUT,
-  EXPIRING_CONVERSATION_COLUMNS,
-  EXPIRING_CONVERSATION_RANGE_SHORTCUTS,
-  EXPIRING_CONVERSATION_RESULT_COUNTS,
+  EXPIRING_CONVERSATIONS_TABLE_COLUMNS,
+  EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS,
+  EXPIRING_CONVERSATIONS_RESULT_COUNTS,
 } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { DeleteConversationsSettings, RouteReadyOptions } from '@utils/interfaces';
@@ -84,7 +84,7 @@ export class DeleteConversationsPage {
     this.inputRangeUntil = this.page.locator('main .endTime input');
     this.tooltipExpiringRange = this.page
       .locator('div.track')
-      .filter({ has: this.buttonRangeShortcut(EXPIRING_CONVERSATION_RANGE_SHORTCUTS[0]) })
+      .filter({ has: this.buttonRangeShortcut(EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS[0]) })
       .last()
       .locator('span[data-state]')
       .first();
@@ -186,7 +186,7 @@ export class DeleteConversationsPage {
     await expect(this.inputRangeUntil, 'The expiring conversations filter takes no date to end at').toBeVisible();
     await expect(this.tooltipExpiringRange, 'The expiring conversations filter carries no tooltip').toBeVisible();
 
-    for (const shortcut of EXPIRING_CONVERSATION_RANGE_SHORTCUTS) {
+    for (const shortcut of EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS) {
       await expect(this.buttonRangeShortcut(shortcut), `The filter offers no "${shortcut}" shortcut`).toBeVisible();
     }
   }
@@ -202,7 +202,7 @@ export class DeleteConversationsPage {
     await expect(
       this.optionsColumnSelector,
       'The column selector offers a different set of columns than the table lists',
-    ).toHaveText(EXPIRING_CONVERSATION_COLUMNS);
+    ).toHaveText(EXPIRING_CONVERSATIONS_TABLE_COLUMNS);
 
     await this.triggerColumnSelector.click();
     await expect(this.triggerColumnSelector, 'The column selector stayed open').toHaveAttribute(
@@ -222,7 +222,7 @@ export class DeleteConversationsPage {
   async assertTableListsEveryColumnWithSorting(): Promise<void> {
     await expect(this.table, 'The expiring conversations table is not on the page').toBeVisible();
 
-    for (const column of EXPIRING_CONVERSATION_COLUMNS) {
+    for (const column of EXPIRING_CONVERSATIONS_TABLE_COLUMNS) {
       await expect(
         this.table.getByRole('columnheader', { name: column, exact: true }),
         `The table lists no "${column}" column`,
@@ -230,7 +230,7 @@ export class DeleteConversationsPage {
     }
 
     await expect(this.tableSortButtons, 'A column was listed with no way to sort by it').toHaveCount(
-      EXPIRING_CONVERSATION_COLUMNS.length,
+      EXPIRING_CONVERSATIONS_TABLE_COLUMNS.length,
     );
   }
 
@@ -260,12 +260,12 @@ export class DeleteConversationsPage {
   async assertResultCountOffered(): Promise<void> {
     await expect(this.selectResultCount, 'The table offers no choice of how many rows to show').toBeVisible();
     await expect(this.selectResultCount, 'The result count does not start on the page size the case names').toHaveValue(
-      EXPIRING_CONVERSATION_RESULT_COUNTS[0],
+      EXPIRING_CONVERSATIONS_RESULT_COUNTS[0],
     );
     await expect(
       this.selectResultCount.locator('option'),
       'The result count offers a different set of page sizes',
-    ).toHaveText(EXPIRING_CONVERSATION_RESULT_COUNTS);
+    ).toHaveText(EXPIRING_CONVERSATIONS_RESULT_COUNTS);
   }
 
   async assertAuthenticatedPeriodHidden(): Promise<void> {
