@@ -43,8 +43,8 @@ export class DeleteConversationsPage {
   private readonly table: Locator;
   private readonly tableSortButtons: Locator;
 
-  private readonly paginationNav: Locator;
-  private readonly selectResultCount: Locator;
+  private readonly paginationNavigation: Locator;
+  private readonly selectPageSize: Locator;
 
   private readonly expiringConversationsTable: PaginatedDataTable;
 
@@ -99,12 +99,12 @@ export class DeleteConversationsPage {
     this.table = this.page.locator('main table.data-table');
     this.tableSortButtons = this.table.locator('thead th button');
 
-    this.paginationNav = this.page.getByRole('navigation', { name: 'Pagination navigation' });
-    this.selectResultCount = this.page.locator('main .data-table__page-size select');
+    this.paginationNavigation = this.page.getByRole('navigation', { name: 'Pagination navigation' });
+    this.selectPageSize = this.page.locator('main .data-table__page-size select');
 
     this.expiringConversationsTable = new PaginatedDataTable(this.page, {
       table: this.table,
-      pageSizeSelect: this.selectResultCount,
+      pageSizeSelect: this.selectPageSize,
       rowLabelSelector: 'td',
       defaultPageSize: EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS[0],
     });
@@ -250,7 +250,7 @@ export class DeleteConversationsPage {
   }
 
   async assertPagingOfferedWhenListOverflows(): Promise<void> {
-    const pageSize = Number(await this.selectResultCount.inputValue());
+    const pageSize = Number(await this.selectPageSize.inputValue());
     const rows = await this.expiringConversationsTable.getRows().count();
 
     expect(rows, 'The expiring conversations table stayed empty').toBeGreaterThan(0);
@@ -259,16 +259,16 @@ export class DeleteConversationsPage {
       return;
     }
 
-    await expect(this.paginationNav, 'The list filled its page but was offered no way to turn it').toBeVisible();
+    await expect(this.paginationNavigation, 'The list filled its page but was offered no way to turn it').toBeVisible();
   }
 
   async assertResultCountOffered(): Promise<void> {
-    await expect(this.selectResultCount, 'The table offers no choice of how many rows to show').toBeVisible();
-    await expect(this.selectResultCount, 'The result count does not start on the page size the case names').toHaveValue(
+    await expect(this.selectPageSize, 'The table offers no choice of how many rows to show').toBeVisible();
+    await expect(this.selectPageSize, 'The result count does not start on the page size the case names').toHaveValue(
       EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS[0],
     );
     await expect(
-      this.selectResultCount.locator('option'),
+      this.selectPageSize.locator('option'),
       'The result count offers a different set of page sizes',
     ).toHaveText(EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS);
   }
@@ -363,6 +363,6 @@ export class DeleteConversationsPage {
     await expect(this.labelExpiringRange, 'Nothing expires any more, yet the filter stayed').toHaveCount(0);
     await expect(this.textConversationsInPeriod, 'Nothing expires any more, yet the count stayed').toHaveCount(0);
     await expect(this.table, 'Nothing expires any more, yet the table stayed').toHaveCount(0);
-    await expect(this.paginationNav, 'Nothing expires any more, yet the paging stayed').toHaveCount(0);
+    await expect(this.paginationNavigation, 'Nothing expires any more, yet the paging stayed').toHaveCount(0);
   }
 }
