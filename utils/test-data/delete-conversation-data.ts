@@ -4,7 +4,11 @@ const FALLBACK_DELETION_TIME = '11:00:00';
 export function createLongerPeriod(currentPeriod?: string): string {
   const current = Number.parseInt(currentPeriod ?? '', 10);
 
-  return Number.isFinite(current) ? String(current + 1) : FALLBACK_PERIOD;
+  if (!Number.isFinite(current)) {
+    return FALLBACK_PERIOD;
+  }
+
+  return String(current + 1);
 }
 
 export function createShiftedDeletionTime(currentTime?: string): string {
