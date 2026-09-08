@@ -6,7 +6,7 @@ import { DeleteConversationsSettings } from '@utils/interfaces';
 import { createLongerPeriod, createShiftedDeletionTime } from '@utils/test-data';
 
 test.describe(
-  '[administration] [functional] "Delete Conversations" follows its removal toggles',
+  '[administration] [functional] The conversations deletion page follows its removal toggles',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/156/' } },
   () => {
     test('A removal switched off takes its own fields off the page', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe(
 );
 
 test.describe(
-  '[administration] [functional] "Delete Conversations" saves the rules it is given',
+  '[administration] [functional] The conversations deletion page saves the rules it is given',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/178/' } },
   () => {
     let settingsBeforeRun: DeleteConversationsSettings;

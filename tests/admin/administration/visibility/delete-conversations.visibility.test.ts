@@ -2,7 +2,7 @@ import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { test } from '@setup/test-setup';
 
 test.describe(
-  '[administration] [visibility] "Delete Conversations" shows the whole deletion form',
+  '[administration] [visibility] The conversations deletion page shows the whole deletion form',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/156/' } },
   () => {
     test('The page shows its heading and description and offers both removals with a way to save them', async ({
