@@ -9,7 +9,7 @@ test.describe(
   '[administration] [functional] "Delete Conversations" saves the rules it is given',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/178/' } },
   () => {
-    let settingsBeforeRun: DeleteConversationsSettings | undefined;
+    let settingsBeforeRun: DeleteConversationsSettings;
 
     test.beforeEach(async ({ page }) => {
       const dcp = new AdminPageFactory(page).getDeleteConversationsPage();
@@ -57,7 +57,7 @@ test.describe(
     test('A removal switched off is confirmed and stays off after a reload', async ({ page }) => {
       const dcp = new AdminPageFactory(page).getDeleteConversationsPage();
 
-      const authenticatedRemoval = settingsBeforeRun?.authenticatedRemoval ?? true;
+      const { authenticatedRemoval } = settingsBeforeRun;
 
       await test.step('Anonymous removal is switched off', async () => {
         await dcp.setAnonymousRemoval(false);
