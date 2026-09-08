@@ -1,9 +1,9 @@
 import { Page } from '@playwright/test';
 
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-import { DeleteConversationSettings } from '@utils/interfaces';
+import { DeleteConversationsSettings } from '@utils/interfaces';
 
-type SettingsResolver = () => DeleteConversationSettings | undefined;
+type SettingsResolver = () => DeleteConversationsSettings | undefined;
 
 export function deleteConversationsCleanup(resolveSettings: SettingsResolver) {
   return async ({ page }: { page: Page }): Promise<void> => {

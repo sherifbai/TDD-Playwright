@@ -1,4 +1,4 @@
-export interface DeleteConversationSettings {
+export interface DeleteConversationsSettings {
   readonly authenticatedRemoval: boolean;
   readonly authenticatedPeriod?: string;
   readonly anonymousRemoval: boolean;

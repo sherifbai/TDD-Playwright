@@ -7,7 +7,7 @@ import {
   EXPIRING_CONVERSATION_RESULT_COUNTS,
 } from '@utils/constants';
 import { URLS } from '@utils/env';
-import { DeleteConversationSettings, RouteReadyOptions } from '@utils/interfaces';
+import { DeleteConversationsSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForDeleteConversationsReady } from '@utils/waits';
 
 export class DeleteConversationsPage {
@@ -284,7 +284,7 @@ export class DeleteConversationsPage {
     await expect(this.noteAnonymous, 'The note of a switched off removal stayed on the page').toHaveCount(0);
   }
 
-  async readFormSettings(): Promise<DeleteConversationSettings> {
+  async readFormSettings(): Promise<DeleteConversationsSettings> {
     const authenticatedRemoval = (await this.switchAuthenticatedRemoval.getAttribute('aria-checked')) === 'true';
     const anonymousRemoval = (await this.switchAnonymousRemoval.getAttribute('aria-checked')) === 'true';
     const anyRemoval = authenticatedRemoval || anonymousRemoval;
@@ -298,7 +298,7 @@ export class DeleteConversationsPage {
     };
   }
 
-  async applySettings(settings: DeleteConversationSettings): Promise<void> {
+  async applySettings(settings: DeleteConversationsSettings): Promise<void> {
     await this.setAuthenticatedRemoval(settings.authenticatedRemoval);
     await this.setAnonymousRemoval(settings.anonymousRemoval);
 
@@ -326,7 +326,7 @@ export class DeleteConversationsPage {
     );
   }
 
-  async assertStoredSettings(expected: DeleteConversationSettings): Promise<void> {
+  async assertStoredSettings(expected: DeleteConversationsSettings): Promise<void> {
     await expect(
       this.switchAuthenticatedRemoval,
       'Authenticated removal came back in a state it was not saved in',

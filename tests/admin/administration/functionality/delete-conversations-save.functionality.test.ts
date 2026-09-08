@@ -2,14 +2,14 @@ import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { test } from '@setup/test-setup';
 import { BOTH_REMOVALS_ON } from '@utils/constants';
 import { deleteConversationsCleanup } from '@utils/helpers';
-import { DeleteConversationSettings } from '@utils/interfaces';
+import { DeleteConversationsSettings } from '@utils/interfaces';
 import { createLongerPeriod, createShiftedDeletionTime } from '@utils/test-data';
 
 test.describe(
   '[administration] [functional] "Delete Conversations" saves the rules it is given',
   { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/178/' } },
   () => {
-    let settingsBeforeRun: DeleteConversationSettings | undefined;
+    let settingsBeforeRun: DeleteConversationsSettings | undefined;
 
     test.beforeEach(async ({ page }) => {
       const dcp = new AdminPageFactory(page).getDeleteConversationsPage();
@@ -31,7 +31,7 @@ test.describe(
       const wanted = await test.step('A longer period and a shifted deletion time are entered', async () => {
         const current = await dcp.readFormSettings();
 
-        const next: DeleteConversationSettings = {
+        const next: DeleteConversationsSettings = {
           ...BOTH_REMOVALS_ON,
           authenticatedPeriod: createLongerPeriod(current.authenticatedPeriod),
           anonymousPeriod: createLongerPeriod(current.anonymousPeriod),
