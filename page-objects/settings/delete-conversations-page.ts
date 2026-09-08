@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { PaginatedDataTable } from '@page-objects/common';
 import {
   ACTION_TIMEOUT,
   EXPIRING_CONVERSATIONS_TABLE_COLUMNS,
@@ -41,10 +42,11 @@ export class DeleteConversationsPage {
 
   private readonly table: Locator;
   private readonly tableSortButtons: Locator;
-  private readonly tableRows: Locator;
 
   private readonly paginationNav: Locator;
   private readonly selectResultCount: Locator;
+
+  private readonly expiringConversationsTable: PaginatedDataTable;
 
   private readonly buttonSave: Locator;
   private readonly toastList: Locator;
@@ -96,10 +98,16 @@ export class DeleteConversationsPage {
 
     this.table = this.page.locator('main table.data-table');
     this.tableSortButtons = this.table.locator('thead th button');
-    this.tableRows = this.table.locator('tbody tr');
 
     this.paginationNav = this.page.getByRole('navigation', { name: 'Pagination navigation' });
     this.selectResultCount = this.page.locator('main .data-table__page-size select');
+
+    this.expiringConversationsTable = new PaginatedDataTable(this.page, {
+      table: this.table,
+      pageSizeSelect: this.selectResultCount,
+      rowLabelSelector: 'td',
+      defaultPageSize: EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS[0],
+    });
 
     this.buttonSave = this.page.getByRole('button', { name: 'Save', exact: true });
     this.toastList = this.page.locator('ol.toast__list');
@@ -213,10 +221,7 @@ export class DeleteConversationsPage {
 
   async loadNinetyDayRange(): Promise<void> {
     await this.buttonRangeShortcut('90 days').click();
-    await expect(
-      this.tableRows.first(),
-      'No conversation expires within ninety days, so the table has nothing to list',
-    ).toBeVisible({ timeout: ACTION_TIMEOUT });
+    await this.expiringConversationsTable.waitUntilReady();
   }
 
   async assertTableListsEveryColumnWithSorting(): Promise<void> {
@@ -235,7 +240,7 @@ export class DeleteConversationsPage {
   }
 
   async assertEveryRowEndsWithView(): Promise<void> {
-    const rows = await this.tableRows.count();
+    const rows = await this.expiringConversationsTable.getRows().count();
 
     expect(rows, 'The expiring conversations table stayed empty').toBeGreaterThan(0);
     await expect(
@@ -246,7 +251,7 @@ export class DeleteConversationsPage {
 
   async assertPagingOfferedWhenListOverflows(): Promise<void> {
     const pageSize = Number(await this.selectResultCount.inputValue());
-    const rows = await this.tableRows.count();
+    const rows = await this.expiringConversationsTable.getRows().count();
 
     expect(rows, 'The expiring conversations table stayed empty').toBeGreaterThan(0);
 
