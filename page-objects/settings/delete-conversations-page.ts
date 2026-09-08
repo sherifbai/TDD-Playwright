@@ -127,8 +127,8 @@ export class DeleteConversationsPage {
   }
 
   async assertPageHeadingAndDescriptionAreShown(): Promise<void> {
-    await expect(this.headingDeleteConversations, 'The page does not name itself').toBeVisible();
-    await expect(this.textDescription, 'The page does not say what the rules below it do').toBeVisible();
+    await expect(this.headingDeleteConversations, 'Conversation deletion never rendered its heading').toBeVisible();
+    await expect(this.textDescription, 'Conversation deletion never rendered its description').toBeVisible();
   }
 
   async assertRemovalTogglesOffered(): Promise<void> {
