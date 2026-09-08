@@ -132,8 +132,11 @@ export class DeleteConversationsPage {
   }
 
   async assertRemovalTogglesOffered(): Promise<void> {
-    await expect(this.switchAuthenticatedRemoval, 'Authenticated conversations cannot be switched off').toBeVisible();
-    await expect(this.switchAnonymousRemoval, 'Anonymous conversations cannot be switched off').toBeVisible();
+    await expect(
+      this.switchAuthenticatedRemoval,
+      'Authenticated conversations removal is offered no toggle',
+    ).toBeVisible();
+    await expect(this.switchAnonymousRemoval, 'Anonymous conversations removal is offered no toggle').toBeVisible();
     await expect(this.tooltipsRemoval, 'A removal toggle was offered without its tooltip').toHaveCount(2);
     await expect(this.tooltipsRemoval.first(), 'The tooltip of a removal toggle never became visible').toBeVisible();
   }
