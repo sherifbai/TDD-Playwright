@@ -61,7 +61,7 @@ test.describe(
 
       await test.step('A ninety day range fills the table, each conversation offered for viewing', async () => {
         await dcp.loadNinetyDayRange();
-        await dcp.assertEveryRowEndsWithView();
+        await dcp.assertEveryRowEndsWithViewButton();
       });
 
       await test.step('The filled list is paged and the result count starts on the size the case names', async () => {

@@ -242,7 +242,7 @@ export class DeleteConversationsPage {
     );
   }
 
-  async assertEveryRowEndsWithView(): Promise<void> {
+  async assertEveryRowEndsWithViewButton(): Promise<void> {
     const rows = await this.expiringConversationsTable.getRows().count();
 
     expect(rows, 'The expiring conversations table stayed empty').toBeGreaterThan(0);
