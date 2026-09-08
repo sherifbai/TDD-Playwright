@@ -40,11 +40,11 @@ export class AdminPageFactory {
     return new OfficeOpeningHoursPage(this.page);
   }
 
-  getMultiDomainsPage(): MultiDomainsPage {
-    return new MultiDomainsPage(this.page);
-  }
-
   getDeleteConversationsPage(): DeleteConversationsPage {
     return new DeleteConversationsPage(this.page);
+  }
+
+  getMultiDomainsPage(): MultiDomainsPage {
+    return new MultiDomainsPage(this.page);
   }
 }
