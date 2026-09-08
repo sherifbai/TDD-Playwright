@@ -1,5 +1,5 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-import { test } from '@setup/test-setup';
+import { expect, test } from '@setup/test-setup';
 import { AnonymizerSettings } from '@utils/interfaces';
 import {
   createAnonymizerEmail,
@@ -100,6 +100,56 @@ test.describe('[administration] [functional] The anonymizer testing card anonymi
         await test.step('Clearing the testing card empties the text that was entered', async () => {
           await ap.clearTestingInput();
           await ap.assertTestingInputIsCleared();
+        });
+      });
+    },
+  );
+});
+
+test.describe('[administration] [functional] Anonymizer settings are copied from one domain to another', () => {
+  test(
+    'The copied domain comes back holding the settings of the domain they were copied from',
+    { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/173/' } },
+    async ({ page }) => {
+      const ap = new AdminPageFactory(page).getAnonymizerPage();
+
+      await ap.open();
+
+      const domains = await ap.domainNames();
+      expect(domains.length, 'The stand offers too few domains to copy anonymizer settings between').toBeGreaterThan(1);
+
+      const [source, target] = domains;
+
+      await ap.withSettingsRestoredForDomains([source, target], async (settingsBefore) => {
+        const settings: AnonymizerSettings = {
+          approach: 'Replace',
+          entities: ['EMAIL_ADDRESS'],
+          allowlist: [createAnonymizerWord('allow')],
+          denylist: [createAnonymizerWord('deny')],
+          anonymizationBeforeLlm: settingsBefore[source].anonymizationBeforeLlm,
+          recordAnonymously: settingsBefore[source].recordAnonymously,
+        };
+
+        await test.step(`The settings of "${source}" are made to differ from those of "${target}"`, async () => {
+          await ap.selectDomain(source);
+          await ap.applySettings(settings);
+          await ap.saveSettings();
+          await ap.assertSaveWasConfirmed();
+
+          expect(
+            settingsBefore[target],
+            `"${target}" already holds the settings that are about to be copied onto it`,
+          ).not.toEqual(settings);
+        });
+
+        await test.step(`Copying the settings onto "${target}" is confirmed on the page`, async () => {
+          await ap.copySettingsToDomain(target);
+          await ap.assertSaveWasConfirmed();
+        });
+
+        await test.step(`The tab of "${target}" comes back holding the settings of "${source}"`, async () => {
+          await ap.selectDomain(target);
+          await ap.assertSettingsStored(settings);
         });
       });
     },

@@ -1,6 +1,12 @@
 import { Locator, Page, expect, test } from '@playwright/test';
 
-import { ACTION_TIMEOUT, ANONYMIZER_APPROACHES, ANONYMIZER_CONFIG_PATH, ANONYMIZER_ENTITIES } from '@utils/constants';
+import {
+  ACTION_TIMEOUT,
+  ANONYMIZER_APPROACHES,
+  ANONYMIZER_CONFIG_PATH,
+  ANONYMIZER_ENTITIES,
+  ANONYMIZER_TRANSFER_PATH,
+} from '@utils/constants';
 import { URLS } from '@utils/env';
 import { AnonymizedText, AnonymizerSettings, RouteReadyOptions } from '@utils/interfaces';
 import { waitForAnonymizerReady } from '@utils/waits';
@@ -42,6 +48,11 @@ export class AnonymizerPage {
   private readonly buttonClear: Locator;
   private readonly buttonAnonymize: Locator;
 
+  private readonly dialogCopyToDomain: Locator;
+  private readonly selectTargetDomains: Locator;
+  private readonly targetDomainOptions: Locator;
+  private readonly buttonCopy: Locator;
+
   constructor(page: Page) {
     this.page = page;
 
@@ -81,6 +92,11 @@ export class AnonymizerPage {
     this.textareaOutputText = this.page.getByPlaceholder('Anonymized text will appear here');
     this.buttonClear = this.page.getByRole('button', { name: 'Clear', exact: true });
     this.buttonAnonymize = this.page.getByRole('button', { name: 'Anonymize', exact: true });
+
+    this.dialogCopyToDomain = this.page.getByRole('dialog').filter({ has: heading('Copy to domain') });
+    this.selectTargetDomains = this.dialogCopyToDomain.getByRole('combobox');
+    this.targetDomainOptions = this.dialogCopyToDomain.getByRole('option');
+    this.buttonCopy = this.dialogCopyToDomain.getByRole('button', { name: 'Copy', exact: true });
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -207,10 +223,50 @@ export class AnonymizerPage {
     const tab = this.domainTabs.first();
     const domain = (await tab.innerText()).trim();
 
+    await this.openDomainTab(tab, domain);
+
+    return domain;
+  }
+
+  async domainNames(): Promise<string[]> {
+    return (await this.domainTabs.allInnerTexts()).map((name) => name.trim());
+  }
+
+  async selectDomain(domain: string): Promise<void> {
+    const tab = await this.domainTab(domain);
+
     await tab.click();
     await expect(tab, `The domain tabs never moved to "${domain}"`).toHaveClass(/domain-tab-selector__tab--active/);
 
-    return domain;
+    await this.open();
+  }
+
+  async copySettingsToDomain(domain: string): Promise<void> {
+    await this.buttonCopyToDomain.click();
+    await expect(
+      this.dialogCopyToDomain,
+      'The settings offered no dialog to copy them to another domain',
+    ).toBeVisible();
+
+    await this.selectTargetDomains.click();
+    await this.targetDomainOptions
+      .filter({ hasText: new RegExp(`^${domain}$`) })
+      .first()
+      .click();
+
+    await this.selectTargetDomains.click();
+
+    await expect(this.buttonCopy, `The dialog would not copy the settings to "${domain}"`).toBeEnabled({
+      timeout: ACTION_TIMEOUT,
+    });
+    const settingsCopied = this.page.waitForResponse(
+      (response) => response.url().includes(ANONYMIZER_TRANSFER_PATH) && response.ok(),
+      { timeout: ACTION_TIMEOUT },
+    );
+
+    await this.buttonCopy.click();
+    await settingsCopied;
+    await expect(this.dialogCopyToDomain, 'The dialog stayed open after the settings were copied').toBeHidden();
   }
 
   async readSettings(): Promise<AnonymizerSettings> {
@@ -265,6 +321,65 @@ export class AnonymizerPage {
         });
       });
     }
+  }
+
+  async withSettingsRestoredForDomains(
+    domains: string[],
+    body: (settingsBefore: Record<string, AnonymizerSettings>) => Promise<void>,
+  ): Promise<void> {
+    const settingsBefore: Record<string, AnonymizerSettings> = {};
+
+    for (const domain of domains) {
+      await this.selectDomain(domain);
+      settingsBefore[domain] = await this.readSettings();
+    }
+
+    try {
+      await body(settingsBefore);
+    } finally {
+      for (const domain of domains) {
+        await this.restoreDomain(domain, settingsBefore[domain]).catch((error: unknown) => {
+          test.info().annotations.push({
+            type: `anonymizer settings left changed on "${domain}"`,
+            description: error instanceof Error ? error.message.split('\n')[0] : String(error),
+          });
+        });
+      }
+    }
+  }
+
+  private async openDomainTab(tab: Locator, domain: string): Promise<void> {
+    const wasActive = ((await tab.getAttribute('class')) ?? '').includes('domain-tab-selector__tab--active');
+
+    if (wasActive) {
+      return;
+    }
+
+    const settingsLoaded = this.page.waitForResponse(
+      (response) => response.url().includes(ANONYMIZER_CONFIG_PATH) && response.ok(),
+      { timeout: ACTION_TIMEOUT },
+    );
+
+    await tab.click();
+    await expect(tab, `The domain tabs never moved to "${domain}"`).toHaveClass(/domain-tab-selector__tab--active/);
+    await settingsLoaded;
+    await this.waitForSettingsRendered();
+  }
+
+  private async domainTab(domain: string): Promise<Locator> {
+    const names = await this.domainNames();
+    const index = names.indexOf(domain);
+
+    expect(index, `The settings are offered for no domain named "${domain}"`).toBeGreaterThan(-1);
+
+    return this.domainTabs.nth(index);
+  }
+
+  private async restoreDomain(domain: string, settings: AnonymizerSettings): Promise<void> {
+    await this.selectDomain(domain);
+    await this.applySettings(settings);
+    await this.saveSettings();
+    await this.assertSaveWasConfirmed();
   }
 
   private async restore(settings: AnonymizerSettings): Promise<void> {
