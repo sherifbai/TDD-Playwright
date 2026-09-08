@@ -3,7 +3,7 @@ import { Locator, Page, expect } from '@playwright/test';
 import {
   ACTION_TIMEOUT,
   EXPIRING_CONVERSATIONS_TABLE_COLUMNS,
-  EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS,
+  EXPIRING_CONVERSATIONS_PERIOD_RANGE_SHORTCUTS,
   EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS,
 } from '@utils/constants';
 import { URLS } from '@utils/env';
@@ -84,7 +84,7 @@ export class DeleteConversationsPage {
     this.inputRangeUntil = this.page.locator('main .endTime input');
     this.tooltipExpiringRange = this.page
       .locator('div.track')
-      .filter({ has: this.buttonRangeShortcut(EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS[0]) })
+      .filter({ has: this.buttonRangeShortcut(EXPIRING_CONVERSATIONS_PERIOD_RANGE_SHORTCUTS[0]) })
       .last()
       .locator('span[data-state]')
       .first();
@@ -186,7 +186,7 @@ export class DeleteConversationsPage {
     await expect(this.inputRangeUntil, 'The expiring conversations filter takes no date to end at').toBeVisible();
     await expect(this.tooltipExpiringRange, 'The expiring conversations filter carries no tooltip').toBeVisible();
 
-    for (const shortcut of EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS) {
+    for (const shortcut of EXPIRING_CONVERSATIONS_PERIOD_RANGE_SHORTCUTS) {
       await expect(this.buttonRangeShortcut(shortcut), `The filter offers no "${shortcut}" shortcut`).toBeVisible();
     }
   }
