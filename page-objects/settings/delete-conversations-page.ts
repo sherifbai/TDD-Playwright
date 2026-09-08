@@ -4,7 +4,7 @@ import {
   ACTION_TIMEOUT,
   EXPIRING_CONVERSATIONS_TABLE_COLUMNS,
   EXPIRING_CONVERSATIONS_RANGE_SHORTCUTS,
-  EXPIRING_CONVERSATIONS_RESULT_COUNTS,
+  EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS,
 } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { DeleteConversationsSettings, RouteReadyOptions } from '@utils/interfaces';
@@ -260,12 +260,12 @@ export class DeleteConversationsPage {
   async assertResultCountOffered(): Promise<void> {
     await expect(this.selectResultCount, 'The table offers no choice of how many rows to show').toBeVisible();
     await expect(this.selectResultCount, 'The result count does not start on the page size the case names').toHaveValue(
-      EXPIRING_CONVERSATIONS_RESULT_COUNTS[0],
+      EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS[0],
     );
     await expect(
       this.selectResultCount.locator('option'),
       'The result count offers a different set of page sizes',
-    ).toHaveText(EXPIRING_CONVERSATIONS_RESULT_COUNTS);
+    ).toHaveText(EXPIRING_CONVERSATIONS_TABLE_RESULT_COUNTS);
   }
 
   async assertAuthenticatedPeriodHidden(): Promise<void> {
