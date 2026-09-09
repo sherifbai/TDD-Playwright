@@ -18,3 +18,5 @@ export const WIDGET_REDRAW_TIMEOUT = 15000;
 
 /** How long the widget may keep its message box hidden before it is reloaded. */
 export const WIDGET_MESSAGE_BOX_TIMEOUT = 10000;
+
+export const CHAT_LOG_TIMEOUT = 30000;
