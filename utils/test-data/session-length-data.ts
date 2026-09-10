@@ -1,7 +1,5 @@
 import { uniqueSuffix } from './shared-data';
 
-export const MINIMUM_RESPONSE_TIME = '5';
-
 export function createSessionLengthMessage(prefix = 'autotest session length'): string {
   return `${prefix} ${uniqueSuffix()}`;
 }

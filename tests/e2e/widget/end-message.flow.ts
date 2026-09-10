@@ -1,10 +1,10 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { WidgetPage } from '@page-objects/widget';
 import { test } from '@setup/test-setup';
-import { ADMIN_AUTH_STATE, WIDGET_IDLE_TEST_TIMEOUT } from '@utils/constants';
+import { ADMIN_AUTH_STATE, MINIMUM_RESPONSE_TIME, WIDGET_IDLE_TEST_TIMEOUT } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { seedEnglishLocale } from '@utils/helpers';
-import { MINIMUM_RESPONSE_TIME, createSessionLengthMessage } from '@utils/test-data';
+import { createSessionLengthMessage } from '@utils/test-data';
 
 test(
   '[e2e] [widget] An idle conversation ends with the message the session length settings hold',
