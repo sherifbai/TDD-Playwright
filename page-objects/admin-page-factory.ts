@@ -40,15 +40,15 @@ export class AdminPageFactory {
     return new NewServicePage(this.page);
   }
 
+  getChatAnalysisPage(): ChatAnalysisPage {
+    return new ChatAnalysisPage(this.page);
+  }
+
   getOfficeOpeningHoursPage(): OfficeOpeningHoursPage {
     return new OfficeOpeningHoursPage(this.page);
   }
 
   getMultiDomainsPage(): MultiDomainsPage {
     return new MultiDomainsPage(this.page);
-  }
-
-  getChatAnalysisPage(): ChatAnalysisPage {
-    return new ChatAnalysisPage(this.page);
   }
 }

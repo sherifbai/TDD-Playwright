@@ -1,10 +1,10 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { expect, test } from '@setup/test-setup';
-import { ACTION_TIMEOUT } from '@utils/constants';
+import { ACTION_TIMEOUT, CHAT_ANALYSIS_LABEL_SECTIONS } from '@utils/constants';
 import { URLS } from '@utils/env';
 import { chatAnalysisCleanup, conversationAnalysisCleanup, readUserDisplayName } from '@utils/helpers';
 import { ConversationAnalysis } from '@utils/interfaces';
-import { CHAT_ANALYSIS_LABEL_SECTIONS, createChatAnalysisLabel } from '@utils/test-data';
+import { createChatAnalysisLabel } from '@utils/test-data';
 
 const [themeSection, qualitySection, followUpSection] = CHAT_ANALYSIS_LABEL_SECTIONS;
 
