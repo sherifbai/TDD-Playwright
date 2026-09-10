@@ -1,4 +1,7 @@
 export * from './admin-page-visit.interface';
+export * from './analysed-conversation.interface';
+export * from './chat-analysis-config.interface';
+export * from './chat-analysis-domain-snapshot.interface';
 export * from './chat-analysis-label-section.interface';
 export * from './chat-analysis-settings.interface';
 export * from './conversation-analysis.interface';

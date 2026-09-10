@@ -2,12 +2,7 @@ import { Page, expect } from '@playwright/test';
 
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { USER_INFO_URL } from '@utils/constants';
-import { ConversationAnalysis } from '@utils/interfaces';
-
-interface AnalysedConversation {
-  readonly conversationId: string;
-  readonly analysis: ConversationAnalysis;
-}
+import { AnalysedConversation } from '@utils/interfaces';
 
 export async function readUserDisplayName(page: Page): Promise<string> {
   const response = await page.request.get(USER_INFO_URL);
