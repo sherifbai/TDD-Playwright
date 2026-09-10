@@ -1,6 +1,7 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { test } from '@setup/test-setup';
-import { CHAT_ANALYSIS_LABEL_SECTIONS, createChatAnalysisLabel } from '@utils/test-data';
+import { CHAT_ANALYSIS_LABEL_SECTIONS } from '@utils/constants';
+import { createChatAnalysisLabel } from '@utils/test-data';
 
 test.describe('[administration] [visibility] The chat analysis page shows its domains, its switch and its label sections', () => {
   test(

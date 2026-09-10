@@ -1,13 +1,9 @@
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
 import { expect, test } from '@setup/test-setup';
-import { ACTION_TIMEOUT } from '@utils/constants';
+import { ACTION_TIMEOUT, CHAT_ANALYSIS_LABEL_SECTIONS } from '@utils/constants';
 import { chatAnalysisCleanup, chatAnalysisConfigRestore, readChatAnalysisConfig } from '@utils/helpers';
 import { ChatAnalysisDomainSnapshot, ChatAnalysisSettings } from '@utils/interfaces';
-import {
-  CHAT_ANALYSIS_LABEL_SECTIONS,
-  createChatAnalysisLabel,
-  createOverlongChatAnalysisLabel,
-} from '@utils/test-data';
+import { createChatAnalysisLabel, createOverlongChatAnalysisLabel } from '@utils/test-data';
 
 const [fieldSection, qualitySection] = CHAT_ANALYSIS_LABEL_SECTIONS;
 const savedLabel = createChatAnalysisLabel('autotestsavedfield');

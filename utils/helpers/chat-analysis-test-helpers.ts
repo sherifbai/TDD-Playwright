@@ -1,9 +1,8 @@
 import { Page, expect } from '@playwright/test';
 
 import { AdminPageFactory } from '@page-objects/admin-page-factory';
-import { CHAT_ANALYSIS_URL } from '@utils/constants';
+import { CHAT_ANALYSIS_LABEL_SECTIONS, CHAT_ANALYSIS_URL } from '@utils/constants';
 import { ChatAnalysisConfig, ChatAnalysisDomainSnapshot } from '@utils/interfaces';
-import { CHAT_ANALYSIS_LABEL_SECTIONS } from '@utils/test-data';
 
 import { asUniqueNames } from './shared-helpers';
 
