@@ -44,11 +44,11 @@ export class AdminPageFactory {
     return new OfficeOpeningHoursPage(this.page);
   }
 
-  getMultiDomainsPage(): MultiDomainsPage {
-    return new MultiDomainsPage(this.page);
-  }
-
   getAnonymizerPage(): AnonymizerPage {
     return new AnonymizerPage(this.page);
+  }
+
+  getMultiDomainsPage(): MultiDomainsPage {
+    return new MultiDomainsPage(this.page);
   }
 }
