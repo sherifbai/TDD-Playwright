@@ -5,26 +5,20 @@ import { sessionLengthCleanup } from '@utils/helpers';
 import { SessionLengthSettings } from '@utils/interfaces';
 import { createSessionLengthMessage, nextResponseTime, nextSessionLength } from '@utils/test-data';
 
-function readSettingsBeforeEachTest(): () => SessionLengthSettings {
-  let settingsBeforeRun: SessionLengthSettings;
+let settingsBeforeRun: SessionLengthSettings;
 
-  test.beforeEach(async ({ page }) => {
-    const slp = new AdminPageFactory(page).getSessionLengthPage();
+test.beforeEach(async ({ page }) => {
+  const slp = new AdminPageFactory(page).getSessionLengthPage();
 
-    await slp.open();
-    await slp.assertPageIsShown();
+  await slp.open();
+  await slp.assertPageIsShown();
 
-    settingsBeforeRun = await slp.readSettings();
-  });
+  settingsBeforeRun = await slp.readSettings();
+});
 
-  return () => settingsBeforeRun;
-}
+test.afterEach(sessionLengthCleanup(() => settingsBeforeRun));
 
 test.describe('[administration] [functional] Session length settings are saved for the stand', () => {
-  const settingsBeforeRun = readSettingsBeforeEachTest();
-
-  test.afterEach(sessionLengthCleanup(settingsBeforeRun));
-
   test(
     'The saved settings are confirmed and read back after a reload',
     { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/184/' } },
@@ -32,8 +26,8 @@ test.describe('[administration] [functional] Session length settings are saved f
       const slp = new AdminPageFactory(page).getSessionLengthPage();
 
       const updatedSettings: SessionLengthSettings = {
-        sessionLength: nextSessionLength(settingsBeforeRun().sessionLength),
-        responseTime: nextResponseTime(settingsBeforeRun().responseTime),
+        sessionLength: nextSessionLength(settingsBeforeRun.sessionLength),
+        responseTime: nextResponseTime(settingsBeforeRun.responseTime),
         displayMessage: true,
         idleWarningMessage: createSessionLengthMessage('autotest idle warning'),
         showEndMessage: true,
@@ -59,10 +53,6 @@ test.describe('[administration] [functional] Session length settings are saved f
 });
 
 test.describe('[administration] [functional] Times outside their range are refused and nothing is stored', () => {
-  const settingsBeforeRun = readSettingsBeforeEachTest();
-
-  test.afterEach(sessionLengthCleanup(settingsBeforeRun));
-
   test(
     'Every invalid time is named in a notification and the stand keeps the settings it ran on',
     { annotation: { type: 'kiwi case', description: 'https://monitooring.test.buerokratt.ee/case/185/' } },
@@ -84,7 +74,7 @@ test.describe('[administration] [functional] Times outside their range are refus
       });
 
       await test.step('An empty response time is refused as empty', async () => {
-        await slp.fillSessionLength(settingsBeforeRun().sessionLength);
+        await slp.fillSessionLength(settingsBeforeRun.sessionLength);
         await slp.fillResponseTime('');
         await slp.saveSettings();
 
@@ -101,7 +91,7 @@ test.describe('[administration] [functional] Times outside their range are refus
       await test.step('The settings the page opened on survive the refused saves', async () => {
         await slp.open();
 
-        await slp.assertSettingsStored(settingsBeforeRun());
+        await slp.assertSettingsStored(settingsBeforeRun);
       });
     },
   );
