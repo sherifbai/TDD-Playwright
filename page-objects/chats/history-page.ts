@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { PaginatedDataTable } from '@page-objects/common';
 import {
   ACTION_TIMEOUT,
   CHAT_LOG_TIMEOUT,
@@ -20,6 +21,7 @@ export class HistoryPage {
 
   private readonly headingHistory: Locator;
   private readonly table: Locator;
+  private readonly conversationsTable: PaginatedDataTable;
 
   private readonly drawer: Locator;
   private readonly buttonCloseDrawer: Locator;
@@ -27,17 +29,18 @@ export class HistoryPage {
   private readonly metadataSection: Locator;
   private readonly analysisSection: Locator;
 
-  private readonly toastList: Locator;
-
   private readonly transcript: Locator;
   private readonly customerMessages: Locator;
   private readonly botMessages: Locator;
+
+  private readonly toastList: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
     this.headingHistory = this.page.getByRole('heading', { name: /^History/ });
     this.table = this.page.locator('table.data-table').first();
+    this.conversationsTable = new PaginatedDataTable(this.page, { table: this.table, rowLabelSelector: 'td' });
 
     this.drawer = this.page.locator('.drawer').first();
     this.buttonCloseDrawer = this.drawer.locator('.drawer__close');
@@ -45,11 +48,11 @@ export class HistoryPage {
     this.metadataSection = this.page.locator('.side-meta');
     this.analysisSection = this.page.locator('.quality-settings');
 
-    this.toastList = this.page.locator('ol.toast__list');
-
     this.transcript = this.page.locator('.historical-chat__group-wrapper');
     this.customerMessages = this.transcript.locator('.historical-chat__group--end-user .historical-chat__message-text');
     this.botMessages = this.transcript.locator('.historical-chat__group--buerokratt .historical-chat__message-text');
+
+    this.toastList = this.page.locator('ol.toast__list');
   }
 
   async waitForReady(options: RouteReadyOptions = {}): Promise<void> {
@@ -62,7 +65,7 @@ export class HistoryPage {
       { timeout: ACTION_TIMEOUT },
     );
 
-    await this.page.goto(`${URLS.admin}chat/history`);
+    await this.page.goto(URLS.admin + 'chat/history');
     await this.waitForReady();
     await endedChatsLoaded;
   }
@@ -170,7 +173,8 @@ export class HistoryPage {
   }
 
   async openChat(chatId: string): Promise<void> {
-    const row = this.chatRow(chatId);
+    const shownId = chatId.slice(0, 8);
+    const row = this.conversationRow(shownId);
 
     await expect(async () => {
       await this.open();
@@ -179,7 +183,7 @@ export class HistoryPage {
       });
     }).toPass({ timeout: CHAT_LOG_TIMEOUT });
 
-    await row.getByRole('button', { name: 'View', exact: true }).click();
+    await this.openConversation(shownId);
     await expect(this.transcript, `The chat log never opened the transcript of ${chatId}`).toBeVisible({
       timeout: ACTION_TIMEOUT,
     });
@@ -209,17 +213,11 @@ export class HistoryPage {
   }
 
   private conversationRow(conversationId: string): Locator {
-    return this.rows().filter({ hasText: conversationId }).first();
-  }
-
-  private chatRow(chatId: string): Locator {
-    return this.rows()
-      .filter({ hasText: chatId.slice(0, 8) })
-      .first();
+    return this.conversationsTable.getRowByText(conversationId).first();
   }
 
   private rows(): Locator {
-    return this.table.locator('tbody tr');
+    return this.conversationsTable.getRows();
   }
 
   private async columnIndex(name: string): Promise<number> {
