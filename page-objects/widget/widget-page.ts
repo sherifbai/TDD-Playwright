@@ -14,7 +14,7 @@ export class WidgetPage {
   private readonly page: Page;
 
   private readonly widget: Locator;
-  private readonly bykTitle: Locator;
+  private readonly headingByk: Locator;
   private readonly inputField: Locator;
   private readonly sendButton: Locator;
   private readonly buttonHamburger: Locator;
@@ -34,7 +34,7 @@ export class WidgetPage {
     this.page = page;
 
     this.widget = this.page.getByTitle('Open chat');
-    this.bykTitle = this.page.getByRole('heading', { name: 'Bürokratt' });
+    this.headingByk = this.page.getByRole('heading', { name: 'Bürokratt' });
     this.inputField = this.page.getByPlaceholder('Enter your message...');
     this.sendButton = this.page.getByTitle('Send');
     this.buttonHamburger = this.page.getByTitle('Details');
@@ -56,7 +56,7 @@ export class WidgetPage {
       timeout: WIDGET_REPLY_TIMEOUT,
     });
     await this.widget.click();
-    await this.bykTitle.waitFor({ state: 'visible' });
+    await this.headingByk.waitFor({ state: 'visible' });
   }
 
   /**
@@ -134,15 +134,16 @@ export class WidgetPage {
   }
 
   async chatId(): Promise<string> {
-    let stored: string | null = null;
+    const storedId = (): Promise<string | null> => this.page.evaluate(() => window.localStorage.getItem('byk-va-cid'));
 
-    await expect(async () => {
-      stored = await this.page.evaluate(() => window.localStorage.getItem('byk-va-cid'));
+    await expect
+      .poll(storedId, {
+        timeout: WIDGET_REDRAW_TIMEOUT,
+        message: 'The widget never stored an id for the conversation',
+      })
+      .not.toBeNull();
 
-      expect(stored, 'The widget never stored an id for the conversation').toBeTruthy();
-    }).toPass({ timeout: WIDGET_REDRAW_TIMEOUT });
-
-    return JSON.parse(stored as unknown as string);
+    return JSON.parse((await storedId()) as string);
   }
 
   private async lastReply(noCsaAvailableMessage?: string): Promise<string> {

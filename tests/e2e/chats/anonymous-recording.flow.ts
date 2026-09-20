@@ -3,7 +3,7 @@ import { WidgetPage } from '@page-objects/widget';
 import { test } from '@setup/test-setup';
 import { ADMIN_AUTH_STATE } from '@utils/constants';
 import { URLS } from '@utils/env';
-import { seedEnglishLocale } from '@utils/helpers';
+import { customerWidgetName, seedEnglishLocale } from '@utils/helpers';
 import { AnonymizerSettings } from '@utils/interfaces';
 import { createAnonymizerEmail } from '@utils/test-data';
 
@@ -26,6 +26,7 @@ test(
       const history = admin.getHistoryPage();
 
       await anonymizer.open();
+      await anonymizer.selectDomain(await customerWidgetName(page));
 
       await anonymizer.withSettingsRestored(async () => {
         const settings: AnonymizerSettings = {
