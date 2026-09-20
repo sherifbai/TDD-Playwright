@@ -1,5 +1,7 @@
 export const ANONYMIZER_APPROACHES = ['Replace', 'Redact', 'Mask', 'Hash'] as const;
 
+export type AnonymizerApproach = (typeof ANONYMIZER_APPROACHES)[number];
+
 export const ANONYMIZER_ENTITIES = [
   'EST_ID_DOC',
   'ORGANIZATION',
@@ -17,3 +19,5 @@ export const ANONYMIZER_ENTITIES = [
   'EE_PERSONAL_CODE',
   'EMAIL_ADDRESS',
 ] as const;
+
+export type AnonymizerEntity = (typeof ANONYMIZER_ENTITIES)[number];

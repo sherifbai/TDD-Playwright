@@ -1,4 +1,4 @@
 export interface AnonymizedText {
-  hidden: string[];
-  kept: string[];
+  readonly hidden: string[];
+  readonly kept: string[];
 }

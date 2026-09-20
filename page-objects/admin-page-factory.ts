@@ -55,16 +55,16 @@ export class AdminPageFactory {
     return new OfficeOpeningHoursPage(this.page);
   }
 
-  getAnonymizerPage(): AnonymizerPage {
-    return new AnonymizerPage(this.page);
-  }
-
   getSessionLengthPage(): SessionLengthPage {
     return new SessionLengthPage(this.page);
   }
 
   getDeleteConversationsPage(): DeleteConversationsPage {
     return new DeleteConversationsPage(this.page);
+  }
+
+  getAnonymizerPage(): AnonymizerPage {
+    return new AnonymizerPage(this.page);
   }
 
   getMultiDomainsPage(): MultiDomainsPage {

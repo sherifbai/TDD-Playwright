@@ -143,7 +143,7 @@ test.describe('[administration] [functional] Anonymizer settings are copied from
         });
 
         await test.step(`Copying the settings onto "${target}" is confirmed on the page`, async () => {
-          await ap.copySettingsToDomain(target);
+          await ap.copySettingsTo(target);
           await ap.assertSaveWasConfirmed();
         });
 

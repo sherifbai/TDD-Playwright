@@ -1,8 +1,10 @@
+import { AnonymizerApproach, AnonymizerEntity } from '@utils/constants';
+
 export interface AnonymizerSettings {
-  approach: string;
-  entities: string[];
-  allowlist: string[];
-  denylist: string[];
-  anonymizationBeforeLlm: boolean;
-  recordAnonymously: boolean;
+  readonly approach: AnonymizerApproach;
+  readonly entities: readonly AnonymizerEntity[];
+  readonly allowlist: string[];
+  readonly denylist: string[];
+  readonly anonymizationBeforeLlm: boolean;
+  readonly recordAnonymously: boolean;
 }
