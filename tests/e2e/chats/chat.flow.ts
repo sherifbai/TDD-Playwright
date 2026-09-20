@@ -33,7 +33,7 @@ test('[e2e] [chats] A routed chat carries messages both ways between customer an
     });
 
     await test.step('The operator is watching the queue', async () => {
-      await page.goto(`${URLS.admin}chat/unanswered`);
+      await page.goto(URLS.admin + 'chat/unanswered');
     });
 
     // Each step raises the window it is about to act through. Both the widget and the queue

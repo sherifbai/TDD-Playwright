@@ -22,7 +22,7 @@ export class ChatAnalysisPage {
   private readonly labelSections: Locator;
   private readonly buttonSave: Locator;
 
-  private readonly deleteDialog: Locator;
+  private readonly dialogDelete: Locator;
   private readonly buttonConfirmDelete: Locator;
   private readonly toastList: Locator;
 
@@ -45,8 +45,8 @@ export class ChatAnalysisPage {
     this.labelSections = this.page.locator('main .label-section');
     this.buttonSave = this.page.locator('main').getByRole('button', { name: 'Save', exact: true });
 
-    this.deleteDialog = this.page.getByRole('dialog');
-    this.buttonConfirmDelete = this.deleteDialog.getByRole('button', { name: 'Delete', exact: true });
+    this.dialogDelete = this.page.getByRole('dialog');
+    this.buttonConfirmDelete = this.dialogDelete.getByRole('button', { name: 'Delete', exact: true });
 
     this.toastList = this.page.locator('ol.toast__list');
   }
@@ -196,7 +196,7 @@ export class ChatAnalysisPage {
 
     await chip.getByRole('button', { name: `Remove ${label}` }).click();
 
-    await expect(this.deleteDialog, `Removing label "${label}" asked for no confirmation`).toContainText(
+    await expect(this.dialogDelete, `Removing label "${label}" asked for no confirmation`).toContainText(
       'Confirm deletion',
     );
     await this.buttonConfirmDelete.click();

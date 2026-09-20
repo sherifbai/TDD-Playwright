@@ -42,7 +42,7 @@ export class Header {
       return;
     }
 
-    await this.page.goto(`${URLS.admin}chat/landing`);
+    await this.page.goto(URLS.admin + 'chat/landing');
 
     await expect(
       this.toggleSwitchStatus,
