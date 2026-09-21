@@ -1,4 +1,4 @@
-import { Locator, Page, expect, test } from '@playwright/test';
+import { Locator, Page, Response, expect, test } from '@playwright/test';
 
 import { CopyToDomainModal } from '@page-objects/common';
 import {
@@ -93,10 +93,7 @@ export class AnonymizerPage {
   }
 
   async open(): Promise<void> {
-    const settingsLoaded = this.page.waitForResponse(
-      (response) => response.url().includes(ANONYMIZER_CONFIG_PATH) && response.ok(),
-      { timeout: ACTION_TIMEOUT },
-    );
+    const settingsLoaded = this.settingsLoaded();
 
     await this.page.goto(URLS.admin + 'chat/anonymizer');
     await this.waitForReady();
@@ -312,10 +309,7 @@ export class AnonymizerPage {
       return;
     }
 
-    const settingsLoaded = this.page.waitForResponse(
-      (response) => response.url().includes(ANONYMIZER_CONFIG_PATH) && response.ok(),
-      { timeout: ACTION_TIMEOUT },
-    );
+    const settingsLoaded = this.settingsLoaded();
 
     await tab.click();
     await expect(tab, `The domain tabs never moved to "${domain}"`).toHaveClass(/domain-tab-selector__tab--active/);
@@ -352,6 +346,13 @@ export class AnonymizerPage {
       {
         timeout: ACTION_TIMEOUT,
       },
+    );
+  }
+
+  private settingsLoaded({ timeout = ACTION_TIMEOUT }: RouteReadyOptions = {}): Promise<Response> {
+    return this.page.waitForResponse(
+      (response) => response.url().includes(ANONYMIZER_CONFIG_PATH) && response.request().method() === 'GET',
+      { timeout },
     );
   }
 

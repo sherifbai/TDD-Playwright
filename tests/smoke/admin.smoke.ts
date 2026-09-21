@@ -78,18 +78,18 @@ test('[SMOKE] "Administration" → "Session length" page loads with its session 
   visit.assertNoFailedApiCalls();
 });
 
-test('[SMOKE] "Administration" → "Anonymizer" page loads with its heading', async ({ page }) => {
-  const visit = await openAdminPage(page, 'chat/anonymizer');
-
-  await expect(page.getByRole('heading', { name: 'Anonymizer Settings', exact: true })).toBeVisible();
-  visit.assertBackendAnswered();
-  visit.assertNoFailedApiCalls();
-});
-
 test('[SMOKE] "Administration" → "Delete Conversations" page loads with its heading', async ({ page }) => {
   const visit = await openAdminPage(page, 'chat/delete-conversations');
 
   await expect(page.getByRole('heading', { name: 'Conversation deletion', exact: true })).toBeVisible();
+  visit.assertBackendAnswered();
+  visit.assertNoFailedApiCalls();
+});
+
+test('[SMOKE] "Administration" → "Anonymizer" page loads with its heading', async ({ page }) => {
+  const visit = await openAdminPage(page, 'chat/anonymizer');
+
+  await expect(page.getByRole('heading', { name: 'Anonymizer Settings', exact: true })).toBeVisible();
   visit.assertBackendAnswered();
   visit.assertNoFailedApiCalls();
 });
